@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"fmt"
 	"log"
 	"strings"
 	"testing"
@@ -9,7 +10,7 @@ import (
 )
 
 func TestXxx(t *testing.T) {
-	r := strings.NewReader(".[123 : 1]['\"foo.bar\"'][\"\"][0]")
+	r := strings.NewReader(".[123 : 1]['\"foo.bar\"][\"\"][0]")
 	s, err := scanner.New(r)
 	if err != nil {
 		t.Fatal("failed to initialize the scanner")
@@ -21,5 +22,5 @@ func TestXxx(t *testing.T) {
 	for l.Next() {
 		log.Println(l.Token(), l.Token().Lexeme())
 	}
-	log.Println(l.Errors)
+	fmt.Println(l.Errors[0])
 }

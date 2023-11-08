@@ -7,6 +7,7 @@ package lexer
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/mdm-code/scanner"
@@ -67,13 +68,9 @@ type TokenType uint8
 
 // Error ...
 type Error struct {
-	T   Token
-	Err error
-}
-
-// Error ...
-func (e *Error) Error() string {
-	return e.Err.Error()
+	Buffer *[]scanner.Token
+	Offset int
+	Err    error
 }
 
 // Token ...
@@ -84,24 +81,6 @@ type Token struct {
 }
 
 // Lexer ...
-//
-// TODO: Think how Lexer can represent its errors.
-// I can try and define lexer-specific error type that would take
-// the buffer, the offset of the char it occurred at so that it can
-// represent it's context to the left and to the right. It would also
-// be able to tell at which char # it occurred.
-//
-// Since I don't allow for newline characters, I might want to try and
-// do something fancy and report the error like so:
-//
-// .[2:6]["person"]['name]
-//
-//	^
-//
-// Error: unterminated string literal
-//
-// This can be handled by the lexer itself and reported by the cmd tq.
-// It should not be an issue at this point.
 type Lexer struct {
 	Buffer []scanner.Token
 	Errors []error
@@ -131,6 +110,26 @@ func New(s *scanner.Scanner) (*Lexer, error) {
 		},
 	}
 	return &l, nil
+}
+
+// Error ...
+func (e *Error) Error() string {
+	if e.Buffer == nil {
+		return e.Err.Error()
+	}
+	var b strings.Builder
+	b.Grow(e.Offset*2 + 1)
+	for _, t := range *e.Buffer {
+		b.WriteString(string(t.Rune))
+	}
+	b.WriteString("\n")
+	for i := 0; i < e.Offset; i++ {
+		b.WriteString(" ")
+	}
+	b.WriteString("^")
+	b.WriteString("\n")
+	b.WriteString(fmt.Sprintf("Error: %s", e.Err.Error()))
+	return b.String()
 }
 
 // Lexeme ...
@@ -166,8 +165,7 @@ func (l *Lexer) Next() bool {
 	case IsWhitespace(r):
 		return l.nextWhitespace()
 	default:
-		err := Error{Err: ErrDisallowedChar}
-		l.Errors = append(l.Errors, &err)
+		l.pushErr(ErrDisallowedChar, l.Offset)
 		return false
 	}
 }
@@ -176,8 +174,7 @@ func (l *Lexer) nextKeyChar() bool {
 	t := l.Buffer[l.Offset]
 	tp, ok := KeyCharMap[t.Rune]
 	if !ok {
-		err := Error{Err: ErrKeyCharUnsupported}
-		l.Errors = append(l.Errors, &err)
+		l.pushErr(ErrKeyCharUnsupported, l.Offset)
 		return false
 	}
 	l.Curr = Token{
@@ -205,8 +202,7 @@ func (l *Lexer) nextString() bool {
 				Start:  start,
 				End:    l.Offset + 1,
 			}
-			err := Error{Err: ErrUnterminatedString}
-			l.Errors = append(l.Errors, &err)
+			l.pushErr(ErrUnterminatedString, start)
 			return false
 		}
 		t = l.Buffer[l.Offset]
@@ -217,8 +213,7 @@ func (l *Lexer) nextString() bool {
 				Start:  start,
 				End:    l.Offset + 1,
 			}
-			err := Error{Err: ErrDisallowedChar}
-			l.Errors = append(l.Errors, &err)
+			l.pushErr(ErrDisallowedChar, start)
 			return false
 		}
 		if t.Rune == tq {
@@ -280,4 +275,13 @@ func (l *Lexer) nextWhitespace() bool {
 		End:    l.Offset,
 	}
 	return true
+}
+
+func (l *Lexer) pushErr(err error, offset int) {
+	e := Error{
+		Buffer: &l.Buffer,
+		Offset: offset,
+		Err:    err,
+	}
+	l.Errors = append(l.Errors, &e)
 }
