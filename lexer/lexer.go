@@ -37,8 +37,8 @@ const (
 	// Whitespace ...
 	Whitespace
 
-	// Undef ...
-	Undef
+	// Undefined ...
+	Undefined
 )
 
 // KeyCharMap ...
@@ -77,14 +77,32 @@ func (t Token) Lexeme() string {
 	if t.Buffer == nil {
 		return ""
 	}
-	cs := make([]string, t.End-t.Start)
+	chars := make([]string, t.End-t.Start)
 	for _, t := range (*t.Buffer)[t.Start:t.End] {
-		cs = append(cs, string(t.Rune))
+		chars = append(chars, string(t.Rune))
 	}
-	return strings.Join(cs, "")
+	return strings.Join(chars, "")
 }
 
 // Lexer ...
+//
+// TODO: Think how Lexer can represent its errors.
+// I can try and define lexer-specific error type that would take
+// the buffer, the offset of the char it occurred at so that it can
+// represent it's context to the left and to the right. It would also
+// be able to tell at which char # it occurred.
+//
+// Since I don't allow for newline characters, I might want to try and
+// do something fancy and report the error like so:
+//
+// .[2:6]["person"]['name]
+//
+//	^
+//
+// Error: unterminated string literal
+//
+// This can be handled by the lexer itself and reported by the cmd tq.
+// It should not be an issue at this point.
 type Lexer struct {
 	Buffer []scanner.Token
 	Errors []error
@@ -108,7 +126,7 @@ func New(s *scanner.Scanner) (*Lexer, error) {
 		Buffer: buf,
 		Curr: Token{
 			Buffer: nil,
-			Type:   Undef,
+			Type:   Undefined,
 			Start:  0,
 			End:    0,
 		},
@@ -170,7 +188,7 @@ func (l *Lexer) nextString() bool {
 		if l.Offset > len(l.Buffer)-1 {
 			l.Curr = Token{
 				Buffer: &l.Buffer,
-				Type:   Undef,
+				Type:   Undefined,
 				Start:  start,
 				End:    l.Offset + 1,
 			}
@@ -181,7 +199,7 @@ func (l *Lexer) nextString() bool {
 		if IsNewline(t.Rune) {
 			l.Curr = Token{
 				Buffer: &l.Buffer,
-				Type:   Undef,
+				Type:   Undefined,
 				Start:  start,
 				End:    l.Offset + 1,
 			}
