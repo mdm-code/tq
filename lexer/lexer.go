@@ -8,7 +8,6 @@ package lexer
 import (
 	"errors"
 	"strings"
-	"unicode"
 
 	"github.com/mdm-code/scanner"
 )
@@ -133,9 +132,24 @@ func (l *Lexer) Next() bool {
 	}
 }
 
-// IsNewline ...
-func IsNewline(r rune) bool {
-	return r == '\n' || r == '\r'
+func (l *Lexer) nextKeyChar() bool {
+	t := l.Buffer[l.Offset]
+	tp, ok := KeyCharMap[t.Rune]
+	if !ok {
+		l.Errors = append(l.Errors, ErrKeyCharUnsupported)
+		return false
+	}
+	l.Curr = Token{
+		Buffer: &l.Buffer,
+		Type:   tp,
+		Lexeme: string(t.Rune),
+		Start:  l.Offset,
+		End:    l.Offset + 1,
+	}
+	if ok {
+		l.Offset++
+	}
+	return true
 }
 
 func (l *Lexer) nextString() bool {
@@ -190,39 +204,6 @@ func (l *Lexer) nextString() bool {
 	return true
 }
 
-func (l *Lexer) nextWhitespace() bool {
-	t := l.Buffer[l.Offset]
-	ss := []string{}
-	ss = append(ss, string(t.Rune))
-	start := l.Offset
-	l.Offset++
-	for {
-		if l.Offset > len(l.Buffer)-1 {
-			break
-		}
-		t = l.Buffer[l.Offset]
-		if !IsWhitespace(t.Rune) {
-			break
-		}
-		ss = append(ss, string(t.Rune))
-		l.Offset++
-	}
-	lx := strings.Join(ss, "")
-	l.Curr = Token{
-		Buffer: &l.Buffer,
-		Type:   Whitespace,
-		Lexeme: lx,
-		Start:  start,
-		End:    l.Offset,
-	}
-	return true
-}
-
-// IsWhitespace ...
-func IsWhitespace(r rune) bool {
-	return r == ' ' || r == '\t'
-}
-
 func (l *Lexer) nextInteger() bool {
 	t := l.Buffer[l.Offset]
 	ts := []string{}
@@ -251,38 +232,30 @@ func (l *Lexer) nextInteger() bool {
 	return true
 }
 
-// IsDigit ...
-func IsDigit(r rune) bool {
-	return unicode.IsDigit(r)
-}
-
-// IsKeyChar ...
-func IsKeyChar(r rune) bool {
-	_, ok := KeyCharMap[r]
-	return ok
-}
-
-// IsQuote ...
-func IsQuote(r rune) bool {
-	return r == '"' || r == '\''
-}
-
-func (l *Lexer) nextKeyChar() bool {
+func (l *Lexer) nextWhitespace() bool {
 	t := l.Buffer[l.Offset]
-	tp, ok := KeyCharMap[t.Rune]
-	if !ok {
-		l.Errors = append(l.Errors, ErrKeyCharUnsupported)
-		return false
+	ss := []string{}
+	ss = append(ss, string(t.Rune))
+	start := l.Offset
+	l.Offset++
+	for {
+		if l.Offset > len(l.Buffer)-1 {
+			break
+		}
+		t = l.Buffer[l.Offset]
+		if !IsWhitespace(t.Rune) {
+			break
+		}
+		ss = append(ss, string(t.Rune))
+		l.Offset++
 	}
+	lx := strings.Join(ss, "")
 	l.Curr = Token{
 		Buffer: &l.Buffer,
-		Type:   tp,
-		Lexeme: string(t.Rune),
-		Start:  l.Offset,
-		End:    l.Offset + 1,
-	}
-	if ok {
-		l.Offset++
+		Type:   Whitespace,
+		Lexeme: lx,
+		Start:  start,
+		End:    l.Offset,
 	}
 	return true
 }
