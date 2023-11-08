@@ -65,23 +65,22 @@ var ErrDisallowedChar = errors.New("disallowed character")
 // TokenType ...
 type TokenType uint8
 
+// Error ...
+type Error struct {
+	T   Token
+	Err error
+}
+
+// Error ...
+func (e *Error) Error() string {
+	return e.Err.Error()
+}
+
 // Token ...
 type Token struct {
 	Buffer     *[]scanner.Token
 	Type       TokenType
 	Start, End int
-}
-
-// Lexeme ...
-func (t Token) Lexeme() string {
-	if t.Buffer == nil {
-		return ""
-	}
-	chars := make([]string, t.End-t.Start)
-	for _, t := range (*t.Buffer)[t.Start:t.End] {
-		chars = append(chars, string(t.Rune))
-	}
-	return strings.Join(chars, "")
 }
 
 // Lexer ...
@@ -134,6 +133,18 @@ func New(s *scanner.Scanner) (*Lexer, error) {
 	return &l, nil
 }
 
+// Lexeme ...
+func (t Token) Lexeme() string {
+	if t.Buffer == nil {
+		return ""
+	}
+	chars := make([]string, t.End-t.Start)
+	for _, t := range (*t.Buffer)[t.Start:t.End] {
+		chars = append(chars, string(t.Rune))
+	}
+	return strings.Join(chars, "")
+}
+
 // Token ...
 func (l *Lexer) Token() Token {
 	return l.Curr
@@ -155,7 +166,8 @@ func (l *Lexer) Next() bool {
 	case IsWhitespace(r):
 		return l.nextWhitespace()
 	default:
-		l.Errors = append(l.Errors, ErrDisallowedChar)
+		err := Error{Err: ErrDisallowedChar}
+		l.Errors = append(l.Errors, &err)
 		return false
 	}
 }
@@ -164,7 +176,8 @@ func (l *Lexer) nextKeyChar() bool {
 	t := l.Buffer[l.Offset]
 	tp, ok := KeyCharMap[t.Rune]
 	if !ok {
-		l.Errors = append(l.Errors, ErrKeyCharUnsupported)
+		err := Error{Err: ErrKeyCharUnsupported}
+		l.Errors = append(l.Errors, &err)
 		return false
 	}
 	l.Curr = Token{
@@ -192,7 +205,8 @@ func (l *Lexer) nextString() bool {
 				Start:  start,
 				End:    l.Offset + 1,
 			}
-			l.Errors = append(l.Errors, ErrUnterminatedString)
+			err := Error{Err: ErrUnterminatedString}
+			l.Errors = append(l.Errors, &err)
 			return false
 		}
 		t = l.Buffer[l.Offset]
@@ -203,7 +217,8 @@ func (l *Lexer) nextString() bool {
 				Start:  start,
 				End:    l.Offset + 1,
 			}
-			l.Errors = append(l.Errors, ErrDisallowedChar)
+			err := Error{Err: ErrDisallowedChar}
+			l.Errors = append(l.Errors, &err)
 			return false
 		}
 		if t.Rune == tq {
