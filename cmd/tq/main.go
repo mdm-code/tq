@@ -15,5 +15,7 @@ func main() {
 		log.Fatalf("%v\n", err)
 	}
 	l, err := lexer.New(s)
-	fmt.Println(l.Buffer)
+	for l.Next() {
+		fmt.Println(l.Token(), l.Token().Lexeme())
+	}
 }
