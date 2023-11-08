@@ -69,8 +69,19 @@ type TokenType uint8
 type Token struct {
 	Buffer     *[]scanner.Token
 	Type       TokenType
-	Lexeme     string
 	Start, End int
+}
+
+// Lexeme ...
+func (t Token) Lexeme() string {
+	if t.Buffer == nil {
+		return ""
+	}
+	cs := make([]string, t.End-t.Start)
+	for _, t := range (*t.Buffer)[t.Start:t.End] {
+		cs = append(cs, string(t.Rune))
+	}
+	return strings.Join(cs, "")
 }
 
 // Lexer ...
@@ -98,7 +109,6 @@ func New(s *scanner.Scanner) (*Lexer, error) {
 		Curr: Token{
 			Buffer: nil,
 			Type:   Undef,
-			Lexeme: "",
 			Start:  0,
 			End:    0,
 		},
@@ -142,7 +152,6 @@ func (l *Lexer) nextKeyChar() bool {
 	l.Curr = Token{
 		Buffer: &l.Buffer,
 		Type:   tp,
-		Lexeme: string(t.Rune),
 		Start:  l.Offset,
 		End:    l.Offset + 1,
 	}
@@ -155,17 +164,13 @@ func (l *Lexer) nextKeyChar() bool {
 func (l *Lexer) nextString() bool {
 	t := l.Buffer[l.Offset]
 	tq := t.Rune
-	ss := []string{}
-	ss = append(ss, string(t.Rune))
 	start := l.Offset
 	l.Offset++
 	for {
 		if l.Offset > len(l.Buffer)-1 {
-			lx := strings.Join(ss, "")
 			l.Curr = Token{
 				Buffer: &l.Buffer,
 				Type:   Undef,
-				Lexeme: lx,
 				Start:  start,
 				End:    l.Offset + 1,
 			}
@@ -174,11 +179,9 @@ func (l *Lexer) nextString() bool {
 		}
 		t = l.Buffer[l.Offset]
 		if IsNewline(t.Rune) {
-			lx := strings.Join(ss, "")
 			l.Curr = Token{
 				Buffer: &l.Buffer,
 				Type:   Undef,
-				Lexeme: lx,
 				Start:  start,
 				End:    l.Offset + 1,
 			}
@@ -186,18 +189,14 @@ func (l *Lexer) nextString() bool {
 			return false
 		}
 		if t.Rune == tq {
-			ss = append(ss, string(t.Rune))
 			l.Offset++
 			break
 		}
-		ss = append(ss, string(t.Rune))
 		l.Offset++
 	}
-	lx := strings.Join(ss, "")
 	l.Curr = Token{
 		Buffer: &l.Buffer,
 		Type:   String,
-		Lexeme: lx,
 		Start:  start,
 		End:    l.Offset,
 	}
@@ -206,8 +205,6 @@ func (l *Lexer) nextString() bool {
 
 func (l *Lexer) nextInteger() bool {
 	t := l.Buffer[l.Offset]
-	ts := []string{}
-	ts = append(ts, string(t.Rune))
 	start := l.Offset
 	l.Offset++
 	for {
@@ -218,14 +215,11 @@ func (l *Lexer) nextInteger() bool {
 		if !IsDigit(t.Rune) {
 			break
 		}
-		ts = append(ts, string(t.Rune))
 		l.Offset++
 	}
-	lx := strings.Join(ts, "")
 	l.Curr = Token{
 		Buffer: &l.Buffer,
 		Type:   Integer,
-		Lexeme: lx,
 		Start:  start,
 		End:    l.Offset,
 	}
@@ -234,8 +228,6 @@ func (l *Lexer) nextInteger() bool {
 
 func (l *Lexer) nextWhitespace() bool {
 	t := l.Buffer[l.Offset]
-	ss := []string{}
-	ss = append(ss, string(t.Rune))
 	start := l.Offset
 	l.Offset++
 	for {
@@ -246,14 +238,11 @@ func (l *Lexer) nextWhitespace() bool {
 		if !IsWhitespace(t.Rune) {
 			break
 		}
-		ss = append(ss, string(t.Rune))
 		l.Offset++
 	}
-	lx := strings.Join(ss, "")
 	l.Curr = Token{
 		Buffer: &l.Buffer,
 		Type:   Whitespace,
-		Lexeme: lx,
 		Start:  start,
 		End:    l.Offset,
 	}

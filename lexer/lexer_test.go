@@ -19,7 +19,7 @@ func TestXxx(t *testing.T) {
 		t.Fatal("failed to initialize the lexer")
 	}
 	for l.Next() {
-		log.Println(l.Token())
+		log.Println(l.Token(), l.Token().Lexeme())
 	}
 	log.Println(l.Errors)
 }
