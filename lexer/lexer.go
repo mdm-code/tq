@@ -3,6 +3,9 @@
 // It's difficult but let's decide that all keys should be quoted. This makes
 // allowed toml only-digits keys explicit. Dotted keys in toml will be handled
 // with ["foo"]["bar"] syntax of a query.
+//
+// TODO: tests
+// TODO: documentation
 package lexer
 
 import (
@@ -51,17 +54,19 @@ var KeyCharMap = map[rune]TokenType{
 	']': ArrayClose,
 }
 
-// ErrNilScanner ...
-var ErrNilScanner = errors.New("provided Scanner is nil")
+var (
+	// ErrNilScanner ...
+	ErrNilScanner = errors.New("provided Scanner is nil")
 
-// ErrKeyCharUnsupported ...
-var ErrKeyCharUnsupported = errors.New("unsupported key character")
+	// ErrKeyCharUnsupported ...
+	ErrKeyCharUnsupported = errors.New("unsupported key character")
 
-// ErrUnterminatedString ...
-var ErrUnterminatedString = errors.New("unterminated string literal")
+	// ErrUnterminatedString ...
+	ErrUnterminatedString = errors.New("unterminated string literal")
 
-// ErrDisallowedChar ...
-var ErrDisallowedChar = errors.New("disallowed character")
+	// ErrDisallowedChar ...
+	ErrDisallowedChar = errors.New("disallowed character")
+)
 
 // TokenType ...
 type TokenType uint8
@@ -165,6 +170,7 @@ func (l *Lexer) Next() bool {
 	case IsWhitespace(r):
 		return l.nextWhitespace()
 	default:
+		l.setToken(Undefined, l.Offset, l.Offset+1)
 		l.pushErr(ErrDisallowedChar, l.Offset)
 		return false
 	}
@@ -177,14 +183,9 @@ func (l *Lexer) nextKeyChar() bool {
 		l.pushErr(ErrKeyCharUnsupported, l.Offset)
 		return false
 	}
-	l.Curr = Token{
-		Buffer: &l.Buffer,
-		Type:   tp,
-		Start:  l.Offset,
-		End:    l.Offset + 1,
-	}
+	l.setToken(tp, l.Offset, l.Offset+1)
 	if ok {
-		l.Offset++
+		l.advance()
 	}
 	return true
 }
@@ -193,48 +194,33 @@ func (l *Lexer) nextString() bool {
 	t := l.Buffer[l.Offset]
 	tq := t.Rune
 	start := l.Offset
-	l.Offset++
+	l.advance()
 	for {
 		if l.Offset > len(l.Buffer)-1 {
-			l.Curr = Token{
-				Buffer: &l.Buffer,
-				Type:   Undefined,
-				Start:  start,
-				End:    l.Offset + 1,
-			}
+			l.setToken(Undefined, start, l.Offset+1)
 			l.pushErr(ErrUnterminatedString, start)
 			return false
 		}
 		t = l.Buffer[l.Offset]
 		if IsNewline(t.Rune) {
-			l.Curr = Token{
-				Buffer: &l.Buffer,
-				Type:   Undefined,
-				Start:  start,
-				End:    l.Offset + 1,
-			}
+			l.setToken(Undefined, start, l.Offset+1)
 			l.pushErr(ErrDisallowedChar, start)
 			return false
 		}
 		if t.Rune == tq {
-			l.Offset++
+			l.advance()
 			break
 		}
-		l.Offset++
+		l.advance()
 	}
-	l.Curr = Token{
-		Buffer: &l.Buffer,
-		Type:   String,
-		Start:  start,
-		End:    l.Offset,
-	}
+	l.setToken(String, start, l.Offset)
 	return true
 }
 
 func (l *Lexer) nextInteger() bool {
 	t := l.Buffer[l.Offset]
 	start := l.Offset
-	l.Offset++
+	l.advance()
 	for {
 		if l.Offset > len(l.Buffer)-1 {
 			break
@@ -243,21 +229,16 @@ func (l *Lexer) nextInteger() bool {
 		if !IsDigit(t.Rune) {
 			break
 		}
-		l.Offset++
+		l.advance()
 	}
-	l.Curr = Token{
-		Buffer: &l.Buffer,
-		Type:   Integer,
-		Start:  start,
-		End:    l.Offset,
-	}
+	l.setToken(Integer, start, l.Offset)
 	return true
 }
 
 func (l *Lexer) nextWhitespace() bool {
 	t := l.Buffer[l.Offset]
 	start := l.Offset
-	l.Offset++
+	l.advance()
 	for {
 		if l.Offset > len(l.Buffer)-1 {
 			break
@@ -266,15 +247,19 @@ func (l *Lexer) nextWhitespace() bool {
 		if !IsWhitespace(t.Rune) {
 			break
 		}
-		l.Offset++
+		l.advance()
 	}
+	l.setToken(Whitespace, start, l.Offset)
+	return true
+}
+
+func (l *Lexer) setToken(tp TokenType, start, end int) {
 	l.Curr = Token{
 		Buffer: &l.Buffer,
-		Type:   Whitespace,
+		Type:   tp,
 		Start:  start,
-		End:    l.Offset,
+		End:    end,
 	}
-	return true
 }
 
 func (l *Lexer) pushErr(err error, offset int) {
@@ -284,4 +269,8 @@ func (l *Lexer) pushErr(err error, offset int) {
 		Err:    err,
 	}
 	l.Errors = append(l.Errors, &e)
+}
+
+func (l *Lexer) advance() {
+	l.Offset++
 }
