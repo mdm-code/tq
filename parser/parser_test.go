@@ -10,7 +10,7 @@ import (
 )
 
 func TestXxx(t *testing.T) {
-	q := ".['foo']['bar'][0][1:]"
+	q := " . ['foo'][ 'bar' ][0][:10][:][][2 : 12][\"foo\"] "
 	r := strings.NewReader(q)
 	s, err := scanner.New(r)
 	if err != nil {
@@ -20,9 +20,9 @@ func TestXxx(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	p, err := New(l)
+	p, err := New(l, true)
 	if err != nil {
 		t.Fatal(err)
 	}
-	log.Println(p.Buffer)
+	log.Println(p.root())
 }
