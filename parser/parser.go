@@ -14,98 +14,215 @@ package parser
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/mdm-code/tq/lexer"
 )
 
-// Acceptor ...
-type Acceptor struct{}
+// Visitor ...
+type Visitor interface {
+	Print(Expr) string
+	visitRoot(Expr) string
+	visitQuery(Expr) string
+	visitFilter(Expr) string
+	visitIdentity(Expr) string
+	visitSelector(Expr) string
+	visitIterator(Expr) string
+	visitSpan(Expr) string
+	visitString(Expr) string
+	visitInteger(Expr) string
+}
 
-func (a Acceptor) accept() {}
+// AstPrinter ...
+type AstPrinter struct{}
+
+// Print ...
+func (a AstPrinter) Print(e Expr) string {
+	return e.accept(a)
+}
+
+func (a AstPrinter) visitRoot(e Expr) string {
+	switch v := e.(type) {
+	case *Root:
+		return a.parenthesize("root", v.query)
+	default:
+		// error out
+	}
+	return ""
+}
+
+func (a AstPrinter) visitQuery(e Expr) string {
+	switch v := e.(type) {
+	case *Query:
+		return a.parenthesize("query", v.filters...)
+	default:
+		// error out
+	}
+	return ""
+}
+
+func (a AstPrinter) visitFilter(e Expr) string {
+	switch v := e.(type) {
+	case *Filter:
+		return a.parenthesize("filter", v.kind)
+	default:
+		// error out
+	}
+	return ""
+}
+
+func (a AstPrinter) visitIdentity(e Expr) string {
+	switch e.(type) {
+	case *Identity:
+		return "(identity)"
+	default:
+		// error out
+	}
+	return ""
+}
+
+func (a AstPrinter) visitSelector(e Expr) string {
+	switch v := e.(type) {
+	case *Selector:
+		return a.parenthesize("selector", v.value)
+	default:
+		// error out
+	}
+	return ""
+}
+
+func (a AstPrinter) visitIterator(e Expr) string {
+	switch e.(type) {
+	case *Iterator:
+		return "(iterator)"
+	default:
+		// error out
+	}
+	return ""
+}
+
+func (a AstPrinter) visitSpan(e Expr) string {
+	switch v := e.(type) {
+	case *Span:
+		return a.parenthesize("span", v.left, v.right)
+	default:
+		// error out
+	}
+	return ""
+}
+
+func (a AstPrinter) visitInteger(e Expr) string {
+	switch v := e.(type) {
+	case *Integer:
+		return fmt.Sprintf("(integer %v)", v.value)
+	default:
+		// error out
+	}
+	return ""
+}
+
+func (a AstPrinter) visitString(e Expr) string {
+	switch v := e.(type) {
+	case *String:
+		return fmt.Sprintf("(string %v)", v.value)
+	default:
+		// error out
+	}
+	return ""
+}
+
+func (a AstPrinter) parenthesize(name string, es ...Expr) string {
+	var b strings.Builder
+	b.WriteString("(")
+	b.WriteString(name)
+	for _, e := range es {
+		b.WriteString(" ")
+		if e == nil {
+			b.WriteString("(null)")
+			continue
+		}
+		b.WriteString(e.accept(a))
+	}
+	b.WriteString(")")
+	return b.String()
+}
 
 // Root ...
 type Root struct {
-	Acceptor
 	query Expr
 }
 
-func (r Root) String() string {
-	return fmt.Sprintf("root: %v", r.query)
+func (r *Root) accept(v Visitor) string {
+	return v.visitRoot(r)
 }
 
 // Query ...
 type Query struct {
-	Acceptor
 	filters []Expr
 }
 
-func (q Query) String() string {
-	return fmt.Sprintf("query: %v", q.filters)
+func (q *Query) accept(v Visitor) string {
+	return v.visitQuery(q)
 }
 
 // Filter ...
 type Filter struct {
-	Acceptor
 	kind Expr
 }
 
-func (f Filter) String() string {
-	return fmt.Sprintf("filter: %v", f.kind)
+func (f *Filter) accept(v Visitor) string {
+	return v.visitFilter(f)
 }
 
 // Identity ...
-type Identity struct {
-	Acceptor
-}
+type Identity struct{}
 
-func (i Identity) String() string {
-	return fmt.Sprintf("identity")
+func (i *Identity) accept(v Visitor) string {
+	return v.visitIdentity(i)
 }
 
 // Selector ...
 type Selector struct {
-	Acceptor
 	value Expr
 }
 
-func (s Selector) String() string {
-	return fmt.Sprintf("selector: %v", s.value)
+func (s *Selector) accept(v Visitor) string {
+	return v.visitSelector(s)
 }
 
 // Span ...
 type Span struct {
-	Acceptor
 	left, right Expr
 }
 
-func (s Span) String() string {
-	return fmt.Sprintf("span: %v:%v", s.left, s.right)
+func (s *Span) accept(v Visitor) string {
+	return v.visitSpan(s)
 }
 
 // Iterator ...
-type Iterator struct {
-	Acceptor
-}
+type Iterator struct{}
 
-func (i Iterator) String() string {
-	return fmt.Sprintf("iterator")
+func (i *Iterator) accept(v Visitor) string {
+	return v.visitIterator(i)
 }
 
 // String ...
 type String struct {
-	Acceptor
 	value string
 }
 
-func (s String) String() string { return fmt.Sprintf("str: %v", s.value) }
+func (s *String) accept(v Visitor) string {
+	return v.visitString(s)
+}
 
 // Integer ...
 type Integer struct {
-	Acceptor
 	value string
 }
 
-func (i Integer) String() string { return fmt.Sprintf("int: %v", i.value) }
+func (i *Integer) accept(v Visitor) string {
+	return v.visitInteger(i)
+}
 
 // Parser ...
 type Parser struct {
@@ -115,7 +232,7 @@ type Parser struct {
 
 // Expr ...
 type Expr interface {
-	accept()
+	accept(v Visitor) string
 }
 
 // New ...
@@ -134,79 +251,93 @@ func New(l *lexer.Lexer, ignoreWhitespace bool) (*Parser, error) {
 	return &p, nil
 }
 
-func (p *Parser) root() Expr {
-	e := Root{
-		query: p.query(),
-	}
-	return e
+// Parse ...
+func (p *Parser) Parse() (Expr, error) {
+	return p.root()
 }
 
-func (p *Parser) query() Expr {
+func (p *Parser) root() (Expr, error) {
+	q, err := p.query()
+	e := &Root{query: q}
+	return e, err
+}
+
+func (p *Parser) query() (Expr, error) {
+	var err error
+	var f Expr
 	e := Query{}
 	for !p.isAtEnd() {
-		if p.match(lexer.Dot) {
-			f := p.identity()
+		switch {
+		case p.match(lexer.Dot):
+			f, err = p.identity()
 			e.filters = append(e.filters, f)
-			continue
-		}
-		if p.match(lexer.ArrayOpen) {
-			f := p.selector()
+			if err != nil {
+				return &e, err
+			}
+		case p.match(lexer.ArrayOpen):
+			f, err = p.selector()
 			e.filters = append(e.filters, f)
-			continue
+			if err != nil {
+				return &e, err
+			}
+		default:
+			return &e, fmt.Errorf("query error at: %v", p.previous())
 		}
 	}
-	return e
+	return &e, err
 }
 
-func (p *Parser) identity() Expr {
-	return Identity{}
+func (p *Parser) identity() (Expr, error) {
+	return &Identity{}, nil
 }
 
-func (p *Parser) selector() Expr {
+func (p *Parser) selector() (Expr, error) {
 	e := Selector{}
 	if p.match(lexer.String) {
-		e.value = String{value: p.previous().Lexeme()}
-		p.consume(lexer.ArrayClose)
-		return e
+		e.value = &String{value: p.previous().Lexeme()}
+		_, err := p.consume(lexer.ArrayClose)
+		return &e, err
+	}
+	if p.match(lexer.ArrayClose) {
+		e.value = &Iterator{}
+		return &e, nil
 	}
 	if p.match(lexer.Colon) {
 		s := Span{}
 		if p.match(lexer.Integer) {
 			r := Integer{value: p.previous().Lexeme()}
-			s.right = r
+			s.right = &r
 		}
-		e.value = s
-		p.consume(lexer.ArrayClose)
-		return e
+		e.value = &s
+		_, err := p.consume(lexer.ArrayClose)
+		return &e, err
 	}
 	if p.match(lexer.Integer) {
 		l := Integer{value: p.previous().Lexeme()}
 		if p.match(lexer.ArrayClose) {
-			e.value = l
-			return e
+			e.value = &l
+			return &e, nil
 		}
 		if p.match(lexer.Colon) {
 			if p.match(lexer.Integer) {
 				r := Integer{value: p.previous().Lexeme()}
-				e.value = Span{left: l, right: r}
-				p.consume(lexer.ArrayClose)
-				return e
+				e.value = &Span{left: &l, right: &r}
+				_, err := p.consume(lexer.ArrayClose)
+				return &e, err
 			}
-			e.value = Span{left: l}
-			p.consume(lexer.ArrayClose)
-			return e
+			e.value = &Span{left: &l}
+			_, err := p.consume(lexer.ArrayClose)
+			return &e, err
 		}
 	}
-	e.value = Iterator{}
-	p.consume(lexer.ArrayClose)
-	return e
+	return &e, fmt.Errorf("parser error at: %v", p.previous())
 }
 
 func (p *Parser) consume(t lexer.TokenType) (lexer.Token, error) {
 	if p.check(t) {
 		return p.advance(), nil
 	}
-	return lexer.Token{}, fmt.Errorf("can't consume")
+	return lexer.Token{}, fmt.Errorf("consume error at: %v", p.previous())
 }
 
 func (p *Parser) match(tt ...lexer.TokenType) bool {

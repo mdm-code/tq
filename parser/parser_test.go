@@ -10,7 +10,7 @@ import (
 )
 
 func TestXxx(t *testing.T) {
-	q := " . ['foo'][ 'bar' ][0][:10][:][][2 : 12][\"foo\"] "
+	q := ". ['foo'][ 'bar' ][][0][:10][:][][2 : 12][\"foo\"] "
 	r := strings.NewReader(q)
 	s, err := scanner.New(r)
 	if err != nil {
@@ -20,9 +20,14 @@ func TestXxx(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	p, err := New(l, true)
+	// TODO: at this point whenever there's a lexer error and some tokens are
+	// not returned for this reason, the query will be processed up until this
+	// point, and this is wrong and has to be fixed.
+	p, err := New(l, true) // the lexer errors are not handled in any way here
 	if err != nil {
 		t.Fatal(err)
 	}
-	log.Println(p.root())
+	e, err := p.Parse()
+	var v AstPrinter
+	log.Println(v.Print(e))
 }
