@@ -98,7 +98,6 @@ func New(s *scanner.Scanner) (*Lexer, error) {
 	if s == nil {
 		return nil, ErrNilScanner
 	}
-	buf := []scanner.Token{}
 	buf, ok := s.ScanAll()
 	if !ok {
 		err := errors.Join(s.Errors...)
@@ -154,21 +153,21 @@ func (l *Lexer) Token() Token {
 	return l.Curr
 }
 
-// Next ...
-func (l *Lexer) Next() bool {
+// Scan ...
+func (l *Lexer) Scan() bool {
 	if l.Offset > len(l.Buffer)-1 {
 		return false
 	}
 	t := l.Buffer[l.Offset]
 	switch r := t.Rune; {
 	case IsKeyChar(r):
-		return l.nextKeyChar()
+		return l.scanKeyChar()
 	case IsQuote(r):
-		return l.nextString()
+		return l.scanString()
 	case IsDigit(r):
-		return l.nextInteger()
+		return l.scanInteger()
 	case IsWhitespace(r):
-		return l.nextWhitespace()
+		return l.scanWhitespace()
 	default:
 		l.setToken(Undefined, l.Offset, l.Offset+1)
 		l.pushErr(ErrDisallowedChar, l.Offset)
@@ -176,7 +175,7 @@ func (l *Lexer) Next() bool {
 	}
 }
 
-func (l *Lexer) nextKeyChar() bool {
+func (l *Lexer) scanKeyChar() bool {
 	t := l.Buffer[l.Offset]
 	tp, ok := KeyCharMap[t.Rune]
 	if !ok {
@@ -190,7 +189,7 @@ func (l *Lexer) nextKeyChar() bool {
 	return true
 }
 
-func (l *Lexer) nextString() bool {
+func (l *Lexer) scanString() bool {
 	t := l.Buffer[l.Offset]
 	tq := t.Rune
 	start := l.Offset
@@ -217,7 +216,7 @@ func (l *Lexer) nextString() bool {
 	return true
 }
 
-func (l *Lexer) nextInteger() bool {
+func (l *Lexer) scanInteger() bool {
 	t := l.Buffer[l.Offset]
 	start := l.Offset
 	l.advance()
@@ -235,7 +234,7 @@ func (l *Lexer) nextInteger() bool {
 	return true
 }
 
-func (l *Lexer) nextWhitespace() bool {
+func (l *Lexer) scanWhitespace() bool {
 	t := l.Buffer[l.Offset]
 	start := l.Offset
 	l.advance()
@@ -273,4 +272,25 @@ func (l *Lexer) pushErr(err error, offset int) {
 
 func (l *Lexer) advance() {
 	l.Offset++
+}
+
+// ScanAll ...
+func (l *Lexer) ScanAll(ignoreWhitespace bool) ([]Token, bool) {
+	result := []Token{}
+	for l.Scan() {
+		if ignoreWhitespace && l.Token().Type == Whitespace {
+			continue
+		}
+		t := l.Token()
+		result = append(result, t)
+	}
+	if l.Errored() {
+		return result, false
+	}
+	return result, true
+}
+
+// Errored ...
+func (l *Lexer) Errored() bool {
+	return len(l.Errors) > 0
 }
