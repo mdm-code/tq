@@ -19,7 +19,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("%v\n", err)
 	}
-	p, err := parser.New(l, true)
+	p, err := parser.New(l)
 	if err != nil {
 		log.Fatalf("%v\n", err)
 	}
