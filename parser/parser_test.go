@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"log"
 	"strings"
 	"testing"
@@ -19,13 +20,12 @@ func TestXxx(t *testing.T) {
 	l, err := lexer.New(s)
 	if err != nil {
 		t.Fatal(err)
+
 	}
-	// TODO: at this point whenever there's a lexer error and some tokens are
-	// not returned for this reason, the query will be processed up until this
-	// point, and this is wrong and has to be fixed.
-	p, err := New(l, true) // the lexer errors are not handled in any way here
+	p, err := New(l)
 	if err != nil {
-		t.Fatal(err)
+		fmt.Println(err)
+		t.Fatal()
 	}
 	e, err := p.Parse()
 	var v AstPrinter

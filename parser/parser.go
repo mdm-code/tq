@@ -13,6 +13,7 @@ span        = *INTEGER ':' *INTEGER
 package parser
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -236,13 +237,12 @@ type Expr interface {
 }
 
 // New ...
-func New(l *lexer.Lexer, ignoreWhitespace bool) (*Parser, error) {
+func New(l *lexer.Lexer) (*Parser, error) {
 	buf := []lexer.Token{}
-	for l.Next() {
-		if ignoreWhitespace && l.Token().Type == lexer.Whitespace {
-			continue
-		}
-		buf = append(buf, l.Token())
+	buf, ok := l.ScanAll(true)
+	if !ok {
+		err := errors.Join(l.Errors...)
+		return nil, err
 	}
 	p := Parser{
 		Buffer:  buf,
