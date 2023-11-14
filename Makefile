@@ -1,6 +1,5 @@
 GO=go
 GOFLAGS=-race
-DEV_BIN=bin
 COV_PROFILE=coverage.txt
 
 export CGO_ENABLED = 1
