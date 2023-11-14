@@ -7,6 +7,7 @@ import (
 
 	"github.com/mdm-code/scanner"
 	"github.com/mdm-code/tq/lexer"
+	"github.com/mdm-code/tq/parser"
 )
 
 func main() {
@@ -15,7 +16,14 @@ func main() {
 		log.Fatalf("%v\n", err)
 	}
 	l, err := lexer.New(s)
-	for l.Next() {
-		fmt.Println(l.Token(), l.Token().Lexeme())
+	if err != nil {
+		log.Fatalf("%v\n", err)
 	}
+	p, err := parser.New(l, true)
+	if err != nil {
+		log.Fatalf("%v\n", err)
+	}
+	e, err := p.Parse()
+	var a parser.AstPrinter
+	fmt.Fprintln(os.Stdout, a.Print(e))
 }
