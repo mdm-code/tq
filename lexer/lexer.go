@@ -132,7 +132,13 @@ func (e *Error) Error() string {
 	}
 	b.WriteString("^")
 	b.WriteString("\n")
-	b.WriteString(fmt.Sprintf("Error: %s", e.Err.Error()))
+	var errMsg string
+	if e.Err != nil {
+		errMsg = e.Err.Error()
+	} else {
+		errMsg = "null"
+	}
+	b.WriteString(fmt.Sprintf("Lexer error: %s", errMsg))
 	return b.String()
 }
 
