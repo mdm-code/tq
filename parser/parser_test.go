@@ -12,6 +12,7 @@ import (
 
 func TestXxx(t *testing.T) {
 	q := ". ['foo'][ 'bar' ][][0][:10][:][][2 : 12][\"foo\"] "
+	// q := "['foo'][:1'bar']"
 	r := strings.NewReader(q)
 	s, err := scanner.New(r)
 	if err != nil {
@@ -28,6 +29,7 @@ func TestXxx(t *testing.T) {
 		t.Fatal()
 	}
 	e, err := p.Parse()
-	var v AstPrinter
-	log.Println(v.Print(e))
+	qc := &QueryConstructor{}
+	qc.Interpret(e)
+	log.Println(qc.Filters, err)
 }

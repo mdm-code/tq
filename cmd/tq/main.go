@@ -24,6 +24,7 @@ func main() {
 		log.Fatalf("%v\n", err)
 	}
 	e, err := p.Parse()
-	var a parser.AstPrinter
-	fmt.Fprintln(os.Stdout, a.Print(e))
+	qc := &parser.QueryConstructor{}
+	qc.Interpret(e)
+	fmt.Fprintln(os.Stdout, qc.Filters)
 }
