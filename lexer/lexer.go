@@ -1,11 +1,4 @@
 // Package lexer ...
-//
-// It's difficult but let's decide that all keys should be quoted. This makes
-// allowed toml only-digits keys explicit. Dotted keys in toml will be handled
-// with ["foo"]["bar"] syntax of a query.
-//
-// TODO: tests
-// TODO: documentation
 package lexer
 
 import (
@@ -26,9 +19,6 @@ const (
 	// Dot ...
 	Dot
 
-	// Comma ...
-	Comma
-
 	// Colon ...
 	Colon
 
@@ -48,7 +38,6 @@ const (
 // KeyCharMap ...
 var KeyCharMap = map[rune]TokenType{
 	'.': Dot,
-	',': Comma,
 	':': Colon,
 	'[': ArrayOpen,
 	']': ArrayClose,
