@@ -13,138 +13,177 @@ span        = *INTEGER ':' *INTEGER
 package parser
 
 import (
+	"errors"
 	"fmt"
+	"io"
+	"strconv"
 	"strings"
 
 	"github.com/mdm-code/tq/lexer"
 )
 
+// Error ...
+type Error struct {
+	Token lexer.Token
+	Err   error
+}
+
+// Error ...
+func (e Error) Error() string {
+	if e.Err != nil {
+		return e.Err.Error() + fmt.Sprintf(" but got '%s'", e.Token.Lexeme())
+	}
+	return "null"
+}
+
 // Visitor ...
 type Visitor interface {
-	Print(Expr) string
-	visitRoot(Expr) string
-	visitQuery(Expr) string
-	visitFilter(Expr) string
-	visitIdentity(Expr) string
-	visitSelector(Expr) string
-	visitIterator(Expr) string
-	visitSpan(Expr) string
-	visitString(Expr) string
-	visitInteger(Expr) string
+	Interpret(Expr)
+	visitRoot(Expr)
+	visitQuery(Expr)
+	visitFilter(Expr)
+	visitIdentity(Expr)
+	visitSelector(Expr)
+	// visitIterator(Expr)
+	// visitSpan(Expr)
+	// visitString(Expr) string
+	// visitInteger(Expr) string
 }
 
-// AstPrinter ...
-type AstPrinter struct{}
+// FilterFunc ...
+type FilterFunc func(data ...interface{}) ([]interface{}, error)
 
-// Print ...
-func (a AstPrinter) Print(e Expr) string {
-	return e.accept(a)
+// QueryConstructor ...
+type QueryConstructor struct {
+	Filters []FilterFunc
 }
 
-func (a AstPrinter) visitRoot(e Expr) string {
+func (q *QueryConstructor) interpret(es ...Expr) {
+	for _, e := range es {
+		e.accept(q)
+	}
+}
+
+// Interpret ...
+func (q *QueryConstructor) Interpret(e Expr) {
+	e.accept(q)
+}
+
+func (q *QueryConstructor) visitRoot(e Expr) {
 	switch v := e.(type) {
 	case *Root:
-		return a.parenthesize("root", v.query)
+		q.interpret(v.query)
 	default:
 		// error out
 	}
-	return ""
 }
 
-func (a AstPrinter) visitQuery(e Expr) string {
+func (q *QueryConstructor) visitQuery(e Expr) {
 	switch v := e.(type) {
 	case *Query:
-		return a.parenthesize("query", v.filters...)
+		q.interpret(v.filters...)
 	default:
 		// error out
 	}
-	return ""
 }
 
-func (a AstPrinter) visitFilter(e Expr) string {
+func (q *QueryConstructor) visitFilter(e Expr) {
 	switch v := e.(type) {
 	case *Filter:
-		return a.parenthesize("filter", v.kind)
+		q.interpret(v.kind)
 	default:
 		// error out
 	}
-	return ""
 }
-
-func (a AstPrinter) visitIdentity(e Expr) string {
-	switch e.(type) {
+func (q *QueryConstructor) visitIdentity(e Expr) {
+	switch v := e.(type) {
 	case *Identity:
-		return "(identity)"
+		fmt.Fprintf(io.Discard, "%v", *v)
+		q.Filters = append(q.Filters, identityFn)
 	default:
 		// error out
 	}
-	return ""
 }
 
-func (a AstPrinter) visitSelector(e Expr) string {
+func identityFn(data ...interface{}) ([]interface{}, error) {
+	return data, nil
+}
+
+func (q *QueryConstructor) visitSelector(e Expr) {
 	switch v := e.(type) {
 	case *Selector:
-		return a.parenthesize("selector", v.value)
-	default:
-		// error out
-	}
-	return ""
-}
-
-func (a AstPrinter) visitIterator(e Expr) string {
-	switch e.(type) {
-	case *Iterator:
-		return "(iterator)"
-	default:
-		// error out
-	}
-	return ""
-}
-
-func (a AstPrinter) visitSpan(e Expr) string {
-	switch v := e.(type) {
-	case *Span:
-		return a.parenthesize("span", v.left, v.right)
-	default:
-		// error out
-	}
-	return ""
-}
-
-func (a AstPrinter) visitInteger(e Expr) string {
-	switch v := e.(type) {
-	case *Integer:
-		return fmt.Sprintf("(integer %v)", v.value)
-	default:
-		// error out
-	}
-	return ""
-}
-
-func (a AstPrinter) visitString(e Expr) string {
-	switch v := e.(type) {
-	case *String:
-		return fmt.Sprintf("(string %v)", v.value)
-	default:
-		// error out
-	}
-	return ""
-}
-
-func (a AstPrinter) parenthesize(name string, es ...Expr) string {
-	var b strings.Builder
-	b.WriteString("(")
-	b.WriteString(name)
-	for _, e := range es {
-		b.WriteString(" ")
-		if e == nil {
-			b.WriteString("(null)")
-			continue
+		fn := func(data ...interface{}) ([]interface{}, error) {
+			var err error
+			result := []interface{}{}
+			switch vv := v.value.(type) {
+			case *String:
+				for _, d := range data {
+					switch vvv := d.(type) {
+					case map[string]interface{}:
+						val := vv.value
+						val = strings.Trim(val, "'") // might want trim bytes instead
+						val = strings.Trim(val, "\"")
+						result = append(result, vvv[val])
+					default:
+						err = fmt.Errorf("type error")
+					}
+				}
+			case *Integer:
+				for _, d := range data {
+					switch vvv := d.(type) {
+					case []interface{}:
+						i, _ := strconv.Atoi(vv.value)
+						result = append(result, vvv[i])
+					default:
+						err = fmt.Errorf("type error")
+					}
+				}
+			case *Span:
+				var l int
+				if vv.left != nil {
+					l, _ = strconv.Atoi(vv.left.value)
+				} else {
+					l = 0
+				}
+				for _, d := range data {
+					switch vvv := d.(type) {
+					case []interface{}:
+						var r int
+						if vv.right != nil {
+							r, _ = strconv.Atoi(vv.right.value)
+							if r > len(vvv) {
+								r = len(vvv)
+							}
+						} else {
+							r = len(vvv)
+						}
+						result = append(result, vvv[l:r])
+					default:
+						err = fmt.Errorf("type error")
+					}
+				}
+			case *Iterator:
+				for _, d := range data {
+					switch v := d.(type) {
+					case []interface{}:
+						for _, v := range v {
+							result = append(result, v)
+						}
+					case map[string]interface{}:
+						for _, v := range v {
+							result = append(result, v)
+						}
+					default:
+						err = fmt.Errorf("type error")
+					}
+				}
+			}
+			return result, err
 		}
-		b.WriteString(e.accept(a))
+		q.Filters = append(q.Filters, fn)
+	default:
+		// error out
 	}
-	b.WriteString(")")
-	return b.String()
 }
 
 // Root ...
@@ -152,8 +191,8 @@ type Root struct {
 	query Expr
 }
 
-func (r *Root) accept(v Visitor) string {
-	return v.visitRoot(r)
+func (r *Root) accept(v Visitor) {
+	v.visitRoot(r)
 }
 
 // Query ...
@@ -161,8 +200,8 @@ type Query struct {
 	filters []Expr
 }
 
-func (q *Query) accept(v Visitor) string {
-	return v.visitQuery(q)
+func (q *Query) accept(v Visitor) {
+	v.visitQuery(q)
 }
 
 // Filter ...
@@ -170,15 +209,15 @@ type Filter struct {
 	kind Expr
 }
 
-func (f *Filter) accept(v Visitor) string {
-	return v.visitFilter(f)
+func (f *Filter) accept(v Visitor) {
+	v.visitFilter(f)
 }
 
 // Identity ...
 type Identity struct{}
 
-func (i *Identity) accept(v Visitor) string {
-	return v.visitIdentity(i)
+func (i *Identity) accept(v Visitor) {
+	v.visitIdentity(i)
 }
 
 // Selector ...
@@ -186,24 +225,24 @@ type Selector struct {
 	value Expr
 }
 
-func (s *Selector) accept(v Visitor) string {
-	return v.visitSelector(s)
+func (s *Selector) accept(v Visitor) {
+	v.visitSelector(s)
 }
 
 // Span ...
 type Span struct {
-	left, right Expr
+	left, right *Integer
 }
 
-func (s *Span) accept(v Visitor) string {
-	return v.visitSpan(s)
+func (s *Span) accept(v Visitor) {
+	// v.visitSpan(s)
 }
 
 // Iterator ...
 type Iterator struct{}
 
-func (i *Iterator) accept(v Visitor) string {
-	return v.visitIterator(i)
+func (i *Iterator) accept(v Visitor) {
+	// v.visitIterator(i)
 }
 
 // String ...
@@ -211,8 +250,8 @@ type String struct {
 	value string
 }
 
-func (s *String) accept(v Visitor) string {
-	return v.visitString(s)
+func (s *String) accept(v Visitor) {
+	// v.visitString(s)
 }
 
 // Integer ...
@@ -220,8 +259,8 @@ type Integer struct {
 	value string
 }
 
-func (i *Integer) accept(v Visitor) string {
-	return v.visitInteger(i)
+func (i *Integer) accept(v Visitor) {
+	// v.visitInteger(i)
 }
 
 // Parser ...
@@ -232,17 +271,16 @@ type Parser struct {
 
 // Expr ...
 type Expr interface {
-	accept(v Visitor) string
+	accept(v Visitor)
 }
 
 // New ...
-func New(l *lexer.Lexer, ignoreWhitespace bool) (*Parser, error) {
+func New(l *lexer.Lexer) (*Parser, error) {
 	buf := []lexer.Token{}
-	for l.Next() {
-		if ignoreWhitespace && l.Token().Type == lexer.Whitespace {
-			continue
-		}
-		buf = append(buf, l.Token())
+	buf, ok := l.ScanAll(true)
+	if !ok {
+		err := errors.Join(l.Errors...)
+		return nil, err
 	}
 	p := Parser{
 		Buffer:  buf,
@@ -281,7 +319,11 @@ func (p *Parser) query() (Expr, error) {
 				return &e, err
 			}
 		default:
-			return &e, fmt.Errorf("query error at: %v", p.previous())
+			err = Error{
+				p.previous(),
+				fmt.Errorf("expected '.' or '[' to parse query element"),
+			}
+			return &e, err
 		}
 	}
 	return &e, err
@@ -295,12 +337,8 @@ func (p *Parser) selector() (Expr, error) {
 	e := Selector{}
 	if p.match(lexer.String) {
 		e.value = &String{value: p.previous().Lexeme()}
-		_, err := p.consume(lexer.ArrayClose)
+		_, err := p.consume(lexer.ArrayClose, "expected ']' to terminate selector")
 		return &e, err
-	}
-	if p.match(lexer.ArrayClose) {
-		e.value = &Iterator{}
-		return &e, nil
 	}
 	if p.match(lexer.Colon) {
 		s := Span{}
@@ -309,7 +347,7 @@ func (p *Parser) selector() (Expr, error) {
 			s.right = &r
 		}
 		e.value = &s
-		_, err := p.consume(lexer.ArrayClose)
+		_, err := p.consume(lexer.ArrayClose, "expected ']' to terminate selector")
 		return &e, err
 	}
 	if p.match(lexer.Integer) {
@@ -322,22 +360,32 @@ func (p *Parser) selector() (Expr, error) {
 			if p.match(lexer.Integer) {
 				r := Integer{value: p.previous().Lexeme()}
 				e.value = &Span{left: &l, right: &r}
-				_, err := p.consume(lexer.ArrayClose)
+				_, err := p.consume(lexer.ArrayClose, "expected ']' to terminate selector")
 				return &e, err
 			}
 			e.value = &Span{left: &l}
-			_, err := p.consume(lexer.ArrayClose)
+			_, err := p.consume(lexer.ArrayClose, "expected ']' to terminate selector")
 			return &e, err
 		}
 	}
-	return &e, fmt.Errorf("parser error at: %v", p.previous())
+	if p.match(lexer.ArrayClose) {
+		e.value = &Iterator{}
+		return &e, nil
+	}
+	err := Error{
+		p.previous(),
+		fmt.Errorf("expected ']' to terminate the selector"),
+	}
+	return &e, err
 }
 
-func (p *Parser) consume(t lexer.TokenType) (lexer.Token, error) {
+func (p *Parser) consume(t lexer.TokenType, msg string) (lexer.Token, error) {
 	if p.check(t) {
 		return p.advance(), nil
 	}
-	return lexer.Token{}, fmt.Errorf("consume error at: %v", p.previous())
+	// NOTE: or possibly p.previous()
+	err := Error{p.peek(), fmt.Errorf(msg)}
+	return p.peek(), err
 }
 
 func (p *Parser) match(tt ...lexer.TokenType) bool {

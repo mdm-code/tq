@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -19,8 +20,9 @@ func TestXxx(t *testing.T) {
 	if err != nil {
 		t.Fatal("failed to initialize the lexer")
 	}
-	for l.Next() {
-		log.Println(l.Token(), l.Token().Lexeme())
+	tt, ok := l.ScanAll(false)
+	if !ok {
+		fmt.Println(errors.Join(l.Errors...))
 	}
-	fmt.Println(l.Errors[0])
+	log.Println(tt)
 }
