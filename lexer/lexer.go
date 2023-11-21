@@ -3,54 +3,9 @@ package lexer
 
 import (
 	"errors"
-	"strings"
 
 	"github.com/mdm-code/scanner"
 )
-
-const (
-	// String ...
-	String TokenType = iota
-
-	// Integer ...
-	Integer
-
-	// Dot ...
-	Dot
-
-	// Colon ...
-	Colon
-
-	// ArrayOpen ...
-	ArrayOpen
-
-	// ArrayClose ...
-	ArrayClose
-
-	// Whitespace ...
-	Whitespace
-
-	// Undefined ...
-	Undefined
-)
-
-// KeyCharMap ...
-var KeyCharMap = map[rune]TokenType{
-	'.': Dot,
-	':': Colon,
-	'[': ArrayOpen,
-	']': ArrayClose,
-}
-
-// TokenType ...
-type TokenType uint8
-
-// Token ...
-type Token struct {
-	Buffer     *[]scanner.Token
-	Type       TokenType
-	Start, End int
-}
 
 // Lexer ...
 type Lexer struct {
@@ -83,18 +38,6 @@ func New(s *scanner.Scanner) (*Lexer, error) {
 	return &l, nil
 }
 
-// Lexeme ...
-func (t Token) Lexeme() string {
-	if t.Buffer == nil {
-		return ""
-	}
-	chars := make([]string, t.End-t.Start)
-	for _, t := range (*t.Buffer)[t.Start:t.End] {
-		chars = append(chars, string(t.Rune))
-	}
-	return strings.Join(chars, "")
-}
-
 // Token ...
 func (l *Lexer) Token() Token {
 	return l.Curr
@@ -120,6 +63,49 @@ func (l *Lexer) Scan() bool {
 		l.pushErr(ErrDisallowedChar, l.Offset)
 		return false
 	}
+}
+
+// ScanAll ...
+func (l *Lexer) ScanAll(ignoreWhitespace bool) ([]Token, bool) {
+	result := []Token{}
+	for l.Scan() {
+		if ignoreWhitespace && l.Token().Type == Whitespace {
+			continue
+		}
+		t := l.Token()
+		result = append(result, t)
+	}
+	if l.Errored() {
+		return result, false
+	}
+	return result, true
+}
+
+// Errored ...
+func (l *Lexer) Errored() bool {
+	return len(l.Errors) > 0
+}
+
+func (l *Lexer) advance() {
+	l.Offset++
+}
+
+func (l *Lexer) setToken(tp TokenType, start, end int) {
+	l.Curr = Token{
+		Buffer: &l.Buffer,
+		Type:   tp,
+		Start:  start,
+		End:    end,
+	}
+}
+
+func (l *Lexer) pushErr(err error, offset int) {
+	e := Error{
+		Buffer: &l.Buffer,
+		Offset: offset,
+		Err:    err,
+	}
+	l.Errors = append(l.Errors, &e)
 }
 
 func (l *Lexer) scanKeyChar() bool {
@@ -197,47 +183,4 @@ func (l *Lexer) scanWhitespace() bool {
 	}
 	l.setToken(Whitespace, start, l.Offset)
 	return true
-}
-
-func (l *Lexer) setToken(tp TokenType, start, end int) {
-	l.Curr = Token{
-		Buffer: &l.Buffer,
-		Type:   tp,
-		Start:  start,
-		End:    end,
-	}
-}
-
-func (l *Lexer) pushErr(err error, offset int) {
-	e := Error{
-		Buffer: &l.Buffer,
-		Offset: offset,
-		Err:    err,
-	}
-	l.Errors = append(l.Errors, &e)
-}
-
-func (l *Lexer) advance() {
-	l.Offset++
-}
-
-// ScanAll ...
-func (l *Lexer) ScanAll(ignoreWhitespace bool) ([]Token, bool) {
-	result := []Token{}
-	for l.Scan() {
-		if ignoreWhitespace && l.Token().Type == Whitespace {
-			continue
-		}
-		t := l.Token()
-		result = append(result, t)
-	}
-	if l.Errored() {
-		return result, false
-	}
-	return result, true
-}
-
-// Errored ...
-func (l *Lexer) Errored() bool {
-	return len(l.Errors) > 0
 }
