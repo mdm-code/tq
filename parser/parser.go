@@ -120,7 +120,10 @@ func (q *QueryConstructor) visitSelector(e Expr) {
 				for _, d := range data {
 					switch vvv := d.(type) {
 					case map[string]interface{}:
-						result = append(result, vvv[strings.Trim(vv.value, "'")])
+						val := vv.value
+						val = strings.Trim(val, "'") // might want trim bytes instead
+						val = strings.Trim(val, "\"")
+						result = append(result, vvv[val])
 					default:
 						err = fmt.Errorf("type error")
 					}
