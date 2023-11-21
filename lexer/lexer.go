@@ -9,10 +9,10 @@ import (
 
 // Lexer ...
 type Lexer struct {
-	Buffer []scanner.Token
+	buffer []scanner.Token
 	Errors []error
-	Offset int
-	Curr   Token
+	offset int
+	curr   Token
 }
 
 // New ...
@@ -26,9 +26,9 @@ func New(s *scanner.Scanner) (*Lexer, error) {
 		return nil, err
 	}
 	l := Lexer{
-		Offset: 0,
-		Buffer: buf,
-		Curr: Token{
+		offset: 0,
+		buffer: buf,
+		curr: Token{
 			Buffer: nil,
 			Type:   Undefined,
 			Start:  0,
@@ -40,15 +40,15 @@ func New(s *scanner.Scanner) (*Lexer, error) {
 
 // Token ...
 func (l *Lexer) Token() Token {
-	return l.Curr
+	return l.curr
 }
 
 // Scan ...
 func (l *Lexer) Scan() bool {
-	if l.Offset > len(l.Buffer)-1 {
+	if l.offset > len(l.buffer)-1 {
 		return false
 	}
-	t := l.Buffer[l.Offset]
+	t := l.buffer[l.offset]
 	switch r := t.Rune; {
 	case IsKeyChar(r):
 		return l.scanKeyChar()
@@ -59,8 +59,8 @@ func (l *Lexer) Scan() bool {
 	case IsWhitespace(r):
 		return l.scanWhitespace()
 	default:
-		l.setToken(Undefined, l.Offset, l.Offset+1)
-		l.pushErr(ErrDisallowedChar, l.Offset)
+		l.setToken(Undefined, l.offset, l.offset+1)
+		l.pushErr(ErrDisallowedChar, l.offset)
 		return false
 	}
 }
@@ -87,12 +87,12 @@ func (l *Lexer) Errored() bool {
 }
 
 func (l *Lexer) advance() {
-	l.Offset++
+	l.offset++
 }
 
 func (l *Lexer) setToken(tp TokenType, start, end int) {
-	l.Curr = Token{
-		Buffer: &l.Buffer,
+	l.curr = Token{
+		Buffer: &l.buffer,
 		Type:   tp,
 		Start:  start,
 		End:    end,
@@ -101,7 +101,7 @@ func (l *Lexer) setToken(tp TokenType, start, end int) {
 
 func (l *Lexer) pushErr(err error, offset int) {
 	e := Error{
-		Buffer: &l.Buffer,
+		Buffer: &l.buffer,
 		Offset: offset,
 		Err:    err,
 	}
@@ -109,33 +109,31 @@ func (l *Lexer) pushErr(err error, offset int) {
 }
 
 func (l *Lexer) scanKeyChar() bool {
-	t := l.Buffer[l.Offset]
+	t := l.buffer[l.offset]
 	tp, ok := KeyCharMap[t.Rune]
 	if !ok {
-		l.pushErr(ErrKeyCharUnsupported, l.Offset)
+		l.pushErr(ErrKeyCharUnsupported, l.offset)
 		return false
 	}
-	l.setToken(tp, l.Offset, l.Offset+1)
-	if ok {
-		l.advance()
-	}
+	l.setToken(tp, l.offset, l.offset+1)
+	l.advance()
 	return true
 }
 
 func (l *Lexer) scanString() bool {
-	t := l.Buffer[l.Offset]
+	t := l.buffer[l.offset]
 	tq := t.Rune
-	start := l.Offset
+	start := l.offset
 	l.advance()
 	for {
-		if l.Offset > len(l.Buffer)-1 {
-			l.setToken(Undefined, start, l.Offset+1)
+		if l.offset > len(l.buffer)-1 {
+			l.setToken(Undefined, start, l.offset+1)
 			l.pushErr(ErrUnterminatedString, start)
 			return false
 		}
-		t = l.Buffer[l.Offset]
+		t = l.buffer[l.offset]
 		if IsNewline(t.Rune) {
-			l.setToken(Undefined, start, l.Offset+1)
+			l.setToken(Undefined, start, l.offset+1)
 			l.pushErr(ErrDisallowedChar, start)
 			return false
 		}
@@ -145,42 +143,42 @@ func (l *Lexer) scanString() bool {
 		}
 		l.advance()
 	}
-	l.setToken(String, start, l.Offset)
+	l.setToken(String, start, l.offset)
 	return true
 }
 
 func (l *Lexer) scanInteger() bool {
-	t := l.Buffer[l.Offset]
-	start := l.Offset
+	t := l.buffer[l.offset]
+	start := l.offset
 	l.advance()
 	for {
-		if l.Offset > len(l.Buffer)-1 {
+		if l.offset > len(l.buffer)-1 {
 			break
 		}
-		t = l.Buffer[l.Offset]
+		t = l.buffer[l.offset]
 		if !IsDigit(t.Rune) {
 			break
 		}
 		l.advance()
 	}
-	l.setToken(Integer, start, l.Offset)
+	l.setToken(Integer, start, l.offset)
 	return true
 }
 
 func (l *Lexer) scanWhitespace() bool {
-	t := l.Buffer[l.Offset]
-	start := l.Offset
+	t := l.buffer[l.offset]
+	start := l.offset
 	l.advance()
 	for {
-		if l.Offset > len(l.Buffer)-1 {
+		if l.offset > len(l.buffer)-1 {
 			break
 		}
-		t = l.Buffer[l.Offset]
+		t = l.buffer[l.offset]
 		if !IsWhitespace(t.Rune) {
 			break
 		}
 		l.advance()
 	}
-	l.setToken(Whitespace, start, l.Offset)
+	l.setToken(Whitespace, start, l.offset)
 	return true
 }
