@@ -50,13 +50,13 @@ func (l *Lexer) Scan() bool {
 	}
 	t := l.buffer[l.offset]
 	switch r := t.Rune; {
-	case IsKeyChar(r):
+	case isKeyChar(r):
 		return l.scanKeyChar()
-	case IsQuote(r):
+	case isQuote(r):
 		return l.scanString()
-	case IsDigit(r):
+	case isDigit(r):
 		return l.scanInteger()
-	case IsWhitespace(r):
+	case isWhitespace(r):
 		return l.scanWhitespace()
 	default:
 		l.setToken(Undefined, l.offset, l.offset+1)
@@ -132,7 +132,7 @@ func (l *Lexer) scanString() bool {
 			return false
 		}
 		t = l.buffer[l.offset]
-		if IsNewline(t.Rune) {
+		if isNewline(t.Rune) {
 			l.setToken(Undefined, start, l.offset+1)
 			l.pushErr(ErrDisallowedChar, start)
 			return false
@@ -156,7 +156,7 @@ func (l *Lexer) scanInteger() bool {
 			break
 		}
 		t = l.buffer[l.offset]
-		if !IsDigit(t.Rune) {
+		if !isDigit(t.Rune) {
 			break
 		}
 		l.advance()
@@ -174,7 +174,7 @@ func (l *Lexer) scanWhitespace() bool {
 			break
 		}
 		t = l.buffer[l.offset]
-		if !IsWhitespace(t.Rune) {
+		if !isWhitespace(t.Rune) {
 			break
 		}
 		l.advance()
