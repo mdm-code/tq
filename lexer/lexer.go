@@ -101,9 +101,9 @@ func (l *Lexer) setToken(tp TokenType, start, end int) {
 
 func (l *Lexer) pushErr(err error, offset int) {
 	e := Error{
-		Buffer: &l.buffer,
-		Offset: offset,
-		Err:    err,
+		buffer: &l.buffer,
+		offset: offset,
+		err:    err,
 	}
 	l.Errors = append(l.Errors, &e)
 }
