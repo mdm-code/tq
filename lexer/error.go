@@ -2,7 +2,6 @@ package lexer
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/mdm-code/scanner"
@@ -34,35 +33,49 @@ type Error struct {
 // Error reports the Lexer error wrapped inside the Lexer buffer context with
 // a marker indicating the start of the Lexer token at which the occurred.
 func (e *Error) Error() string {
-	msg := e.getErrorMsg()
-	if e.buffer == nil {
-		return msg
+	line := e.getErrorLine()
+	if e.buffer == nil || len(*e.buffer) < 1 {
+		return line
 	}
-	marker := "^"
-	result := e.wrapErrorMsg(msg, marker)
+	pointer := "^"
+	indentChar := " "
+	result := e.wrapErrorLine(line, pointer, indentChar)
 	return result
 }
 
-// getErrorMsg provides the wrapped error message or the nil default.
-func (e *Error) getErrorMsg() string {
+// getErrorLine provides the error line with the nil error as default.
+func (e *Error) getErrorLine() string {
+	var b strings.Builder
+	b.WriteString("Lexer error: ")
 	if e.err != nil {
-		return e.err.Error()
+		b.WriteString(e.err.Error())
+		return b.String()
 	}
-	return "nil"
+	b.WriteString("nil")
+	return b.String()
 }
 
-// wrapErrorMsg wraps the error message inside the Lexer buffer context.
-func (e *Error) wrapErrorMsg(msg, marker string) string {
+// wrapErrorLine wraps the error message inside the Lexer buffer context.
+func (e *Error) wrapErrorLine(line, pointer, indentChar string) string {
 	var b strings.Builder
-	b.Grow(e.offset*2 + 1)
+	b.Grow(len(*e.buffer)*2 + 1)
 	for _, t := range *e.buffer {
 		b.WriteRune(t.Rune)
 	}
 	b.WriteString("\n")
-	indent := strings.Repeat(" ", e.offset-1)
+	indent := e.getIndent(indentChar)
 	b.WriteString(indent)
-	b.WriteString(marker)
+	b.WriteString(pointer)
 	b.WriteString("\n")
-	b.WriteString(fmt.Sprintf("Lexer error: %s", msg))
+	b.WriteString(line)
 	return b.String()
+}
+
+// getIndent constructs the pointer indentation. Negative offsets result in an
+// empty string.
+func (e *Error) getIndent(indentChar string) string {
+	if e.offset > 0 {
+		return strings.Repeat(indentChar, e.offset-1) // leave space for the pointer
+	}
+	return ""
 }
