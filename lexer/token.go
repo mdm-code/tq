@@ -7,8 +7,11 @@ import (
 )
 
 const (
+	// Undefined ...
+	Undefined TokenType = iota
+
 	// String ...
-	String TokenType = iota
+	String
 
 	// Integer ...
 	Integer
@@ -27,9 +30,6 @@ const (
 
 	// Whitespace ...
 	Whitespace
-
-	// Undefined ...
-	Undefined
 )
 
 // KeyCharMap ...
