@@ -1,23 +1,102 @@
 package lexer
 
-/*
-The purpose of token tests is the verify how the Lexeme() value receiver
-function behaves given different values for the buffer, start and end.
+import (
+	"testing"
 
-Scenarios:
-1. Happy path: The buffer has a larger query buffer, the token is of type
-   string, both start and end point to the right elements in the buffer,
-   start and end are non-negative, start > end. This is how the it is used
-   in code.
-2. Given the buffer, when the buffer is nil, then Lexeme returns an empty
-   string.
-3. Given the buffer when the buffer is empty then Lexeme returns an empty
-   string.
-4. Given start and end, when start > end, then Lexeme returns an empty string
-   without an error or panic.
-5. Given start and end, start < end, when end > len(buffer), then the function
-   goes only to the end of the buffer even when that would seemingly return
-   an incomplete lexeme.
-6. A default bare token with a nil buffer and start, end equal to 0 should
-   return an empty string as a lexeme without an error.
-*/
+	"github.com/mdm-code/scanner"
+)
+
+// Test that given Token state Lexeme() value receiver function return value
+// matches the expected output.
+func TestLexeme(t *testing.T) {
+	cases := []struct {
+		name  string
+		token Token
+		want  string
+	}{
+		{
+			name: "default",
+			token: Token{
+				Buffer: &[]scanner.Token{
+					{Pos: scanner.Pos{Rune: '.'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '['}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '"'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 't'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'o'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'o'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'l'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 's'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '"'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: ']'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '.'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '['}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: ']'}, Buffer: nil},
+				},
+				Type:  String,
+				Start: 2,
+				End:   9,
+			},
+			want: "\"tools\"",
+		},
+		{
+			name: "nil-buffer",
+			token: Token{
+				Type:  Undefined,
+				Start: 0,
+				End:   10,
+			},
+			want: "",
+		},
+		{
+			name: "empty-buffer",
+			token: Token{
+				Buffer: &[]scanner.Token{},
+				Type:   Undefined,
+				Start:  0,
+				End:    10,
+			},
+			want: "",
+		},
+		{
+			name: "start-gt",
+			token: Token{
+				Buffer: &[]scanner.Token{
+					{Pos: scanner.Pos{Rune: '.'}, Buffer: nil},
+				},
+				Type:  Dot,
+				Start: 2,
+				End:   1,
+			},
+			want: "",
+		},
+		{
+			name:  "bare-token",
+			token: Token{},
+			want:  "",
+		},
+		{
+			name: "shorter-buffer",
+			token: Token{
+				Buffer: &[]scanner.Token{
+					{Pos: scanner.Pos{Rune: '.'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '['}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '8'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '0'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '2'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '4'}, Buffer: nil},
+				},
+				Type:  Integer,
+				Start: 2,
+				End:   8,
+			},
+			want: "8024",
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if have := c.token.Lexeme(); have != c.want {
+				t.Errorf("want: %s; have %s", c.want, have)
+			}
+		})
+	}
+}

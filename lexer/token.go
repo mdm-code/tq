@@ -52,11 +52,15 @@ type Token struct {
 
 // Lexeme ...
 func (t Token) Lexeme() string {
-	if t.Buffer == nil {
+	if t.Buffer == nil || len(*t.Buffer) < 1 || t.Start > t.End {
 		return ""
 	}
-	chars := make([]string, t.End-t.Start)
-	for _, t := range (*t.Buffer)[t.Start:t.End] {
+	end := t.End
+	if end > len(*t.Buffer) {
+		end = len(*t.Buffer)
+	}
+	chars := make([]string, end-t.Start)
+	for _, t := range (*t.Buffer)[t.Start:end] {
 		chars = append(chars, string(t.Rune))
 	}
 	return strings.Join(chars, "")
