@@ -7,60 +7,60 @@ import (
 )
 
 const (
-	// Undefined ...
+	// Undefined represents an undefined token type.
 	Undefined TokenType = iota
 
-	// String ...
+	// String represents a string token type.
 	String
 
-	// Integer ...
+	// Integer represents an integer token type.
 	Integer
 
-	// Dot ...
+	// Dot represents a full stop token type.
 	Dot
 
-	// Colon ...
+	// Colon represents a colon token type.
 	Colon
 
-	// ArrayOpen ...
+	// ArrayOpen represents an opening bracket token type.
 	ArrayOpen
 
-	// ArrayClose ...
+	// ArrayClose represents a closing bracket token type.
 	ArrayClose
 
-	// Whitespace ...
+	// Whitespace represents a white space token type.
 	Whitespace
 )
 
-// KeyCharMap ...
-var KeyCharMap = map[rune]TokenType{
+// keyCharMap maps runes onto TokenTypes.
+var keyCharMap = map[rune]TokenType{
 	'.': Dot,
 	':': Colon,
 	'[': ArrayOpen,
 	']': ArrayClose,
 }
 
-// TokenType ...
+// TokenType indicates the type of the lexer Token.
 type TokenType uint8
 
-// Token ...
+// Token represents a single lexeme read from the Scanner token buffer.
 type Token struct {
-	Buffer     *[]scanner.Token
 	Type       TokenType
-	Start, End int
+	buffer     *[]scanner.Token
+	start, end int
 }
 
-// Lexeme ...
+// Lexeme returns the string representation of the Token.
 func (t Token) Lexeme() string {
-	if t.Buffer == nil || len(*t.Buffer) < 1 || t.Start > t.End {
+	if t.buffer == nil || len(*t.buffer) < 1 || t.start > t.end {
 		return ""
 	}
-	end := t.End
-	if end > len(*t.Buffer) {
-		end = len(*t.Buffer)
+	end := t.end
+	if end > len(*t.buffer) {
+		end = len(*t.buffer)
 	}
-	chars := make([]string, end-t.Start)
-	for _, t := range (*t.Buffer)[t.Start:end] {
+	chars := make([]string, end-t.start)
+	for _, t := range (*t.buffer)[t.start:end] {
 		chars = append(chars, string(t.Rune))
 	}
 	return strings.Join(chars, "")

@@ -19,7 +19,7 @@ func isDigit(r rune) bool {
 
 // isKeyChar verifies if the rune r is a key character.
 func isKeyChar(r rune) bool {
-	_, ok := KeyCharMap[r]
+	_, ok := keyCharMap[r]
 	return ok
 }
 

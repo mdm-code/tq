@@ -29,10 +29,10 @@ func New(s *scanner.Scanner) (*Lexer, error) {
 		offset: 0,
 		buffer: buf,
 		curr: Token{
-			Buffer: nil,
+			buffer: nil,
 			Type:   Undefined,
-			Start:  0,
-			End:    0,
+			start:  0,
+			end:    0,
 		},
 	}
 	return &l, nil
@@ -92,10 +92,10 @@ func (l *Lexer) advance() {
 
 func (l *Lexer) setToken(tp TokenType, start, end int) {
 	l.curr = Token{
-		Buffer: &l.buffer,
+		buffer: &l.buffer,
 		Type:   tp,
-		Start:  start,
-		End:    end,
+		start:  start,
+		end:    end,
 	}
 }
 
@@ -110,7 +110,7 @@ func (l *Lexer) pushErr(err error, offset int) {
 
 func (l *Lexer) scanKeyChar() bool {
 	t := l.buffer[l.offset]
-	tp, ok := KeyCharMap[t.Rune]
+	tp, ok := keyCharMap[t.Rune]
 	if !ok {
 		l.pushErr(ErrKeyCharUnsupported, l.offset)
 		return false
