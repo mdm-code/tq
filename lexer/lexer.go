@@ -1,4 +1,5 @@
-// Package lexer ...
+// Package lexer provides a Lexer struct that converts a string of scanned
+// characters into allowed tq lexemes.
 package lexer
 
 import (
@@ -7,15 +8,16 @@ import (
 	"github.com/mdm-code/scanner"
 )
 
-// Lexer ...
+// Lexer is the struct that tokenizes character input into tq lexemes.
 type Lexer struct {
 	buffer []scanner.Token
-	Errors []error
+	Errors []error // errors encountered in the course of Lexer execution
 	offset int
 	curr   Token
 }
 
-// New ...
+// New returns a new Lexer with its buffer populated with Scanner Tokens read
+// from s.
 func New(s *scanner.Scanner) (*Lexer, error) {
 	if s == nil {
 		return nil, ErrNilScanner
@@ -38,7 +40,7 @@ func New(s *scanner.Scanner) (*Lexer, error) {
 	return &l, nil
 }
 
-// Token ...
+// Token return the most recently scanned Token.
 func (l *Lexer) Token() Token {
 	return l.curr
 }
@@ -88,7 +90,10 @@ func (l *Lexer) ScanAll(ignoreWhitespace bool) ([]Token, bool) {
 	return result, true
 }
 
-// Errored ...
+// Errored reports if Lexer accumulated errors in the course of its execution.
+//
+// The Lexer field Errors holds a slice of errors that occurred during its
+// execution.
 func (l *Lexer) Errored() bool {
 	return len(l.Errors) > 0
 }
