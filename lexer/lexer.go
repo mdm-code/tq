@@ -43,7 +43,9 @@ func (l *Lexer) Token() Token {
 	return l.curr
 }
 
-// Scan ...
+// Scan attempts to scan the next lexer Token from the internal buffer.
+//
+// It returns true if the scan succeeds and false in case it fails.
 func (l *Lexer) Scan() bool {
 	if l.offset > len(l.buffer)-1 {
 		return false
@@ -65,7 +67,12 @@ func (l *Lexer) Scan() bool {
 	}
 }
 
-// ScanAll ...
+// ScanAll attempts to scann all lexer Tokens from the internal buffer.
+//
+// It has ignoreWhitespace boolean parameter that controls if white space
+// tokens are to be ignored in the output slice of Tokens. In case errors are
+// encountered in the course of scanning over the buffer, it returns false as
+// its second return value.
 func (l *Lexer) ScanAll(ignoreWhitespace bool) ([]Token, bool) {
 	result := []Token{}
 	for l.Scan() {
