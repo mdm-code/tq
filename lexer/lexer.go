@@ -1,99 +1,23 @@
-// Package lexer ...
-//
-// It's difficult but let's decide that all keys should be quoted. This makes
-// allowed toml only-digits keys explicit. Dotted keys in toml will be handled
-// with ["foo"]["bar"] syntax of a query.
-//
-// TODO: tests
-// TODO: documentation
+// Package lexer provides a Lexer struct that converts a string of scanned
+// characters into allowed tq lexemes.
 package lexer
 
 import (
 	"errors"
-	"fmt"
-	"strings"
 
 	"github.com/mdm-code/scanner"
 )
 
-const (
-	// String ...
-	String TokenType = iota
-
-	// Integer ...
-	Integer
-
-	// Dot ...
-	Dot
-
-	// Comma ...
-	Comma
-
-	// Colon ...
-	Colon
-
-	// ArrayOpen ...
-	ArrayOpen
-
-	// ArrayClose ...
-	ArrayClose
-
-	// Whitespace ...
-	Whitespace
-
-	// Undefined ...
-	Undefined
-)
-
-// KeyCharMap ...
-var KeyCharMap = map[rune]TokenType{
-	'.': Dot,
-	',': Comma,
-	':': Colon,
-	'[': ArrayOpen,
-	']': ArrayClose,
-}
-
-var (
-	// ErrNilScanner ...
-	ErrNilScanner = errors.New("provided Scanner is nil")
-
-	// ErrKeyCharUnsupported ...
-	ErrKeyCharUnsupported = errors.New("unsupported key character")
-
-	// ErrUnterminatedString ...
-	ErrUnterminatedString = errors.New("unterminated string literal")
-
-	// ErrDisallowedChar ...
-	ErrDisallowedChar = errors.New("disallowed character")
-)
-
-// TokenType ...
-type TokenType uint8
-
-// Error ...
-type Error struct {
-	Buffer *[]scanner.Token
-	Offset int
-	Err    error
-}
-
-// Token ...
-type Token struct {
-	Buffer     *[]scanner.Token
-	Type       TokenType
-	Start, End int
-}
-
-// Lexer ...
+// Lexer is the struct that tokenizes character input into tq lexemes.
 type Lexer struct {
-	Buffer []scanner.Token
-	Errors []error
-	Offset int
-	Curr   Token
+	buffer []scanner.Token
+	Errors []error // errors encountered in the course of Lexer execution
+	offset int
+	curr   Token
 }
 
-// New ...
+// New returns a new Lexer with its buffer populated with Scanner Tokens read
+// from s.
 func New(s *scanner.Scanner) (*Lexer, error) {
 	if s == nil {
 		return nil, ErrNilScanner
@@ -104,183 +28,53 @@ func New(s *scanner.Scanner) (*Lexer, error) {
 		return nil, err
 	}
 	l := Lexer{
-		Offset: 0,
-		Buffer: buf,
-		Curr: Token{
-			Buffer: nil,
+		offset: 0,
+		buffer: buf,
+		curr: Token{
+			buffer: nil,
 			Type:   Undefined,
-			Start:  0,
-			End:    0,
+			start:  0,
+			end:    0,
 		},
 	}
 	return &l, nil
 }
 
-// Error ...
-func (e *Error) Error() string {
-	if e.Buffer == nil {
-		return e.Err.Error()
-	}
-	var b strings.Builder
-	b.Grow(e.Offset*2 + 1)
-	for _, t := range *e.Buffer {
-		b.WriteString(string(t.Rune))
-	}
-	b.WriteString("\n")
-	for i := 0; i < e.Offset; i++ {
-		b.WriteString(" ")
-	}
-	b.WriteString("^")
-	b.WriteString("\n")
-	var errMsg string
-	if e.Err != nil {
-		errMsg = e.Err.Error()
-	} else {
-		errMsg = "null"
-	}
-	b.WriteString(fmt.Sprintf("Lexer error: %s", errMsg))
-	return b.String()
-}
-
-// Lexeme ...
-func (t Token) Lexeme() string {
-	if t.Buffer == nil {
-		return ""
-	}
-	chars := make([]string, t.End-t.Start)
-	for _, t := range (*t.Buffer)[t.Start:t.End] {
-		chars = append(chars, string(t.Rune))
-	}
-	return strings.Join(chars, "")
-}
-
-// Token ...
+// Token return the most recently scanned Token.
 func (l *Lexer) Token() Token {
-	return l.Curr
+	return l.curr
 }
 
-// Scan ...
+// Scan attempts to scan the next lexer Token from the internal buffer.
+//
+// It returns true if the scan succeeds and false in case it fails.
 func (l *Lexer) Scan() bool {
-	if l.Offset > len(l.Buffer)-1 {
+	if l.offset > len(l.buffer)-1 {
 		return false
 	}
-	t := l.Buffer[l.Offset]
+	t := l.buffer[l.offset]
 	switch r := t.Rune; {
-	case IsKeyChar(r):
+	case isKeyChar(r):
 		return l.scanKeyChar()
-	case IsQuote(r):
+	case isQuote(r):
 		return l.scanString()
-	case IsDigit(r):
+	case isDigit(r):
 		return l.scanInteger()
-	case IsWhitespace(r):
+	case isWhitespace(r):
 		return l.scanWhitespace()
 	default:
-		l.setToken(Undefined, l.Offset, l.Offset+1)
-		l.pushErr(ErrDisallowedChar, l.Offset)
+		l.setToken(Undefined, l.offset, l.offset+1)
+		l.pushErr(ErrDisallowedChar, l.offset)
 		return false
 	}
 }
 
-func (l *Lexer) scanKeyChar() bool {
-	t := l.Buffer[l.Offset]
-	tp, ok := KeyCharMap[t.Rune]
-	if !ok {
-		l.pushErr(ErrKeyCharUnsupported, l.Offset)
-		return false
-	}
-	l.setToken(tp, l.Offset, l.Offset+1)
-	if ok {
-		l.advance()
-	}
-	return true
-}
-
-func (l *Lexer) scanString() bool {
-	t := l.Buffer[l.Offset]
-	tq := t.Rune
-	start := l.Offset
-	l.advance()
-	for {
-		if l.Offset > len(l.Buffer)-1 {
-			l.setToken(Undefined, start, l.Offset+1)
-			l.pushErr(ErrUnterminatedString, start)
-			return false
-		}
-		t = l.Buffer[l.Offset]
-		if IsNewline(t.Rune) {
-			l.setToken(Undefined, start, l.Offset+1)
-			l.pushErr(ErrDisallowedChar, start)
-			return false
-		}
-		if t.Rune == tq {
-			l.advance()
-			break
-		}
-		l.advance()
-	}
-	l.setToken(String, start, l.Offset)
-	return true
-}
-
-func (l *Lexer) scanInteger() bool {
-	t := l.Buffer[l.Offset]
-	start := l.Offset
-	l.advance()
-	for {
-		if l.Offset > len(l.Buffer)-1 {
-			break
-		}
-		t = l.Buffer[l.Offset]
-		if !IsDigit(t.Rune) {
-			break
-		}
-		l.advance()
-	}
-	l.setToken(Integer, start, l.Offset)
-	return true
-}
-
-func (l *Lexer) scanWhitespace() bool {
-	t := l.Buffer[l.Offset]
-	start := l.Offset
-	l.advance()
-	for {
-		if l.Offset > len(l.Buffer)-1 {
-			break
-		}
-		t = l.Buffer[l.Offset]
-		if !IsWhitespace(t.Rune) {
-			break
-		}
-		l.advance()
-	}
-	l.setToken(Whitespace, start, l.Offset)
-	return true
-}
-
-func (l *Lexer) setToken(tp TokenType, start, end int) {
-	l.Curr = Token{
-		Buffer: &l.Buffer,
-		Type:   tp,
-		Start:  start,
-		End:    end,
-	}
-}
-
-func (l *Lexer) pushErr(err error, offset int) {
-	e := Error{
-		Buffer: &l.Buffer,
-		Offset: offset,
-		Err:    err,
-	}
-	l.Errors = append(l.Errors, &e)
-}
-
-func (l *Lexer) advance() {
-	l.Offset++
-}
-
-// ScanAll ...
+// ScanAll attempts to scann all lexer Tokens from the internal buffer.
+//
+// It has ignoreWhitespace boolean parameter that controls if white space
+// tokens are to be ignored in the output slice of Tokens. In case errors are
+// encountered in the course of scanning over the buffer, it returns false as
+// its second return value.
 func (l *Lexer) ScanAll(ignoreWhitespace bool) ([]Token, bool) {
 	result := []Token{}
 	for l.Scan() {
@@ -296,7 +90,107 @@ func (l *Lexer) ScanAll(ignoreWhitespace bool) ([]Token, bool) {
 	return result, true
 }
 
-// Errored ...
+// Errored reports if Lexer accumulated errors in the course of its execution.
+//
+// The Lexer field Errors holds a slice of errors that occurred during its
+// execution.
 func (l *Lexer) Errored() bool {
 	return len(l.Errors) > 0
+}
+
+func (l *Lexer) advance() {
+	l.offset++
+}
+
+func (l *Lexer) setToken(tp TokenType, start, end int) {
+	l.curr = Token{
+		buffer: &l.buffer,
+		Type:   tp,
+		start:  start,
+		end:    end,
+	}
+}
+
+func (l *Lexer) pushErr(err error, offset int) {
+	e := Error{
+		buffer: &l.buffer,
+		offset: offset,
+		err:    err,
+	}
+	l.Errors = append(l.Errors, &e)
+}
+
+func (l *Lexer) scanKeyChar() bool {
+	t := l.buffer[l.offset]
+	tp, ok := keyCharMap[t.Rune]
+	if !ok {
+		l.pushErr(ErrKeyCharUnsupported, l.offset)
+		return false
+	}
+	l.setToken(tp, l.offset, l.offset+1)
+	l.advance()
+	return true
+}
+
+func (l *Lexer) scanString() bool {
+	t := l.buffer[l.offset]
+	tq := t.Rune
+	start := l.offset
+	l.advance()
+	for {
+		if l.offset > len(l.buffer)-1 {
+			l.setToken(Undefined, start, l.offset+1)
+			l.pushErr(ErrUnterminatedString, start)
+			return false
+		}
+		t = l.buffer[l.offset]
+		if isNewline(t.Rune) {
+			l.setToken(Undefined, start, l.offset+1)
+			l.pushErr(ErrDisallowedChar, start)
+			return false
+		}
+		if t.Rune == tq {
+			l.advance()
+			break
+		}
+		l.advance()
+	}
+	l.setToken(String, start, l.offset)
+	return true
+}
+
+func (l *Lexer) scanInteger() bool {
+	t := l.buffer[l.offset]
+	start := l.offset
+	l.advance()
+	for {
+		if l.offset > len(l.buffer)-1 {
+			break
+		}
+		t = l.buffer[l.offset]
+		if !isDigit(t.Rune) {
+			break
+		}
+		l.advance()
+	}
+	l.setToken(Integer, start, l.offset)
+	return true
+}
+
+func (l *Lexer) scanWhitespace() bool {
+	t := l.buffer[l.offset]
+	start := l.offset
+	l.advance()
+	for {
+		if l.offset > len(l.buffer)-1 {
+			break
+		}
+		t = l.buffer[l.offset]
+		if !isWhitespace(t.Rune) {
+			break
+		}
+		l.advance()
+	}
+	l.setToken(Whitespace, start, l.offset)
+	return true
 }
