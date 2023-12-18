@@ -30,6 +30,11 @@ type Error struct {
 	err    error            // wrapped Lexer error
 }
 
+// Is allows to check if Error.err matches the target error.
+func (e *Error) Is(target error) bool {
+	return e.err == target
+}
+
 // Error reports the Lexer error wrapped inside the Lexer buffer context with
 // a marker indicating the start of the Lexer token at which the occurred.
 func (e *Error) Error() string {
