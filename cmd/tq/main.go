@@ -31,6 +31,9 @@ func main() {
 		log.Fatalf("%v\n", err)
 	}
 	e, err := p.Parse()
+	if err != nil {
+		log.Fatalf("%v\n", err)
+	}
 	qc := &parser.QueryConstructor{}
 	qc.Interpret(e)
 	var data interface{}
