@@ -231,7 +231,7 @@ func (s *Selector) accept(v Visitor) {
 
 // Span ...
 type Span struct {
-	left, right *Integer
+	left, right *Integer // why * here? maybe this is ok.
 }
 
 func (s *Span) accept(v Visitor) {
@@ -263,15 +263,15 @@ func (i *Integer) accept(v Visitor) {
 	// v.visitInteger(i)
 }
 
-// Parser ...
-type Parser struct {
-	Buffer  []lexer.Token
-	Current int
-}
-
 // Expr ...
 type Expr interface {
 	accept(v Visitor)
+}
+
+// Parser ...
+type Parser struct {
+	buffer  []lexer.Token
+	current int
 }
 
 // New ...
@@ -283,107 +283,107 @@ func New(l *lexer.Lexer) (*Parser, error) {
 		return nil, err
 	}
 	p := Parser{
-		Buffer:  buf,
-		Current: 0,
+		buffer:  buf,
+		current: 0,
 	}
 	return &p, nil
 }
 
-// Parse ...
-func (p *Parser) Parse() (Expr, error) {
-	return p.root()
+// Parse the abstract syntax tree given the buffer of tq lexer tokens.
+func (p *Parser) Parse() (*Root, error) {
+	root, err := p.root()
+	return &root, err
 }
 
-func (p *Parser) root() (Expr, error) {
+func (p *Parser) root() (Root, error) {
 	q, err := p.query()
-	e := &Root{query: q}
-	return e, err
+	expr := Root{query: &q}
+	return expr, err
 }
 
-func (p *Parser) query() (Expr, error) {
+func (p *Parser) query() (Query, error) {
 	var err error
-	var f Expr
-	e := Query{}
+	expr := Query{}
 	for !p.isAtEnd() {
 		switch {
 		case p.match(lexer.Dot):
-			f, err = p.identity()
-			e.filters = append(e.filters, f)
+			i, err := p.identity()
+			expr.filters = append(expr.filters, &i)
 			if err != nil {
-				return &e, err
+				return expr, err
 			}
 		case p.match(lexer.ArrayOpen):
-			f, err = p.selector()
-			e.filters = append(e.filters, f)
+			s, err := p.selector()
+			expr.filters = append(expr.filters, &s)
 			if err != nil {
-				return &e, err
+				return expr, err
 			}
 		default:
 			err = Error{
 				p.previous(),
 				fmt.Errorf("expected '.' or '[' to parse query element"),
 			}
-			return &e, err
+			return expr, err
 		}
 	}
-	return &e, err
+	return expr, err
 }
 
-func (p *Parser) identity() (Expr, error) {
-	return &Identity{}, nil
+func (p *Parser) identity() (Identity, error) {
+	return Identity{}, nil
 }
 
-func (p *Parser) selector() (Expr, error) {
-	e := Selector{}
-	if p.match(lexer.String) {
-		e.value = &String{value: p.previous().Lexeme()}
-		_, err := p.consume(lexer.ArrayClose, "expected ']' to terminate selector")
-		return &e, err
-	}
-	if p.match(lexer.Colon) {
-		s := Span{}
-		if p.match(lexer.Integer) {
-			r := Integer{value: p.previous().Lexeme()}
-			s.right = &r
-		}
-		e.value = &s
-		_, err := p.consume(lexer.ArrayClose, "expected ']' to terminate selector")
-		return &e, err
-	}
-	if p.match(lexer.Integer) {
-		l := Integer{value: p.previous().Lexeme()}
-		if p.match(lexer.ArrayClose) {
-			e.value = &l
-			return &e, nil
-		}
+func (p *Parser) selector() (Selector, error) {
+	var expr Selector
+	var err error
+	switch {
+	case p.check(lexer.ArrayClose):
+		i, _ := p.iterator()
+		expr.value = &i
+	case p.match(lexer.String):
+		s, _ := p.string()
+		expr.value = &s
+	case p.match(lexer.Colon):
+		s, _ := p.span(nil)
+		expr.value = &s
+	case p.match(lexer.Integer):
+		i, _ := p.integer()
 		if p.match(lexer.Colon) {
-			if p.match(lexer.Integer) {
-				r := Integer{value: p.previous().Lexeme()}
-				e.value = &Span{left: &l, right: &r}
-				_, err := p.consume(lexer.ArrayClose, "expected ']' to terminate selector")
-				return &e, err
-			}
-			e.value = &Span{left: &l}
-			_, err := p.consume(lexer.ArrayClose, "expected ']' to terminate selector")
-			return &e, err
+			s, _ := p.span(&i)
+			expr.value = &s
+		} else {
+			expr.value = &i
 		}
 	}
-	if p.match(lexer.ArrayClose) {
-		e.value = &Iterator{}
-		return &e, nil
+	_, err = p.consume(lexer.ArrayClose, "expected ']' to terminate selector")
+	return expr, err
+}
+
+func (p *Parser) iterator() (Iterator, error) {
+	return Iterator{}, nil
+}
+
+func (p *Parser) string() (String, error) {
+	return String{value: p.previous().Lexeme()}, nil
+}
+
+func (p *Parser) integer() (Integer, error) {
+	return Integer{value: p.previous().Lexeme()}, nil
+}
+
+func (p *Parser) span(left *Integer) (Span, error) {
+	s := Span{left: left}
+	if p.match(lexer.Integer) {
+		r, _ := p.integer()
+		s.right = &r
 	}
-	err := Error{
-		p.previous(),
-		fmt.Errorf("expected ']' to terminate the selector"),
-	}
-	return &e, err
+	return s, nil
 }
 
 func (p *Parser) consume(t lexer.TokenType, msg string) (lexer.Token, error) {
 	if p.check(t) {
 		return p.advance(), nil
 	}
-	// NOTE: or possibly p.previous()
 	err := Error{p.peek(), fmt.Errorf(msg)}
 	return p.peek(), err
 }
@@ -407,22 +407,22 @@ func (p *Parser) check(t lexer.TokenType) bool {
 
 func (p *Parser) advance() lexer.Token {
 	if !p.isAtEnd() {
-		p.Current++
+		p.current++
 	}
 	return p.previous()
 }
 
 func (p *Parser) isAtEnd() bool {
-	if p.Current > len(p.Buffer)-1 {
+	if p.current > len(p.buffer)-1 {
 		return true
 	}
 	return false
 }
 
 func (p *Parser) previous() lexer.Token {
-	return p.Buffer[p.Current-1]
+	return p.buffer[p.current-1]
 }
 
 func (p *Parser) peek() lexer.Token {
-	return p.Buffer[p.Current]
+	return p.buffer[p.current]
 }
