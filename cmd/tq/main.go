@@ -24,15 +24,18 @@ func main() {
 	}
 	l, err := lexer.New(s)
 	if err != nil {
-		log.Fatalf("%v\n", err)
+		fmt.Printf("%v\n", err)
+		os.Exit(1)
 	}
 	p, err := parser.New(l)
 	if err != nil {
-		log.Fatalf("%v\n", err)
+		fmt.Printf("%v\n", err)
+		os.Exit(1)
 	}
 	e, err := p.Parse()
 	if err != nil {
-		log.Fatalf("%v\n", err)
+		fmt.Printf("%v\n", err)
+		os.Exit(1)
 	}
 	qc := &parser.QueryConstructor{}
 	qc.Interpret(e)
