@@ -22,20 +22,6 @@ import (
 	"github.com/mdm-code/tq/lexer"
 )
 
-// Error ...
-type Error struct {
-	Token lexer.Token
-	Err   error
-}
-
-// Error ...
-func (e Error) Error() string {
-	if e.Err != nil {
-		return e.Err.Error() + fmt.Sprintf(" but got '%s'", e.Token.Lexeme())
-	}
-	return "null"
-}
-
 // Visitor ...
 type Visitor interface {
 	Interpret(Expr)
@@ -231,7 +217,7 @@ func (s *Selector) accept(v Visitor) {
 
 // Span ...
 type Span struct {
-	left, right *Integer // why * here? maybe this is ok.
+	left, right *Integer
 }
 
 func (s *Span) accept(v Visitor) {
@@ -319,10 +305,7 @@ func (p *Parser) query() (Query, error) {
 				return expr, err
 			}
 		default:
-			err = Error{
-				p.previous(),
-				fmt.Errorf("expected '.' or '[' to parse query element"),
-			}
+			err = &Error{p.previous(), ErrQueryElement}
 			return expr, err
 		}
 	}
@@ -355,7 +338,7 @@ func (p *Parser) selector() (Selector, error) {
 			expr.value = &i
 		}
 	}
-	_, err = p.consume(lexer.ArrayClose, "expected ']' to terminate selector")
+	_, err = p.consume(lexer.ArrayClose, ErrSelectorUnterminated)
 	return expr, err
 }
 
@@ -380,12 +363,12 @@ func (p *Parser) span(left *Integer) (Span, error) {
 	return s, nil
 }
 
-func (p *Parser) consume(t lexer.TokenType, msg string) (lexer.Token, error) {
+func (p *Parser) consume(t lexer.TokenType, e error) (lexer.Token, error) {
 	if p.check(t) {
 		return p.advance(), nil
 	}
-	err := Error{p.peek(), fmt.Errorf(msg)}
-	return p.peek(), err
+	err := Error{p.peek(), e}
+	return p.peek(), &err
 }
 
 func (p *Parser) match(tt ...lexer.TokenType) bool {
