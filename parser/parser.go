@@ -22,20 +22,6 @@ import (
 	"github.com/mdm-code/tq/lexer"
 )
 
-// Visitor ...
-type Visitor interface {
-	Interpret(Expr)
-	visitRoot(Expr)
-	visitQuery(Expr)
-	visitFilter(Expr)
-	visitIdentity(Expr)
-	visitSelector(Expr)
-	// visitIterator(Expr)
-	// visitSpan(Expr)
-	// visitString(Expr) string
-	// visitInteger(Expr) string
-}
-
 // FilterFunc ...
 type FilterFunc func(data ...interface{}) ([]interface{}, error)
 
@@ -172,89 +158,7 @@ func (q *QueryConstructor) visitSelector(e Expr) {
 	}
 }
 
-// Root ...
-type Root struct {
-	query Expr
-}
-
-func (r *Root) accept(v Visitor) {
-	v.visitRoot(r)
-}
-
-// Query ...
-type Query struct {
-	filters []Expr
-}
-
-func (q *Query) accept(v Visitor) {
-	v.visitQuery(q)
-}
-
-// Filter ...
-type Filter struct {
-	kind Expr
-}
-
-func (f *Filter) accept(v Visitor) {
-	v.visitFilter(f)
-}
-
-// Identity ...
-type Identity struct{}
-
-func (i *Identity) accept(v Visitor) {
-	v.visitIdentity(i)
-}
-
-// Selector ...
-type Selector struct {
-	value Expr
-}
-
-func (s *Selector) accept(v Visitor) {
-	v.visitSelector(s)
-}
-
-// Span ...
-type Span struct {
-	left, right *Integer
-}
-
-func (s *Span) accept(v Visitor) {
-	// v.visitSpan(s)
-}
-
-// Iterator ...
-type Iterator struct{}
-
-func (i *Iterator) accept(v Visitor) {
-	// v.visitIterator(i)
-}
-
-// String ...
-type String struct {
-	value string
-}
-
-func (s *String) accept(v Visitor) {
-	// v.visitString(s)
-}
-
-// Integer ...
-type Integer struct {
-	value string
-}
-
-func (i *Integer) accept(v Visitor) {
-	// v.visitInteger(i)
-}
-
-// Expr ...
-type Expr interface {
-	accept(v Visitor)
-}
-
-// Parser ...
+// Parser encapsulates the logic of parsing tq queries into valid expressions.
 type Parser struct {
 	buffer  []lexer.Token
 	current int
