@@ -2,7 +2,7 @@ package parser
 
 // Visitor ...
 type Visitor interface {
-	Interpret(Expr)
+	Run(Expr)
 	visitRoot(Expr)
 	visitQuery(Expr)
 	visitFilter(Expr)

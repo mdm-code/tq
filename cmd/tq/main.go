@@ -38,7 +38,7 @@ func main() {
 		os.Exit(1)
 	}
 	qc := &parser.QueryConstructor{}
-	qc.Interpret(e)
+	qc.Run(e)
 	var data interface{}
 	in, _ := ioutil.ReadAll(os.Stdin)
 	toml.Unmarshal(in, &data)
