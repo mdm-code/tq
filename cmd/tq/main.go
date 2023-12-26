@@ -38,13 +38,15 @@ func main() {
 		os.Exit(1)
 	}
 	i := &parser.Interpreter{}
-	i.Interpret(e)
+	execFn := i.Interpret(e)
 	var data interface{}
 	in, _ := ioutil.ReadAll(os.Stdin)
 	toml.Unmarshal(in, &data)
 	d := []interface{}{data}
-	for _, fn := range i.Filters {
-		d, _ = fn(d...)
+	d, err = execFn(d)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		os.Exit(1)
 	}
 	for _, dd := range d {
 		b, _ := toml.Marshal(dd)

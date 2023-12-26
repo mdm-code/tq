@@ -32,7 +32,7 @@ func TestXxx(t *testing.T) {
 	}
 	e, err := p.Parse()
 	qc := &Interpreter{}
-	qc.Interpret(e)
+	execfn := qc.Interpret(e)
 	var data interface{}
 	val := `[nestedDict]
 foo = [1, 2, 3]
@@ -40,9 +40,7 @@ bar = [1, 2, 3]
 `
 	toml.Unmarshal([]byte(val), &data)
 	d := []interface{}{data}
-	log.Println(qc.Filters, err)
-	for _, fn := range qc.Filters {
-		d, _ = fn(d...)
-	}
+	log.Println(qc.filters, err)
+	d, _ = execfn(d...)
 	log.Println(d)
 }

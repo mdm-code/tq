@@ -2,71 +2,67 @@ package parser
 
 import (
 	"fmt"
-	"io"
 	"strconv"
 	"strings"
 )
 
-// filterFunc ...
-type filterFunc func(data ...interface{}) ([]interface{}, error)
+// FilterFn specifies the data transformation function type.
+type FilterFn func(data ...interface{}) ([]interface{}, error)
 
 // Interpreter ...
 type Interpreter struct {
-	Filters []filterFunc
+	filters []FilterFn
 }
 
-func (q *Interpreter) eval(es ...Expr) {
+func (i *Interpreter) eval(es ...Expr) {
 	for _, e := range es {
-		e.accept(q)
+		e.accept(i)
 	}
 }
 
-// Interpret ...
-func (q *Interpreter) Interpret(e Expr) {
-	q.eval(e)
-}
-
-func (q *Interpreter) visitRoot(e Expr) {
-	switch v := e.(type) {
-	case *Root:
-		q.eval(v.query)
-	default:
-		// error out
+// Interpret extracts a sequence of filtering functions by traversing the AST.
+// It returns an entry function that takes in deserialized TOML data and
+// applies filtering functions in the sequence established by the Interpreter.
+func (i *Interpreter) Interpret(root Expr) FilterFn {
+	i.filters = nil // clear out previously accumulated filtering functions
+	i.eval(root)
+	return func(data ...interface{}) ([]interface{}, error) {
+		for _, fn := range i.filters {
+			data, err := fn(data...)
+			if err != nil {
+				return data, err
+			}
+		}
+		return data, nil
 	}
 }
 
-func (q *Interpreter) visitQuery(e Expr) {
-	switch v := e.(type) {
-	case *Query:
-		q.eval(v.filters...)
-	default:
-		// error out
-	}
+func (i *Interpreter) visitRoot(e Expr) {
+	r := e.(*Root)
+	i.eval(r.query)
 }
 
-func (q *Interpreter) visitFilter(e Expr) {
-	switch v := e.(type) {
-	case *Filter:
-		q.eval(v.kind)
-	default:
-		// error out
-	}
-}
-func (q *Interpreter) visitIdentity(e Expr) {
-	switch v := e.(type) {
-	case *Identity:
-		fmt.Fprintf(io.Discard, "%v", *v)
-		q.Filters = append(q.Filters, identityFn)
-	default:
-		// error out
-	}
+func (i *Interpreter) visitQuery(e Expr) {
+	q := e.(*Query)
+	i.eval(q.filters...)
 }
 
-func identityFn(data ...interface{}) ([]interface{}, error) {
-	return data, nil
+func (i *Interpreter) visitFilter(e Expr) {
+	f := e.(*Filter)
+	i.eval(f.kind)
+}
+func (i *Interpreter) visitIdentity(e Expr) {
+	i.filters = append(i.filters, func(data ...interface{}) ([]interface{}, error) {
+		return data, nil
+	})
 }
 
-func (q *Interpreter) visitSelector(e Expr) {
+// TODO: this receiver function has to be undergo a major rework. This includes
+// things like (1) simplified type evaluation (see methods above), (2) separate
+// methods for different selector values 1. Span, 2. String, 3. Integer, 4.
+// Iterator. The Span should allow to infer left/right just fine with i.eval
+// the same way.
+func (i *Interpreter) visitSelector(e Expr) {
 	switch v := e.(type) {
 	case *Selector:
 		fn := func(data ...interface{}) ([]interface{}, error) {
@@ -137,7 +133,7 @@ func (q *Interpreter) visitSelector(e Expr) {
 			}
 			return result, err
 		}
-		q.Filters = append(q.Filters, fn)
+		i.filters = append(i.filters, fn)
 	default:
 		// error out
 	}
