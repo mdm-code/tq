@@ -7,52 +7,52 @@ import (
 	"strings"
 )
 
-// FilterFunc ...
-type FilterFunc func(data ...interface{}) ([]interface{}, error)
+// filterFunc ...
+type filterFunc func(data ...interface{}) ([]interface{}, error)
 
-// QueryConstructor ...
-type QueryConstructor struct {
-	Filters []FilterFunc
+// Interpreter ...
+type Interpreter struct {
+	Filters []filterFunc
 }
 
-func (q *QueryConstructor) interpret(es ...Expr) {
+func (q *Interpreter) eval(es ...Expr) {
 	for _, e := range es {
 		e.accept(q)
 	}
 }
 
-// Run ...
-func (q *QueryConstructor) Run(e Expr) {
-	e.accept(q)
+// Interpret ...
+func (q *Interpreter) Interpret(e Expr) {
+	q.eval(e)
 }
 
-func (q *QueryConstructor) visitRoot(e Expr) {
+func (q *Interpreter) visitRoot(e Expr) {
 	switch v := e.(type) {
 	case *Root:
-		q.interpret(v.query)
+		q.eval(v.query)
 	default:
 		// error out
 	}
 }
 
-func (q *QueryConstructor) visitQuery(e Expr) {
+func (q *Interpreter) visitQuery(e Expr) {
 	switch v := e.(type) {
 	case *Query:
-		q.interpret(v.filters...)
+		q.eval(v.filters...)
 	default:
 		// error out
 	}
 }
 
-func (q *QueryConstructor) visitFilter(e Expr) {
+func (q *Interpreter) visitFilter(e Expr) {
 	switch v := e.(type) {
 	case *Filter:
-		q.interpret(v.kind)
+		q.eval(v.kind)
 	default:
 		// error out
 	}
 }
-func (q *QueryConstructor) visitIdentity(e Expr) {
+func (q *Interpreter) visitIdentity(e Expr) {
 	switch v := e.(type) {
 	case *Identity:
 		fmt.Fprintf(io.Discard, "%v", *v)
@@ -66,7 +66,7 @@ func identityFn(data ...interface{}) ([]interface{}, error) {
 	return data, nil
 }
 
-func (q *QueryConstructor) visitSelector(e Expr) {
+func (q *Interpreter) visitSelector(e Expr) {
 	switch v := e.(type) {
 	case *Selector:
 		fn := func(data ...interface{}) ([]interface{}, error) {

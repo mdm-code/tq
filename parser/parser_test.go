@@ -31,8 +31,8 @@ func TestXxx(t *testing.T) {
 		t.Fatal()
 	}
 	e, err := p.Parse()
-	qc := &QueryConstructor{}
-	qc.Run(e)
+	qc := &Interpreter{}
+	qc.Interpret(e)
 	var data interface{}
 	val := `[nestedDict]
 foo = [1, 2, 3]

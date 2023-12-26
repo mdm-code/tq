@@ -37,13 +37,13 @@ func main() {
 		fmt.Printf("%v\n", err)
 		os.Exit(1)
 	}
-	qc := &parser.QueryConstructor{}
-	qc.Run(e)
+	i := &parser.Interpreter{}
+	i.Interpret(e)
 	var data interface{}
 	in, _ := ioutil.ReadAll(os.Stdin)
 	toml.Unmarshal(in, &data)
 	d := []interface{}{data}
-	for _, fn := range qc.Filters {
+	for _, fn := range i.Filters {
 		d, _ = fn(d...)
 	}
 	for _, dd := range d {
