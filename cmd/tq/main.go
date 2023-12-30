@@ -24,24 +24,34 @@ func main() {
 	}
 	l, err := lexer.New(s)
 	if err != nil {
-		log.Fatalf("%v\n", err)
+		fmt.Printf("%v\n", err)
+		os.Exit(1)
 	}
 	p, err := parser.New(l)
 	if err != nil {
-		log.Fatalf("%v\n", err)
+		fmt.Printf("%v\n", err)
+		os.Exit(1)
 	}
 	e, err := p.Parse()
-	qc := &parser.QueryConstructor{}
-	qc.Interpret(e)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		os.Exit(1)
+	}
+	i := &parser.Interpreter{}
+	execFn := i.Interpret(e)
 	var data interface{}
 	in, _ := ioutil.ReadAll(os.Stdin)
 	toml.Unmarshal(in, &data)
-	d := []interface{}{data}
-	for _, fn := range qc.Filters {
-		d, _ = fn(d...)
+	d, err := execFn(data)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		os.Exit(1)
 	}
 	for _, dd := range d {
 		b, _ := toml.Marshal(dd)
+		if len(b) <= 0 {
+			continue
+		}
 		fmt.Fprintln(os.Stdout, string(b))
 	}
 }

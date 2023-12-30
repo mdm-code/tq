@@ -14,7 +14,7 @@ import (
 func TestXxx(t *testing.T) {
 	// q := ". ['foo'][ 'bar' ][][0][:10][:][][2 : 12][\"foo\"] "
 	// q := "['foo'][:1'bar']"
-	q := ".['nestedDict'][][:2]"
+	q := ".['nestedDict']['bar']"
 	r := strings.NewReader(q)
 	s, err := scanner.New(r)
 	if err != nil {
@@ -31,8 +31,8 @@ func TestXxx(t *testing.T) {
 		t.Fatal()
 	}
 	e, err := p.Parse()
-	qc := &QueryConstructor{}
-	qc.Interpret(e)
+	qc := &Interpreter{}
+	execfn := qc.Interpret(e)
 	var data interface{}
 	val := `[nestedDict]
 foo = [1, 2, 3]
@@ -40,9 +40,7 @@ bar = [1, 2, 3]
 `
 	toml.Unmarshal([]byte(val), &data)
 	d := []interface{}{data}
-	log.Println(qc.Filters, err)
-	for _, fn := range qc.Filters {
-		d, _ = fn(d...)
-	}
+	log.Println(qc.filters, err)
+	d, _ = execfn(d...)
 	log.Println(d)
 }

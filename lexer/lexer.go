@@ -11,13 +11,13 @@ import (
 // Lexer is the struct that tokenizes character input into tq lexemes.
 type Lexer struct {
 	buffer []scanner.Token
-	Errors []error // errors encountered in the course of Lexer execution
+	Errors []error // errors encountered in the course of lexer execution
 	offset int
 	curr   Token
 }
 
-// New returns a new Lexer with its buffer populated with Scanner Tokens read
-// from s.
+// New returns a new Lexer with its buffer populated with scanner tokens read
+// from the Scanner s.
 func New(s *scanner.Scanner) (*Lexer, error) {
 	if s == nil {
 		return nil, ErrNilScanner
@@ -40,12 +40,12 @@ func New(s *scanner.Scanner) (*Lexer, error) {
 	return &l, nil
 }
 
-// Token return the most recently scanned Token.
+// Token return the most recently scanned token.
 func (l *Lexer) Token() Token {
 	return l.curr
 }
 
-// Scan attempts to scan the next lexer Token from the internal buffer.
+// Scan attempts to scan the next lexer token from the internal buffer.
 //
 // It returns true if the scan succeeds and false in case it fails.
 func (l *Lexer) Scan() bool {
@@ -69,10 +69,10 @@ func (l *Lexer) Scan() bool {
 	}
 }
 
-// ScanAll attempts to scann all lexer Tokens from the internal buffer.
+// ScanAll attempts to scann all lexer tokens from the internal buffer.
 //
 // It has ignoreWhitespace boolean parameter that controls if white space
-// tokens are to be ignored in the output slice of Tokens. In case errors are
+// tokens are to be ignored in the output slice of tokens. In case errors are
 // encountered in the course of scanning over the buffer, it returns false as
 // its second return value.
 func (l *Lexer) ScanAll(ignoreWhitespace bool) ([]Token, bool) {
