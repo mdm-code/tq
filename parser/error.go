@@ -14,9 +14,12 @@ var (
 
 	// ErrSelectorUnterminated indicates an unterminated selector element.
 	ErrSelectorUnterminated = errors.New("expected ']' to terminate selector")
+
+	// ErrTOMLDataType indicates unexpected data type passed to the function.
+	ErrTOMLDataType = errors.New("wrong type error")
 )
 
-// Error wraps a concrete Parser error to represent its context. It reports the
+// Error wraps a concrete parser error to represent its context. It reports the
 // token where the error has occurred.
 type Error struct {
 	token lexer.Token
@@ -28,7 +31,7 @@ func (e *Error) Is(target error) bool {
 	return e.err == target
 }
 
-// Error reports the Parser error wrapped inside of the custom context.
+// Error reports the parser error wrapped inside of the custom context.
 func (e *Error) Error() string {
 	return e.getErrorLine()
 }

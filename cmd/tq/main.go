@@ -42,14 +42,16 @@ func main() {
 	var data interface{}
 	in, _ := ioutil.ReadAll(os.Stdin)
 	toml.Unmarshal(in, &data)
-	d := []interface{}{data}
-	d, err = execFn(d)
+	d, err := execFn(data)
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		os.Exit(1)
 	}
 	for _, dd := range d {
 		b, _ := toml.Marshal(dd)
+		if len(b) <= 0 {
+			continue
+		}
 		fmt.Fprintln(os.Stdout, string(b))
 	}
 }

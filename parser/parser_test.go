@@ -14,7 +14,7 @@ import (
 func TestXxx(t *testing.T) {
 	// q := ". ['foo'][ 'bar' ][][0][:10][:][][2 : 12][\"foo\"] "
 	// q := "['foo'][:1'bar']"
-	q := ".['nestedDict'][][:2]"
+	q := ".['nestedDict']['bar']"
 	r := strings.NewReader(q)
 	s, err := scanner.New(r)
 	if err != nil {

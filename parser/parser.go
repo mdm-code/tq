@@ -12,7 +12,8 @@ type Parser struct {
 	current int
 }
 
-// New ...
+// New returns a new Parser with the buffer populated with lexer tokens read
+// from the Lexer l.
 func New(l *lexer.Lexer) (*Parser, error) {
 	buf := []lexer.Token{}
 	buf, ok := l.ScanAll(true)
@@ -46,13 +47,15 @@ func (p *Parser) query() (Query, error) {
 		switch {
 		case p.match(lexer.Dot):
 			i, err := p.identity()
-			expr.filters = append(expr.filters, &i)
+			f := Filter{kind: &i}
+			expr.filters = append(expr.filters, &f)
 			if err != nil {
 				return expr, err
 			}
 		case p.match(lexer.ArrayOpen):
 			s, err := p.selector()
-			expr.filters = append(expr.filters, &s)
+			f := Filter{kind: &s}
+			expr.filters = append(expr.filters, &f)
 			if err != nil {
 				return expr, err
 			}
