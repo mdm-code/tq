@@ -41,28 +41,33 @@ func (p *Parser) root() (Root, error) {
 }
 
 func (p *Parser) query() (Query, error) {
+	var expr Query
 	var err error
-	expr := Query{}
 	for !p.isAtEnd() {
-		switch {
-		case p.match(lexer.Dot):
-			i, err := p.identity()
-			f := Filter{kind: &i}
-			expr.filters = append(expr.filters, &f)
-			if err != nil {
-				return expr, err
-			}
-		case p.match(lexer.ArrayOpen):
-			s, err := p.selector()
-			f := Filter{kind: &s}
-			expr.filters = append(expr.filters, &f)
-			if err != nil {
-				return expr, err
-			}
-		default:
-			err = &Error{p.previous(), ErrQueryElement}
-			return expr, err
+		var f Filter
+		f, err = p.filter()
+		expr.filters = append(expr.filters, &f)
+		if err != nil {
+			break
 		}
+	}
+	return expr, err
+}
+
+func (p *Parser) filter() (Filter, error) {
+	var expr Filter
+	var err error
+	switch {
+	case p.match(lexer.Dot):
+		var i Identity
+		i, err = p.identity()
+		expr.kind = &i
+	case p.match(lexer.ArrayOpen):
+		var s Selector
+		s, err = p.selector()
+		expr.kind = &s
+	default:
+		err = &Error{p.previous(), ErrQueryElement}
 	}
 	return expr, err
 }
