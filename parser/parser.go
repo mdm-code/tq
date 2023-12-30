@@ -67,7 +67,8 @@ func (p *Parser) filter() (Filter, error) {
 		s, err = p.selector()
 		expr.kind = &s
 	default:
-		err = &Error{p.previous(), ErrQueryElement}
+		prev := p.previous()
+		err = &Error{prev.Lexeme(), ErrQueryElement}
 	}
 	return expr, err
 }
@@ -127,8 +128,15 @@ func (p *Parser) consume(t lexer.TokenType, e error) (lexer.Token, error) {
 	if p.check(t) {
 		return p.advance(), nil
 	}
-	err := Error{p.peek(), e}
-	return p.peek(), &err
+	curr, err := p.peek()
+	var lexeme string
+	if err != nil && errors.Is(err, ErrParserBufferOutOfRange) {
+		lexeme = "EOF"
+	} else {
+		lexeme = curr.Lexeme()
+	}
+	err = &Error{lexeme, e}
+	return curr, err
 }
 
 func (p *Parser) match(tt ...lexer.TokenType) bool {
@@ -145,7 +153,11 @@ func (p *Parser) check(t lexer.TokenType) bool {
 	if p.isAtEnd() {
 		return false
 	}
-	return p.peek().Type == t
+	other, err := p.peek()
+	if err != nil {
+		return false
+	}
+	return other.Type == t
 }
 
 func (p *Parser) advance() lexer.Token {
@@ -166,6 +178,9 @@ func (p *Parser) previous() lexer.Token {
 	return p.buffer[p.current-1]
 }
 
-func (p *Parser) peek() lexer.Token {
-	return p.buffer[p.current]
+func (p *Parser) peek() (lexer.Token, error) {
+	if p.isAtEnd() {
+		return p.previous(), ErrParserBufferOutOfRange
+	}
+	return p.buffer[p.current], nil
 }

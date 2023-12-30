@@ -4,8 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-
-	"github.com/mdm-code/tq/lexer"
 )
 
 var (
@@ -15,6 +13,10 @@ var (
 	// ErrSelectorUnterminated indicates an unterminated selector element.
 	ErrSelectorUnterminated = errors.New("expected ']' to terminate selector")
 
+	// ErrParserBufferOutOfRange indicates the end of the parser buffer has
+	// been reached.
+	ErrParserBufferOutOfRange = errors.New("reached the end of the buffer")
+
 	// ErrTOMLDataType indicates unexpected data type passed to the function.
 	ErrTOMLDataType = errors.New("wrong type error")
 )
@@ -22,8 +24,8 @@ var (
 // Error wraps a concrete parser error to represent its context. It reports the
 // token where the error has occurred.
 type Error struct {
-	token lexer.Token
-	err   error
+	lexeme string
+	err    error
 }
 
 // Is allows to check if Error.err matches the target error.
@@ -42,7 +44,7 @@ func (e *Error) getErrorLine() string {
 	b.WriteString("Parser error: ")
 	if e.err != nil {
 		b.WriteString(e.err.Error())
-		b.WriteString(fmt.Sprintf(" but got '%s'", e.token.Lexeme()))
+		b.WriteString(fmt.Sprintf(" but got '%s'", e.lexeme))
 		return b.String()
 	}
 	return b.String()
