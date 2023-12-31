@@ -8,7 +8,7 @@ import (
 // Expr defines the expression interface for the visitor to operate on the
 // contents of the expression node.
 type Expr interface {
-	Accept(v ASTVisitor)
+	Accept(v Visitor)
 }
 
 // Root stands for the top-level root node of the tq query. This version of
@@ -64,27 +64,27 @@ type Integer struct {
 	Value string
 }
 
-func (r *Root) Accept(v ASTVisitor) {
+func (r *Root) Accept(v Visitor) {
 	v.VisitRoot(r)
 }
 
-func (q *Query) Accept(v ASTVisitor) {
+func (q *Query) Accept(v Visitor) {
 	v.VisitQuery(q)
 }
 
-func (f *Filter) Accept(v ASTVisitor) {
+func (f *Filter) Accept(v Visitor) {
 	v.VisitFilter(f)
 }
 
-func (i *Identity) Accept(v ASTVisitor) {
+func (i *Identity) Accept(v Visitor) {
 	v.VisitIdentity(i)
 }
 
-func (s *Selector) Accept(v ASTVisitor) {
+func (s *Selector) Accept(v Visitor) {
 	v.VisitSelector(s)
 }
 
-func (s *Span) Accept(v ASTVisitor) {
+func (s *Span) Accept(v Visitor) {
 	v.VisitSpan(s)
 }
 
@@ -110,11 +110,11 @@ func (s *Span) asInt(i *Integer, def int) int {
 	return result
 }
 
-func (i *Iterator) Accept(v ASTVisitor) {
+func (i *Iterator) Accept(v Visitor) {
 	v.VisitIterator(i)
 }
 
-func (s *String) Accept(v ASTVisitor) {
+func (s *String) Accept(v Visitor) {
 	v.VisitString(s)
 }
 
@@ -126,7 +126,7 @@ func (s *String) Trim() string {
 	return result
 }
 
-func (i *Integer) Accept(v ASTVisitor) {
+func (i *Integer) Accept(v Visitor) {
 	v.VisitInteger(i)
 }
 

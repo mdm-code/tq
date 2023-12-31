@@ -1,8 +1,8 @@
 package ast
 
-// ASTVisitor declares the interface for the AST visitor class. It declares
+// Visitor declares the interface for the AST visitor class. It declares
 // signatures invoked by respective AST expression nodes.
-type ASTVisitor interface {
+type Visitor interface {
 	VisitRoot(Expr)
 	VisitQuery(Expr)
 	VisitFilter(Expr)
