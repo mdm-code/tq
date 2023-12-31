@@ -38,7 +38,7 @@ func main() {
 		fmt.Printf("%v\n", err)
 		os.Exit(1)
 	}
-	i := &interpreter.Interpreter{}
+	i := interpreter.New()
 	execFn := i.Interpret(e)
 	var data interface{}
 	in, _ := ioutil.ReadAll(os.Stdin)

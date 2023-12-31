@@ -32,7 +32,7 @@ func TestXxx(t *testing.T) {
 		t.Fatal()
 	}
 	e, err := p.Parse()
-	qc := &interpreter.Interpreter{}
+	qc := interpreter.New()
 	filter := qc.Interpret(e)
 	var data interface{}
 	val := `[nestedDict]

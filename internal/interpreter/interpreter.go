@@ -13,6 +13,11 @@ type Interpreter struct {
 	filters []FilterFn
 }
 
+// New returns a new instance of Interpreter.
+func New() *Interpreter {
+	return &Interpreter{}
+}
+
 func (i *Interpreter) eval(es ...ast.Expr) {
 	for _, e := range es {
 		e.Accept(i)
