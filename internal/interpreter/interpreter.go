@@ -1,4 +1,8 @@
-package parser
+package interpreter
+
+import (
+	"github.com/mdm-code/tq/internal/ast"
+)
 
 // FilterFn specifies the data transformation function type.
 type FilterFn func(data ...interface{}) ([]interface{}, error)
@@ -9,16 +13,16 @@ type Interpreter struct {
 	filters []FilterFn
 }
 
-func (i *Interpreter) eval(es ...Expr) {
+func (i *Interpreter) eval(es ...ast.Expr) {
 	for _, e := range es {
-		e.accept(i)
+		e.Accept(i)
 	}
 }
 
 // Interpret extracts a sequence of filtering functions by traversing the AST.
 // It returns an entry function that takes in deserialized TOML data and
 // applies filtering functions in the sequence provided by the Interpreter.
-func (i *Interpreter) Interpret(root Expr) FilterFn {
+func (i *Interpreter) Interpret(root ast.Expr) FilterFn {
 	i.filters = nil // clear out previously accumulated filtering functions
 	i.eval(root)
 	return func(data ...interface{}) ([]interface{}, error) {
@@ -33,42 +37,42 @@ func (i *Interpreter) Interpret(root Expr) FilterFn {
 	}
 }
 
-func (i *Interpreter) visitRoot(e Expr) {
-	r := e.(*Root)
-	i.eval(r.query)
+func (i *Interpreter) VisitRoot(e ast.Expr) {
+	r := e.(*ast.Root)
+	i.eval(r.Query)
 }
 
-func (i *Interpreter) visitQuery(e Expr) {
-	q := e.(*Query)
-	i.eval(q.filters...)
+func (i *Interpreter) VisitQuery(e ast.Expr) {
+	q := e.(*ast.Query)
+	i.eval(q.Filters...)
 }
 
-func (i *Interpreter) visitFilter(e Expr) {
-	f := e.(*Filter)
-	i.eval(f.kind)
+func (i *Interpreter) VisitFilter(e ast.Expr) {
+	f := e.(*ast.Filter)
+	i.eval(f.Kind)
 }
 
-func (i *Interpreter) visitIdentity(e Expr) {
+func (i *Interpreter) VisitIdentity(e ast.Expr) {
 	identityFn := func(data ...interface{}) ([]interface{}, error) {
 		return data, nil
 	}
 	i.filters = append(i.filters, identityFn)
 }
 
-func (i *Interpreter) visitSelector(e Expr) {
-	s := e.(*Selector)
-	i.eval(s.value)
+func (i *Interpreter) VisitSelector(e ast.Expr) {
+	s := e.(*ast.Selector)
+	i.eval(s.Value)
 }
 
-func (i *Interpreter) visitSpan(e Expr) {
-	s := e.(*Span)
+func (i *Interpreter) VisitSpan(e ast.Expr) {
+	s := e.(*ast.Span)
 	spanFn := func(data ...interface{}) ([]interface{}, error) {
 		result := make([]interface{}, 0, len(data))
 		var err error
 		for _, d := range data {
 			switch v := d.(type) {
 			case []interface{}:
-				l, r := s.Left(0), s.Right(len(v))
+				l, r := s.GetLeft(0), s.GetRight(len(v))
 				if r > len(v) {
 					r = len(v)
 				}
@@ -85,7 +89,7 @@ func (i *Interpreter) visitSpan(e Expr) {
 	i.filters = append(i.filters, spanFn)
 }
 
-func (i *Interpreter) visitIterator(e Expr) {
+func (i *Interpreter) VisitIterator(e ast.Expr) {
 	iterFn := func(data ...interface{}) ([]interface{}, error) {
 		result := make([]interface{}, 0, len(data))
 		var err error
@@ -108,15 +112,15 @@ func (i *Interpreter) visitIterator(e Expr) {
 	i.filters = append(i.filters, iterFn)
 }
 
-func (i *Interpreter) visitString(e Expr) {
-	str := e.(*String)
+func (i *Interpreter) VisitString(e ast.Expr) {
+	str := e.(*ast.String)
 	strFn := func(data ...interface{}) ([]interface{}, error) {
 		result := make([]interface{}, 0, len(data))
 		var err error
 		for _, d := range data {
 			switch v := d.(type) {
 			case map[string]interface{}:
-				key := str.trimmed()
+				key := str.Trim()
 				res, ok := v[key]
 				if ok {
 					result = append(result, res)
@@ -130,15 +134,15 @@ func (i *Interpreter) visitString(e Expr) {
 	i.filters = append(i.filters, strFn)
 }
 
-func (i *Interpreter) visitInteger(e Expr) {
-	integer := e.(*Integer)
+func (i *Interpreter) VisitInteger(e ast.Expr) {
+	integer := e.(*ast.Integer)
 	intFn := func(data ...interface{}) ([]interface{}, error) {
 		result := make([]interface{}, 0, len(data))
 		var err error
 		for _, d := range data {
 			switch v := d.(type) {
 			case []interface{}:
-				idx, _ := integer.vtoi()
+				idx, _ := integer.Vtoi()
 				if idx >= 0 && idx < len(v) {
 					result = append(result, v[idx])
 				}

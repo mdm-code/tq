@@ -16,9 +16,6 @@ var (
 	// ErrParserBufferOutOfRange indicates the end of the parser buffer has
 	// been reached.
 	ErrParserBufferOutOfRange = errors.New("reached the end of the buffer")
-
-	// ErrTOMLDataType indicates unexpected data type passed to the function.
-	ErrTOMLDataType = errors.New("wrong type error")
 )
 
 // Error wraps a concrete parser error to represent its context. It reports the

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/mdm-code/scanner"
+	"github.com/mdm-code/tq/internal/interpreter"
 	"github.com/mdm-code/tq/internal/lexer"
 	"github.com/mdm-code/tq/internal/parser"
 	"github.com/pelletier/go-toml/v2"
@@ -37,7 +38,7 @@ func main() {
 		fmt.Printf("%v\n", err)
 		os.Exit(1)
 	}
-	i := &parser.Interpreter{}
+	i := &interpreter.Interpreter{}
 	execFn := i.Interpret(e)
 	var data interface{}
 	in, _ := ioutil.ReadAll(os.Stdin)

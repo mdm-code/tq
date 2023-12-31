@@ -3,6 +3,7 @@ package parser
 import (
 	"errors"
 
+	"github.com/mdm-code/tq/internal/ast"
 	"github.com/mdm-code/tq/internal/lexer"
 )
 
@@ -29,24 +30,24 @@ func New(l *lexer.Lexer) (*Parser, error) {
 }
 
 // Parse the abstract syntax tree given the buffer of tq lexer tokens.
-func (p *Parser) Parse() (*Root, error) {
+func (p *Parser) Parse() (*ast.Root, error) {
 	root, err := p.root()
 	return &root, err
 }
 
-func (p *Parser) root() (Root, error) {
+func (p *Parser) root() (ast.Root, error) {
 	q, err := p.query()
-	expr := Root{query: &q}
+	expr := ast.Root{Query: &q}
 	return expr, err
 }
 
-func (p *Parser) query() (Query, error) {
-	var expr Query
+func (p *Parser) query() (ast.Query, error) {
+	var expr ast.Query
 	var err error
 	for !p.isAtEnd() {
-		var f Filter
+		var f ast.Filter
 		f, err = p.filter()
-		expr.filters = append(expr.filters, &f)
+		expr.Filters = append(expr.Filters, &f)
 		if err != nil {
 			break
 		}
@@ -54,18 +55,18 @@ func (p *Parser) query() (Query, error) {
 	return expr, err
 }
 
-func (p *Parser) filter() (Filter, error) {
-	var expr Filter
+func (p *Parser) filter() (ast.Filter, error) {
+	var expr ast.Filter
 	var err error
 	switch {
 	case p.match(lexer.Dot):
-		var i Identity
+		var i ast.Identity
 		i, err = p.identity()
-		expr.kind = &i
+		expr.Kind = &i
 	case p.match(lexer.ArrayOpen):
-		var s Selector
+		var s ast.Selector
 		s, err = p.selector()
-		expr.kind = &s
+		expr.Kind = &s
 	default:
 		prev := p.previous()
 		err = &Error{prev.Lexeme(), ErrQueryElement}
@@ -73,53 +74,53 @@ func (p *Parser) filter() (Filter, error) {
 	return expr, err
 }
 
-func (p *Parser) identity() (Identity, error) {
-	return Identity{}, nil
+func (p *Parser) identity() (ast.Identity, error) {
+	return ast.Identity{}, nil
 }
 
-func (p *Parser) selector() (Selector, error) {
-	var expr Selector
+func (p *Parser) selector() (ast.Selector, error) {
+	var expr ast.Selector
 	var err error
 	switch {
 	case p.check(lexer.ArrayClose):
 		i, _ := p.iterator()
-		expr.value = &i
+		expr.Value = &i
 	case p.match(lexer.String):
 		s, _ := p.string()
-		expr.value = &s
+		expr.Value = &s
 	case p.match(lexer.Colon):
 		s, _ := p.span(nil)
-		expr.value = &s
+		expr.Value = &s
 	case p.match(lexer.Integer):
 		i, _ := p.integer()
 		if p.match(lexer.Colon) {
 			s, _ := p.span(&i)
-			expr.value = &s
+			expr.Value = &s
 		} else {
-			expr.value = &i
+			expr.Value = &i
 		}
 	}
 	_, err = p.consume(lexer.ArrayClose, ErrSelectorUnterminated)
 	return expr, err
 }
 
-func (p *Parser) iterator() (Iterator, error) {
-	return Iterator{}, nil
+func (p *Parser) iterator() (ast.Iterator, error) {
+	return ast.Iterator{}, nil
 }
 
-func (p *Parser) string() (String, error) {
-	return String{value: p.previous().Lexeme()}, nil
+func (p *Parser) string() (ast.String, error) {
+	return ast.String{Value: p.previous().Lexeme()}, nil
 }
 
-func (p *Parser) integer() (Integer, error) {
-	return Integer{value: p.previous().Lexeme()}, nil
+func (p *Parser) integer() (ast.Integer, error) {
+	return ast.Integer{Value: p.previous().Lexeme()}, nil
 }
 
-func (p *Parser) span(left *Integer) (Span, error) {
-	s := Span{left: left}
+func (p *Parser) span(left *ast.Integer) (ast.Span, error) {
+	s := ast.Span{Left: left}
 	if p.match(lexer.Integer) {
 		r, _ := p.integer()
-		s.right = &r
+		s.Right = &r
 	}
 	return s, nil
 }
