@@ -64,26 +64,32 @@ type Integer struct {
 	Value string
 }
 
+// Accept implements the Expr interface for the visitor design pattern.
 func (r *Root) Accept(v Visitor) {
 	v.VisitRoot(r)
 }
 
+// Accept implements the Expr interface for the visitor design pattern.
 func (q *Query) Accept(v Visitor) {
 	v.VisitQuery(q)
 }
 
+// Accept implements the Expr interface for the visitor design pattern.
 func (f *Filter) Accept(v Visitor) {
 	v.VisitFilter(f)
 }
 
+// Accept implements the Expr interface for the visitor design pattern.
 func (i *Identity) Accept(v Visitor) {
 	v.VisitIdentity(i)
 }
 
+// Accept implements the Expr interface for the visitor design pattern.
 func (s *Selector) Accept(v Visitor) {
 	v.VisitSelector(s)
 }
 
+// Accept implements the Expr interface for the visitor design pattern.
 func (s *Span) Accept(v Visitor) {
 	v.VisitSpan(s)
 }
@@ -110,14 +116,18 @@ func (s *Span) asInt(i *Integer, def int) int {
 	return result
 }
 
+// Accept implements the Expr interface for the visitor design pattern.
 func (i *Iterator) Accept(v Visitor) {
 	v.VisitIterator(i)
 }
 
+// Accept implements the Expr interface for the visitor design pattern.
 func (s *String) Accept(v Visitor) {
 	v.VisitString(s)
 }
 
+// Trim returns the value of the String expression node with the surrounding
+// quotation marks stripped off.
 func (s *String) Trim() string {
 	result := s.Value
 	for _, c := range `'"` {
@@ -126,10 +136,13 @@ func (s *String) Trim() string {
 	return result
 }
 
+// Accept implements the Expr interface for the visitor design pattern.
 func (i *Integer) Accept(v Visitor) {
 	v.VisitInteger(i)
 }
 
+// Vtoi returns the value of the Integer expression node converted to a value
+// of the type int.
 func (i *Integer) Vtoi() (int, error) {
 	return strconv.Atoi(i.Value)
 }
