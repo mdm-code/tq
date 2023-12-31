@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/mdm-code/scanner"
-	"github.com/mdm-code/tq/lexer"
+	"github.com/mdm-code/tq/internal/lexer"
 	"github.com/pelletier/go-toml/v2"
 )
 
@@ -32,7 +32,7 @@ func TestXxx(t *testing.T) {
 	}
 	e, err := p.Parse()
 	qc := &Interpreter{}
-	execfn := qc.Interpret(e)
+	filter := qc.Interpret(e)
 	var data interface{}
 	val := `[nestedDict]
 foo = [1, 2, 3]
@@ -41,6 +41,6 @@ bar = [1, 2, 3]
 	toml.Unmarshal([]byte(val), &data)
 	d := []interface{}{data}
 	log.Println(qc.filters, err)
-	d, _ = execfn(d...)
+	d, _ = filter(d...)
 	log.Println(d)
 }

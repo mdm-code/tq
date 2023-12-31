@@ -3,7 +3,7 @@ package parser
 import (
 	"errors"
 
-	"github.com/mdm-code/tq/lexer"
+	"github.com/mdm-code/tq/internal/lexer"
 )
 
 // Parser encapsulates the logic of parsing tq queries into valid expressions.
