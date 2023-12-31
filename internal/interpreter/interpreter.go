@@ -37,21 +37,25 @@ func (i *Interpreter) Interpret(root ast.Expr) FilterFn {
 	}
 }
 
+// VisitRoot interprets the Root AST node.
 func (i *Interpreter) VisitRoot(e ast.Expr) {
 	r := e.(*ast.Root)
 	i.eval(r.Query)
 }
 
+// VisitQuery interprets the Query AST node.
 func (i *Interpreter) VisitQuery(e ast.Expr) {
 	q := e.(*ast.Query)
 	i.eval(q.Filters...)
 }
 
+// VisitFilter interprets the Filter AST node.
 func (i *Interpreter) VisitFilter(e ast.Expr) {
 	f := e.(*ast.Filter)
 	i.eval(f.Kind)
 }
 
+// VisitIdentity interprets the Identity AST node.
 func (i *Interpreter) VisitIdentity(e ast.Expr) {
 	identityFn := func(data ...interface{}) ([]interface{}, error) {
 		return data, nil
@@ -59,11 +63,13 @@ func (i *Interpreter) VisitIdentity(e ast.Expr) {
 	i.filters = append(i.filters, identityFn)
 }
 
+// VisitSelector interprets the Selector AST node.
 func (i *Interpreter) VisitSelector(e ast.Expr) {
 	s := e.(*ast.Selector)
 	i.eval(s.Value)
 }
 
+// VisitSpan interprets the Span AST node.
 func (i *Interpreter) VisitSpan(e ast.Expr) {
 	s := e.(*ast.Span)
 	spanFn := func(data ...interface{}) ([]interface{}, error) {
@@ -89,6 +95,7 @@ func (i *Interpreter) VisitSpan(e ast.Expr) {
 	i.filters = append(i.filters, spanFn)
 }
 
+// VisitIterator interprets the Iterator AST node.
 func (i *Interpreter) VisitIterator(e ast.Expr) {
 	iterFn := func(data ...interface{}) ([]interface{}, error) {
 		result := make([]interface{}, 0, len(data))
@@ -112,6 +119,7 @@ func (i *Interpreter) VisitIterator(e ast.Expr) {
 	i.filters = append(i.filters, iterFn)
 }
 
+// VisitString interprets the String AST node.
 func (i *Interpreter) VisitString(e ast.Expr) {
 	str := e.(*ast.String)
 	strFn := func(data ...interface{}) ([]interface{}, error) {
@@ -134,6 +142,7 @@ func (i *Interpreter) VisitString(e ast.Expr) {
 	i.filters = append(i.filters, strFn)
 }
 
+// VisitInteger interprets the Integer AST node.
 func (i *Interpreter) VisitInteger(e ast.Expr) {
 	integer := e.(*ast.Integer)
 	intFn := func(data ...interface{}) ([]interface{}, error) {
