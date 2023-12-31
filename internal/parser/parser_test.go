@@ -1,47 +1,91 @@
 package parser
 
 import (
-	"fmt"
-	"log"
+	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/mdm-code/scanner"
-	"github.com/mdm-code/tq/internal/interpreter"
+	"github.com/mdm-code/tq/internal/ast"
 	"github.com/mdm-code/tq/internal/lexer"
-	"github.com/pelletier/go-toml/v2"
 )
 
-func TestXxx(t *testing.T) {
-	// q := ". ['foo'][ 'bar' ][][0][:10][:][][2 : 12][\"foo\"] "
-	// q := "['foo'][:1'bar']"
-	q := ".['nestedDict']['bar']"
-	r := strings.NewReader(q)
-	s, err := scanner.New(r)
-	if err != nil {
-		t.Fatal(err)
-	}
-	l, err := lexer.New(s)
-	if err != nil {
-		t.Fatal(err)
+// TODO: Check all the errors from the cover profile that are not covered
+// by the current test case.
 
+// Check if the AST returned by Parse() method matches its predicted output.
+func TestParse(t *testing.T) {
+	cases := []struct {
+		query string
+		want  ast.Expr
+	}{
+		{
+			query: ".['students'][2:4][0]['grades'][]",
+			want: &ast.Root{
+				Query: &ast.Query{
+					Filters: []ast.Expr{
+						&ast.Filter{
+							Kind: &ast.Identity{},
+						},
+						&ast.Filter{
+							Kind: &ast.Selector{
+								Value: &ast.String{
+									Value: "'students'",
+								},
+							},
+						},
+						&ast.Filter{
+							Kind: &ast.Selector{
+								Value: &ast.Span{
+									Left: &ast.Integer{
+										Value: "2",
+									},
+									Right: &ast.Integer{
+										Value: "4",
+									},
+								},
+							},
+						},
+						&ast.Filter{
+							Kind: &ast.Selector{
+								Value: &ast.Integer{
+									Value: "0",
+								},
+							},
+						},
+						&ast.Filter{
+							Kind: &ast.Selector{
+								Value: &ast.String{
+									Value: "'grades'",
+								},
+							},
+						},
+						&ast.Filter{
+							Kind: &ast.Selector{
+								Value: &ast.Iterator{},
+							},
+						},
+					},
+				},
+			},
+		},
 	}
-	p, err := New(l)
-	if err != nil {
-		fmt.Println(err)
-		t.Fatal()
+	for _, c := range cases {
+		t.Run(c.query, func(t *testing.T) {
+			r := strings.NewReader(c.query)
+			s, _ := scanner.New(r)
+			l, _ := lexer.New(s)
+			p, err := New(l)
+			if err != nil {
+				t.Fatal(err)
+			}
+			have, err := p.Parse()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(have, c.want) {
+				t.Errorf("have: %v; want: %v", have, c.want)
+			}
+		})
 	}
-	e, err := p.Parse()
-	qc := interpreter.New()
-	filter := qc.Interpret(e)
-	var data interface{}
-	val := `[nestedDict]
-foo = [1, 2, 3]
-bar = [1, 2, 3]
-`
-	toml.Unmarshal([]byte(val), &data)
-	d := []interface{}{data}
-	log.Println(err)
-	d, _ = filter(d...)
-	log.Println(d)
 }
