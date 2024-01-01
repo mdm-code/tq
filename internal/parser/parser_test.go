@@ -10,8 +10,30 @@ import (
 	"github.com/mdm-code/tq/internal/lexer"
 )
 
-// TODO: Check all the errors from the cover profile that are not covered
-// by the current test case.
+// Test the failing Parser New() constructor.
+func TestNewFails(t *testing.T) {
+	q := ".[\"instances\"][$]" // the unsupported $ character causes the error.
+	r := strings.NewReader(q)
+	s, _ := scanner.New(r)
+	l, _ := lexer.New(s)
+	_, err := New(l)
+	if err == nil {
+		t.Fatal("expected the constructor to fail")
+	}
+}
+
+// Verify the range of possible Parser errors returned by Parse() method.
+func TestParseErrored(t *testing.T) {
+	// TODO: implement the cases
+	cases := []struct {
+		query string
+		err   error
+	}{}
+	for _, c := range cases {
+		t.Run(c.query, func(t *testing.T) {
+		})
+	}
+}
 
 // Check if the AST returned by Parse() method matches its predicted output.
 func TestParse(t *testing.T) {
@@ -20,7 +42,7 @@ func TestParse(t *testing.T) {
 		want  ast.Expr
 	}{
 		{
-			query: ".['students'][2:4][0]['grades'][]",
+			query: ".['students'][2:4][0]['grades'][:6][]",
 			want: &ast.Root{
 				Query: &ast.Query{
 					Filters: []ast.Expr{
@@ -57,6 +79,16 @@ func TestParse(t *testing.T) {
 							Kind: &ast.Selector{
 								Value: &ast.String{
 									Value: "'grades'",
+								},
+							},
+						},
+						&ast.Filter{
+							Kind: &ast.Selector{
+								Value: &ast.Span{
+									Left: nil,
+									Right: &ast.Integer{
+										Value: "6",
+									},
 								},
 							},
 						},
