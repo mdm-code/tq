@@ -174,7 +174,7 @@ func (p *Parser) previous() lexer.Token {
 
 func (p *Parser) peek() (lexer.Token, error) {
 	if p.isAtEnd() {
-		return p.previous(), ErrParserBufferOutOfRange
+		return lexer.Token{}, ErrParserBufferOutOfRange
 	}
 	return p.buffer[p.current], nil
 }
