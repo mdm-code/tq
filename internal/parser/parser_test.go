@@ -121,6 +121,122 @@ func TestParse(t *testing.T) {
 				},
 			},
 		},
+		{
+			query: "[\"employees\"][10:][][\"salary\"][12]",
+			want: &ast.Root{
+				Query: &ast.Query{
+					Filters: []ast.Expr{
+						&ast.Filter{
+							Kind: &ast.Selector{
+								Value: &ast.String{
+									Value: "\"employees\"",
+								},
+							},
+						},
+						&ast.Filter{
+							Kind: &ast.Selector{
+								Value: &ast.Span{
+									Left: &ast.Integer{
+										Value: "10",
+									},
+									Right: nil,
+								},
+							},
+						},
+						&ast.Filter{
+							Kind: &ast.Selector{
+								Value: &ast.Iterator{},
+							},
+						},
+						&ast.Filter{
+							Kind: &ast.Selector{
+								Value: &ast.String{
+									Value: "\"salary\"",
+								},
+							},
+						},
+						&ast.Filter{
+							Kind: &ast.Selector{
+								Value: &ast.Integer{
+									Value: "12",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			query: ".[]['sentences'][:5][]['words'][0]",
+			want: &ast.Root{
+				Query: &ast.Query{
+					Filters: []ast.Expr{
+						&ast.Filter{
+							Kind: &ast.Identity{},
+						},
+						&ast.Filter{
+							Kind: &ast.Selector{
+								Value: &ast.Iterator{},
+							},
+						},
+						&ast.Filter{
+							Kind: &ast.Selector{
+								Value: &ast.String{
+									Value: "'sentences'",
+								},
+							},
+						},
+						&ast.Filter{
+							Kind: &ast.Selector{
+								Value: &ast.Span{
+									Left: nil,
+									Right: &ast.Integer{
+										Value: "5",
+									},
+								},
+							},
+						},
+						&ast.Filter{
+							Kind: &ast.Selector{
+								Value: &ast.Iterator{},
+							},
+						},
+						&ast.Filter{
+							Kind: &ast.Selector{
+								Value: &ast.String{
+									Value: "'words'",
+								},
+							},
+						},
+						&ast.Filter{
+							Kind: &ast.Selector{
+								Value: &ast.Integer{
+									Value: "0",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			query: "",
+			want: &ast.Root{
+				Query: &ast.Query{},
+			},
+		},
+		{
+			query: ".",
+			want: &ast.Root{
+				Query: &ast.Query{
+					Filters: []ast.Expr{
+						&ast.Filter{
+							Kind: &ast.Identity{},
+						},
+					},
+				},
+			},
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.query, func(t *testing.T) {
