@@ -129,15 +129,8 @@ func (p *Parser) consume(t lexer.TokenType, e error) (lexer.Token, error) {
 	if p.check(t) {
 		return p.advance(), nil
 	}
-	curr, err := p.peek()
-	var lexeme string
-	if err != nil && errors.Is(err, ErrParserBufferOutOfRange) {
-		lexeme = "EOF"
-	} else {
-		lexeme = curr.Lexeme()
-	}
-	err = &Error{lexeme, e}
-	return curr, err
+	err := &Error{"EOF", e}
+	return lexer.Token{}, err
 }
 
 func (p *Parser) match(tt ...lexer.TokenType) bool {
