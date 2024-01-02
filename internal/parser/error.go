@@ -44,5 +44,6 @@ func (e *Error) getErrorLine() string {
 		b.WriteString(fmt.Sprintf(" but got '%s'", e.lexeme))
 		return b.String()
 	}
+	b.WriteString("nil")
 	return b.String()
 }
