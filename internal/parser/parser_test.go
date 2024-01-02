@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"errors"
 	"reflect"
 	"strings"
 	"testing"
@@ -22,15 +23,34 @@ func TestNewFails(t *testing.T) {
 	}
 }
 
-// Verify the range of possible Parser errors returned by Parse() method.
+// Verify a range of possible Parser errors returned by Parse() method.
 func TestParseErrored(t *testing.T) {
-	// TODO: implement the cases
 	cases := []struct {
 		query string
-		err   error
-	}{}
+		want  error
+	}{
+		{
+			query: ".[]]",
+			want:  ErrQueryElement,
+		},
+		{
+			query: "['interfaces'][0",
+			want:  ErrSelectorUnterminated,
+		},
+	}
 	for _, c := range cases {
 		t.Run(c.query, func(t *testing.T) {
+			r := strings.NewReader(c.query)
+			s, _ := scanner.New(r)
+			l, _ := lexer.New(s)
+			p, _ := New(l)
+			_, have := p.Parse()
+			if have == nil {
+				t.Fatal("expected Parse() method to error out")
+			}
+			if !errors.Is(have, c.want) {
+				t.Errorf("want: %v; have: %v", c.want, have)
+			}
 		})
 	}
 }
