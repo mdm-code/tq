@@ -46,21 +46,21 @@ type TokenType uint8
 // Token represents a single lexeme read from the Scanner token buffer.
 type Token struct {
 	Type       TokenType
-	buffer     *[]scanner.Token
-	start, end int
+	Buffer     *[]scanner.Token
+	Start, End int
 }
 
 // Lexeme returns the string representation of the Token.
 func (t Token) Lexeme() string {
-	if t.buffer == nil || len(*t.buffer) < 1 || t.start > t.end {
+	if t.Buffer == nil || len(*t.Buffer) < 1 || t.Start > t.End {
 		return ""
 	}
-	end := t.end
-	if end > len(*t.buffer) {
-		end = len(*t.buffer)
+	end := t.End
+	if end > len(*t.Buffer) {
+		end = len(*t.Buffer)
 	}
-	chars := make([]string, end-t.start)
-	for _, t := range (*t.buffer)[t.start:end] {
+	chars := make([]string, end-t.Start)
+	for _, t := range (*t.Buffer)[t.Start:end] {
 		chars = append(chars, string(t.Rune))
 	}
 	return strings.Join(chars, "")

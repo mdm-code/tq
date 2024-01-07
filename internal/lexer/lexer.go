@@ -31,10 +31,10 @@ func New(s *scanner.Scanner) (*Lexer, error) {
 		offset: 0,
 		buffer: buf,
 		curr: Token{
-			buffer: nil,
+			Buffer: nil,
 			Type:   Undefined,
-			start:  0,
-			end:    0,
+			Start:  0,
+			End:    0,
 		},
 	}
 	return &l, nil
@@ -104,10 +104,10 @@ func (l *Lexer) advance() {
 
 func (l *Lexer) setToken(tp TokenType, start, end int) {
 	l.curr = Token{
-		buffer: &l.buffer,
+		Buffer: &l.buffer,
 		Type:   tp,
-		start:  start,
-		end:    end,
+		Start:  start,
+		End:    end,
 	}
 }
 

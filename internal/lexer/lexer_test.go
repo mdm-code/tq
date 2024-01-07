@@ -190,7 +190,7 @@ func TestLexerScanAll(t *testing.T) {
 				t.Error("have tokens: %i; want: %i", len(have), len(c.want))
 			}
 			for i := 0; i < len(c.want)-1; i++ {
-				have[i].buffer = nil
+				have[i].Buffer = nil
 				if have[i] != c.want[i] {
 					t.Errorf("have: %v; want: %v", have, c.want)
 				}
