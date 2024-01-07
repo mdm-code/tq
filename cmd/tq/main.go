@@ -40,7 +40,7 @@ func main() {
 	}
 	i := interpreter.New()
 	execFn := i.Interpret(e)
-	var data interface{}
+	var data any
 	in, _ := ioutil.ReadAll(os.Stdin)
 	toml.Unmarshal(in, &data)
 	d, err := execFn(data)
