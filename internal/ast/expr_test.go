@@ -39,3 +39,29 @@ func TestAccept(t *testing.T) {
 }
 
 func TestSpanLeftRight(t *testing.T) {}
+
+// Check the string integer value conversion to the proper integer.
+func TestIntegerVtoi(t *testing.T) {
+	cases := []struct {
+		value string
+		want  int
+	}{
+		{"0", 0},
+		{"2", 2},
+		{"12", 12},
+		{"67", 67},
+		{"99", 99},
+	}
+	for _, c := range cases {
+		t.Run(c.value, func(t *testing.T) {
+			i := Integer{c.value}
+			have, err := i.Vtoi()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if have != c.want {
+				t.Errorf("have: %d; want: %d", have, c.want)
+			}
+		})
+	}
+}
