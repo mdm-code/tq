@@ -107,7 +107,7 @@ func (s *Span) GetRight(def int) int {
 func (s *Span) asInt(i *Integer, def int) int {
 	var result = def
 	if i != nil {
-		integer, err := strconv.Atoi(i.Value)
+		integer, err := i.Vtoi()
 		if err != nil {
 			return result
 		}
