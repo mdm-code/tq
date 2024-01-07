@@ -40,6 +40,27 @@ func TestAccept(t *testing.T) {
 
 func TestSpanLeftRight(t *testing.T) {}
 
+// Test if the quoted string values get their quotes trimmed.
+func TestStringTrim(t *testing.T) {
+	cases := []struct {
+		value string
+		want  string
+	}{
+		{"'students'", "students"},
+		{"\"employees\"", "employees"},
+		{"", ""},
+	}
+	for _, c := range cases {
+		t.Run(c.value, func(t *testing.T) {
+			s := String{c.value}
+			have := s.Trim()
+			if have != c.want {
+				t.Errorf("have: %s; want: %s", have, c.want)
+			}
+		})
+	}
+}
+
 // Check the string integer value conversion to the proper integer.
 func TestIntegerVtoi(t *testing.T) {
 	cases := []struct {
