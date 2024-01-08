@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/mdm-code/scanner"
 )
 
 var (
@@ -22,6 +24,8 @@ var (
 // token where the error has occurred.
 type Error struct {
 	lexeme string
+	buffer *[]scanner.Token
+	offset int
 	err    error
 }
 
@@ -32,7 +36,30 @@ func (e *Error) Is(target error) bool {
 
 // Error reports the parser error wrapped inside of the custom context.
 func (e *Error) Error() string {
-	return e.getErrorLine()
+	line := e.getErrorLine()
+	if e.buffer == nil || len(*e.buffer) < 1 {
+		return line
+	}
+	pointer := "^"
+	indentChar := " "
+	result := e.wrapErrorLine(line, pointer, indentChar)
+	return result
+}
+
+// wrapErrorLine wraps the error message inside the Parser buffer context.
+func (e *Error) wrapErrorLine(line, pointer, indentChar string) string {
+	var b strings.Builder
+	b.Grow(len(*e.buffer)*2 + 1)
+	for _, t := range *e.buffer {
+		b.WriteRune(t.Rune)
+	}
+	b.WriteString("\n")
+	indent := e.getIndent(indentChar)
+	b.WriteString(indent)
+	b.WriteString(pointer)
+	b.WriteString("\n")
+	b.WriteString(line)
+	return b.String()
 }
 
 // getErrorLine provides the error line with the nil error as default.
@@ -46,4 +73,13 @@ func (e *Error) getErrorLine() string {
 	}
 	b.WriteString("nil")
 	return b.String()
+}
+
+// getIndent constructs the pointer indentation. Negative offsets result in an
+// empty string.
+func (e *Error) getIndent(indentChar string) string {
+	if e.offset > 0 {
+		return strings.Repeat(indentChar, e.offset)
+	}
+	return ""
 }
