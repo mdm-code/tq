@@ -68,8 +68,8 @@ func (p *Parser) filter() (ast.Filter, error) {
 		s, err = p.selector()
 		expr.Kind = &s
 	default:
-		prev := p.previous()
-		err = &Error{prev.Lexeme(), ErrQueryElement}
+		v, _ := p.peek()
+		err = &Error{v.Lexeme(), v.Buffer, v.Start, ErrQueryElement}
 	}
 	return expr, err
 }
@@ -129,7 +129,12 @@ func (p *Parser) consume(t lexer.TokenType, e error) (lexer.Token, error) {
 	if p.check(t) {
 		return p.advance(), nil
 	}
-	err := &Error{"EOF", e}
+	v, err := p.peek()
+	if err != nil {
+		err := &Error{"EOL", v.Buffer, len(*v.Buffer), e}
+		return lexer.Token{}, err
+	}
+	err = &Error{v.Lexeme(), v.Buffer, v.Start, e}
 	return lexer.Token{}, err
 }
 
@@ -174,7 +179,7 @@ func (p *Parser) previous() lexer.Token {
 
 func (p *Parser) peek() (lexer.Token, error) {
 	if p.isAtEnd() {
-		return lexer.Token{}, ErrParserBufferOutOfRange
+		return p.previous(), ErrParserBufferOutOfRange
 	}
 	return p.buffer[p.current], nil
 }

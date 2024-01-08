@@ -17,7 +17,7 @@ func TestLexeme(t *testing.T) {
 		{
 			name: "default",
 			token: Token{
-				buffer: &[]scanner.Token{
+				Buffer: &[]scanner.Token{
 					{Pos: scanner.Pos{Rune: '.'}, Buffer: nil},
 					{Pos: scanner.Pos{Rune: '['}, Buffer: nil},
 					{Pos: scanner.Pos{Rune: '"'}, Buffer: nil},
@@ -33,8 +33,8 @@ func TestLexeme(t *testing.T) {
 					{Pos: scanner.Pos{Rune: ']'}, Buffer: nil},
 				},
 				Type:  String,
-				start: 2,
-				end:   9,
+				Start: 2,
+				End:   9,
 			},
 			want: "\"tools\"",
 		},
@@ -42,30 +42,30 @@ func TestLexeme(t *testing.T) {
 			name: "nil-buffer",
 			token: Token{
 				Type:  Undefined,
-				start: 0,
-				end:   10,
+				Start: 0,
+				End:   10,
 			},
 			want: "",
 		},
 		{
 			name: "empty-buffer",
 			token: Token{
-				buffer: &[]scanner.Token{},
+				Buffer: &[]scanner.Token{},
 				Type:   Undefined,
-				start:  0,
-				end:    10,
+				Start:  0,
+				End:    10,
 			},
 			want: "",
 		},
 		{
 			name: "start-gt",
 			token: Token{
-				buffer: &[]scanner.Token{
+				Buffer: &[]scanner.Token{
 					{Pos: scanner.Pos{Rune: '.'}, Buffer: nil},
 				},
 				Type:  Dot,
-				start: 2,
-				end:   1,
+				Start: 2,
+				End:   1,
 			},
 			want: "",
 		},
@@ -77,7 +77,7 @@ func TestLexeme(t *testing.T) {
 		{
 			name: "shorter-buffer",
 			token: Token{
-				buffer: &[]scanner.Token{
+				Buffer: &[]scanner.Token{
 					{Pos: scanner.Pos{Rune: '.'}, Buffer: nil},
 					{Pos: scanner.Pos{Rune: '['}, Buffer: nil},
 					{Pos: scanner.Pos{Rune: '8'}, Buffer: nil},
@@ -86,8 +86,8 @@ func TestLexeme(t *testing.T) {
 					{Pos: scanner.Pos{Rune: '4'}, Buffer: nil},
 				},
 				Type:  Integer,
-				start: 2,
-				end:   8,
+				Start: 2,
+				End:   8,
 			},
 			want: "8024",
 		},
