@@ -26,7 +26,7 @@ func (e *Error) Is(target error) bool {
 // by the name of the data filter that was to be applied to this data.
 func (e *Error) Error() string {
 	return fmt.Sprintf(
-		"Interpreter error: cannot query [ %T ] ( %s ) with ( %s )",
+		"Interpreter error: cannot query [ %T ] ( %v ) with ( %s )",
 		e.data,
 		e.data,
 		e.filter,
