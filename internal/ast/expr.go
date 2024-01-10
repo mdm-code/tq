@@ -19,12 +19,12 @@ type Root struct {
 	Query Expr
 }
 
-// Query represents a single tq query that can be run against a deserialized
+// Query represents a single tq query that can be run against a de-serialized
 // TOML data object. It potentially comprises of zero or more filters used to
 // filter the TOML data. Although filters are stored in a slice implying a
 // sequence, the order in not enforced neither by the expression nor the
 // parser. It is the responsibility of the visiting interpreter run against the
-// AST to provide the filering mechanism.
+// AST to provide the filtering mechanism.
 type Query struct {
 	Filters []Expr
 }
@@ -70,7 +70,7 @@ func (r *Root) Accept(v Visitor) {
 	v.VisitRoot(r)
 }
 
-// String ...
+// String provides the string representation of the AST expression.
 func (*Root) String() string {
 	return "root"
 }
@@ -80,7 +80,7 @@ func (q *Query) Accept(v Visitor) {
 	v.VisitQuery(q)
 }
 
-// String ...
+// String provides the string representation of the AST expression.
 func (*Query) String() string {
 	return "query"
 }
@@ -90,7 +90,7 @@ func (f *Filter) Accept(v Visitor) {
 	v.VisitFilter(f)
 }
 
-// String ...
+// String provides the string representation of the AST expression.
 func (*Filter) String() string {
 	return "filter"
 }
@@ -100,7 +100,7 @@ func (i *Identity) Accept(v Visitor) {
 	v.VisitIdentity(i)
 }
 
-// String ...
+// String provides the string representation of the AST expression.
 func (*Identity) String() string {
 	return "identity"
 }
@@ -110,7 +110,7 @@ func (s *Selector) Accept(v Visitor) {
 	v.VisitSelector(s)
 }
 
-// String ...
+// String provides the string representation of the AST expression.
 func (*Selector) String() string {
 	return "selector"
 }
@@ -120,7 +120,7 @@ func (s *Span) Accept(v Visitor) {
 	v.VisitSpan(s)
 }
 
-// String ...
+// String provides the string representation of the AST expression.
 func (s *Span) String() string {
 	var l, r string
 	if s.Left != nil {
@@ -159,7 +159,7 @@ func (i *Iterator) Accept(v Visitor) {
 	v.VisitIterator(i)
 }
 
-// String ...
+// String provides the string representation of the AST expression.
 func (i *Iterator) String() string {
 	return "iterator"
 }
@@ -189,7 +189,7 @@ func (i *Integer) Accept(v Visitor) {
 	v.VisitInteger(i)
 }
 
-// String ...
+// String provides the string representation of the AST expression.
 func (i *Integer) String() string {
 	return fmt.Sprintf("integer %s", i.Value)
 }
