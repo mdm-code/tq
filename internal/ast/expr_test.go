@@ -1,6 +1,9 @@
 package ast
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 type mockVisitor struct{}
 
@@ -14,8 +17,8 @@ func (mockVisitor) VisitSpan(e Expr)     {}
 func (mockVisitor) VisitString(e Expr)   {}
 func (mockVisitor) VisitInteger(e Expr)  {}
 
-// Test the Accept public method required by the visitor design pattern.
-func TestAccept(t *testing.T) {
+// Test the Expr Accept public method required by the visitor design pattern.
+func TestExprAccept(t *testing.T) {
 	cases := []struct {
 		name string
 		expr Expr
@@ -34,6 +37,37 @@ func TestAccept(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			var v mockVisitor
 			c.expr.Accept(v)
+		})
+	}
+}
+
+// Check if the Expr String renders the expected string represntation.
+func TestExprString(t *testing.T) {
+	cases := []struct {
+		name string
+		expr fmt.Stringer
+		want string
+	}{
+		{"root", &Root{}, "root"},
+		{"query", &Query{}, "query"},
+		{"filter", &Filter{}, "filter"},
+		{"identity", &Identity{}, "identity"},
+		{"selector", &Selector{}, "selector"},
+		{"iterator", &Iterator{}, "iterator"},
+		{"span", &Span{}, "span [:]"},
+		{"span", &Span{Left: &Integer{"2"}}, "span [2:]"},
+		{"span", &Span{Right: &Integer{"10"}}, "span [:10]"},
+		{"span", &Span{Left: &Integer{"0"}, Right: &Integer{"99"}}, "span [0:99]"},
+		{"string", &String{"programmers"}, "string \"programmers\""},
+		{"string", &String{}, "string \"\""},
+		{"integer", &Integer{}, "integer "},
+		{"integer", &Integer{"48"}, "integer 48"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if have := c.expr.String(); have != c.want {
+				t.Errorf("have: %s; want: %s", have, c.want)
+			}
 		})
 	}
 }
