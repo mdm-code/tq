@@ -1,6 +1,8 @@
 package interpreter
 
 import (
+	"fmt"
+
 	"github.com/mdm-code/tq/internal/ast"
 )
 
@@ -88,7 +90,7 @@ func (i *Interpreter) VisitSelector(e ast.Expr) {
 
 // VisitSpan interprets the Span AST node.
 func (i *Interpreter) VisitSpan(e ast.Expr) {
-	s := e.(*ast.Span)
+	span := e.(*ast.Span)
 	f := filter{
 		name: "span",
 		inner: func(data ...any) ([]any, error) {
@@ -97,7 +99,7 @@ func (i *Interpreter) VisitSpan(e ast.Expr) {
 			for _, d := range data {
 				switch v := d.(type) {
 				case []any:
-					l, r := s.GetLeft(0), s.GetRight(len(v))
+					l, r := span.GetLeft(0), span.GetRight(len(v))
 					if r > len(v) {
 						r = len(v)
 					}
@@ -106,7 +108,11 @@ func (i *Interpreter) VisitSpan(e ast.Expr) {
 					}
 					result = append(result, v[l:r])
 				default:
-					err = ErrTOMLDataType
+					err = &Error{
+						data:   d,
+						filter: fmt.Sprintf("%s", span),
+						err:    ErrTOMLDataType,
+					}
 				}
 			}
 			return result, err
@@ -117,6 +123,7 @@ func (i *Interpreter) VisitSpan(e ast.Expr) {
 
 // VisitIterator interprets the Iterator AST node.
 func (i *Interpreter) VisitIterator(e ast.Expr) {
+	iter := e.(*ast.Iterator)
 	f := filter{
 		name: "iterator",
 		inner: func(data ...any) ([]any, error) {
@@ -133,7 +140,11 @@ func (i *Interpreter) VisitIterator(e ast.Expr) {
 						result = append(result, val)
 					}
 				default:
-					err = ErrTOMLDataType
+					err = &Error{
+						data:   d,
+						filter: fmt.Sprintf("%s", iter),
+						err:    ErrTOMLDataType,
+					}
 				}
 			}
 			return result, err
@@ -159,7 +170,11 @@ func (i *Interpreter) VisitString(e ast.Expr) {
 						result = append(result, res)
 					}
 				default:
-					err = ErrTOMLDataType
+					err = &Error{
+						data:   d,
+						filter: fmt.Sprintf("%s", str),
+						err:    ErrTOMLDataType,
+					}
 				}
 			}
 			return result, err
@@ -184,7 +199,11 @@ func (i *Interpreter) VisitInteger(e ast.Expr) {
 						result = append(result, v[idx])
 					}
 				default:
-					err = ErrTOMLDataType
+					err = &Error{
+						data:   d,
+						filter: fmt.Sprintf("%s", integer),
+						err:    ErrTOMLDataType,
+					}
 				}
 			}
 			return result, err

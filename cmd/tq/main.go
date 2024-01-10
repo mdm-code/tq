@@ -45,7 +45,7 @@ func main() {
 	toml.Unmarshal(in, &data)
 	d, err := execFn(data)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		fmt.Printf("%s\n", err)
 		os.Exit(1)
 	}
 	for _, dd := range d {

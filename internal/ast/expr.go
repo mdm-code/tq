@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -69,9 +70,19 @@ func (r *Root) Accept(v Visitor) {
 	v.VisitRoot(r)
 }
 
+// String ...
+func (*Root) String() string {
+	return "root"
+}
+
 // Accept implements the Expr interface for the visitor design pattern.
 func (q *Query) Accept(v Visitor) {
 	v.VisitQuery(q)
+}
+
+// String ...
+func (*Query) String() string {
+	return "query"
 }
 
 // Accept implements the Expr interface for the visitor design pattern.
@@ -79,9 +90,19 @@ func (f *Filter) Accept(v Visitor) {
 	v.VisitFilter(f)
 }
 
+// String ...
+func (*Filter) String() string {
+	return "filter"
+}
+
 // Accept implements the Expr interface for the visitor design pattern.
 func (i *Identity) Accept(v Visitor) {
 	v.VisitIdentity(i)
+}
+
+// String ...
+func (*Identity) String() string {
+	return "identity"
 }
 
 // Accept implements the Expr interface for the visitor design pattern.
@@ -89,9 +110,26 @@ func (s *Selector) Accept(v Visitor) {
 	v.VisitSelector(s)
 }
 
+// String ...
+func (*Selector) String() string {
+	return "selector"
+}
+
 // Accept implements the Expr interface for the visitor design pattern.
 func (s *Span) Accept(v Visitor) {
 	v.VisitSpan(s)
+}
+
+// String ...
+func (s *Span) String() string {
+	var l, r string
+	if s.Left != nil {
+		l = s.Left.Value
+	}
+	if s.Right != nil {
+		r = s.Right.Value
+	}
+	return fmt.Sprintf("span [%s:%s]", l, r)
 }
 
 // GetLeft returns the value of the left-hand side expression node of the Span.
@@ -121,9 +159,19 @@ func (i *Iterator) Accept(v Visitor) {
 	v.VisitIterator(i)
 }
 
+// String ...
+func (i *Iterator) String() string {
+	return "iterator"
+}
+
 // Accept implements the Expr interface for the visitor design pattern.
 func (s *String) Accept(v Visitor) {
 	v.VisitString(s)
+}
+
+// String ...
+func (s *String) String() string {
+	return fmt.Sprintf("string %q", s.Trim())
 }
 
 // Trim returns the value of the String expression node with the surrounding
@@ -139,6 +187,11 @@ func (s *String) Trim() string {
 // Accept implements the Expr interface for the visitor design pattern.
 func (i *Integer) Accept(v Visitor) {
 	v.VisitInteger(i)
+}
+
+// String ...
+func (i *Integer) String() string {
+	return fmt.Sprintf("integer %s", i.Value)
 }
 
 // Vtoi returns the value of the Integer expression node converted to a value
