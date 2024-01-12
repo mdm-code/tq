@@ -1,5 +1,26 @@
-/*
-tq - query TOML configuration files
+package main
+
+import (
+	"flag"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"strings"
+
+	"github.com/mdm-code/scanner"
+	"github.com/mdm-code/tq/internal/interpreter"
+	"github.com/mdm-code/tq/internal/lexer"
+	"github.com/mdm-code/tq/internal/parser"
+	"github.com/pelletier/go-toml/v2"
+)
+
+const (
+	exitSuccess int = iota
+	exitFailure
+)
+
+var (
+	usage = `tq - query TOML configuration files
 
 Usage:
 
@@ -15,11 +36,11 @@ Example:
 	tq -q '["servers"][]["ip"]' <<EOF
 	[servers]
 
-	[servers.alpha]
+	[servers.prod]
 	ip = "10.0.0.1"
-	role = "frontend"
+	role = "backend"
 
-	[servers.beta]
+	[servers.staging]
 	ip = "10.0.0.2"
 	role = "backend"
 	EOF
@@ -32,62 +53,79 @@ Output:
 Tq is a tool for querying TOML configuration files with a sequence of intuitive
 filters. It works as a regular Unix filter program reading input data from the
 standard input and producing results to the standard output.
-*/
-package main
+`
 
-import (
-	"flag"
-	"fmt"
-	"io/ioutil"
-	"log"
-	"os"
-	"strings"
-
-	"github.com/mdm-code/scanner"
-	"github.com/mdm-code/tq/internal/interpreter"
-	"github.com/mdm-code/tq/internal/lexer"
-	"github.com/mdm-code/tq/internal/parser"
-	"github.com/pelletier/go-toml/v2"
+	query string
 )
 
-func main() {
-	query := flag.String("q", ".", "query")
-	flag.Parse()
-	r := strings.NewReader(*query)
-	s, err := scanner.New(r)
-	if err != nil {
-		log.Fatalf("%v\n", err)
+func setupCLI(args []string) error {
+	fs := flag.NewFlagSet("tq", flag.ExitOnError)
+	fs.Usage = func() {
+		w := flag.CommandLine.Output()
+		fmt.Fprint(w, usage)
 	}
-	l, err := lexer.New(s)
+	queryDefault := "."
+	queryUsage := "specify the query to run against the input data"
+	fs.StringVar(&query, "q", queryDefault, queryUsage)
+	fs.StringVar(&query, "query", queryDefault, queryUsage)
+	err := fs.Parse(args)
+	return err
+}
+
+func run(args []string) (int, error) {
+	err := setupCLI(args)
 	if err != nil {
-		fmt.Printf("%v\n", err)
-		os.Exit(1)
+		return exitFailure, err
 	}
-	p, err := parser.New(l)
+	reader := strings.NewReader(query)
+	scanner, err := scanner.New(reader)
 	if err != nil {
-		fmt.Printf("%v\n", err)
-		os.Exit(1)
+		return exitFailure, err
 	}
-	e, err := p.Parse()
+	lexer, err := lexer.New(scanner)
 	if err != nil {
-		fmt.Printf("%v\n", err)
-		os.Exit(1)
+		return exitFailure, err
 	}
-	i := interpreter.New()
-	execFn := i.Interpret(e)
+	parser, err := parser.New(lexer)
+	if err != nil {
+		return exitFailure, err
+	}
+	ast, err := parser.Parse()
+	if err != nil {
+		return exitFailure, err
+	}
+	interpreter := interpreter.New()
+	exec := interpreter.Interpret(ast)
 	var data any
-	in, _ := ioutil.ReadAll(os.Stdin)
-	toml.Unmarshal(in, &data)
-	d, err := execFn(data)
+	input, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
-		fmt.Printf("%s\n", err)
-		os.Exit(1)
+		return exitFailure, err
 	}
-	for _, dd := range d {
-		b, _ := toml.Marshal(dd)
-		if len(b) <= 0 {
+	err = toml.Unmarshal(input, &data) // TODO: Wrap error in custom error
+	if err != nil {
+		return exitFailure, err
+	}
+	filteredData, err := exec(data)
+	if err != nil {
+		return exitFailure, err
+	}
+	for _, d := range filteredData {
+		bytes, err := toml.Marshal(d)
+		if err != nil {
+			return exitFailure, err
+		}
+		if len(bytes) == 0 {
 			continue
 		}
-		fmt.Fprintln(os.Stdout, string(b))
+		fmt.Fprintln(os.Stdout, string(bytes))
 	}
+	return exitSuccess, nil
+}
+
+func main() {
+	exitCode, err := run(os.Args[1:])
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
+	os.Exit(exitCode)
 }
