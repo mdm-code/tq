@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -11,7 +10,7 @@ import (
 	"github.com/mdm-code/tq/internal/interpreter"
 	"github.com/mdm-code/tq/internal/lexer"
 	"github.com/mdm-code/tq/internal/parser"
-	"github.com/pelletier/go-toml/v2"
+	"github.com/mdm-code/tq/internal/toml"
 )
 
 const (
@@ -72,6 +71,31 @@ func setupCLI(args []string) error {
 	return err
 }
 
+func setupTOMLAdapter() toml.Adapter {
+	conf := toml.GoTOMLConf{
+		Decoder: struct {
+			Strict bool
+		}{
+			false,
+		},
+		Encoder: struct {
+			TablesInline    bool
+			ArraysMultiline bool
+			IndentSymbol    string
+			IndentTables    bool
+		}{
+			false,
+			false,
+			"  ",
+			false,
+		},
+	}
+
+	goToml := toml.NewGoTOML(conf)
+	adapter := toml.NewAdapter(goToml)
+	return adapter
+}
+
 func run(args []string) (int, error) {
 	err := setupCLI(args)
 	if err != nil {
@@ -97,11 +121,8 @@ func run(args []string) (int, error) {
 	interpreter := interpreter.New()
 	exec := interpreter.Interpret(ast)
 	var data any
-	input, err := ioutil.ReadAll(os.Stdin)
-	if err != nil {
-		return exitFailure, err
-	}
-	err = toml.Unmarshal(input, &data) // TODO: Wrap error in custom error
+	tomlAdapter := setupTOMLAdapter()
+	err = tomlAdapter.Unmarshal(os.Stdin, &data)
 	if err != nil {
 		return exitFailure, err
 	}
@@ -110,7 +131,7 @@ func run(args []string) (int, error) {
 		return exitFailure, err
 	}
 	for _, d := range filteredData {
-		bytes, err := toml.Marshal(d)
+		bytes, err := tomlAdapter.Marshal(d)
 		if err != nil {
 			return exitFailure, err
 		}
