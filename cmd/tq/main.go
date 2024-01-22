@@ -72,23 +72,23 @@ func setupCLI(args []string) error {
 		fmt.Fprint(w, usage)
 	}
 
-	queryUsage := "specify the query to run against the input data"
+	queryUsage := "query to run against the input data"
 	fs.StringVar(&query, "q", ".", queryUsage)
 	fs.StringVar(&query, "query", ".", queryUsage)
 
-	tablesInlineUsage := "emit all tables inline"
+	tablesInlineUsage := "emit tables inline"
 	fs.BoolVar(&tablesInline, "tables-inline", false, tablesInlineUsage)
 	fs.BoolVar(&tablesInline, "t", false, tablesInlineUsage)
 
-	arraysMultilineDefault := "emit all arrays with one element per line"
+	arraysMultilineDefault := "emit arrays one element per line"
 	fs.BoolVar(&arraysMultiline, "arrays-multiline", false, arraysMultilineDefault)
 	fs.BoolVar(&arraysMultiline, "m", false, arraysMultilineDefault)
 
-	indentSymbolDefault := "provide the string for the indentation level"
+	indentSymbolDefault := "provide the indentation string"
 	fs.StringVar(&indentSymbol, "indent-symbol", "  ", indentSymbolDefault)
 	fs.StringVar(&indentSymbol, "s", "  ", indentSymbolDefault)
 
-	indentTablesDefault := "indent tables and array tables literals"
+	indentTablesDefault := "indent tables and array tables"
 	fs.BoolVar(&indentTables, "indent-tables", false, indentTablesDefault)
 	fs.BoolVar(&indentTables, "i", false, indentTablesDefault)
 
