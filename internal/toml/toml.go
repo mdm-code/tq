@@ -2,67 +2,78 @@ package toml
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"io"
 
 	"github.com/pelletier/go-toml/v2"
 )
 
-// Decoder ...
-type Decoder interface {
+type decoder interface {
 	Decode(io.Reader, any) error
 }
 
-// Encoder ...
-type Encoder interface {
+type encoder interface {
 	Encode(any) ([]byte, error)
 }
 
-// DecodeEncoder ...
-type DecodeEncoder interface {
-	Decoder
-	Encoder
+type decodeEncoder interface {
+	decoder
+	encoder
 }
 
-// Adapter ...
+// Adapter unifies the external TOML library interface to confine any changes
+// to external libraries confined to a particular place in code.
 type Adapter struct {
-	adapted DecodeEncoder
+	adapted decodeEncoder
 }
 
-// NewAdapter ...
-func NewAdapter(adapted DecodeEncoder) Adapter {
+// NewAdapter returns the adapted external library TOML functionalities.
+func NewAdapter(adapted decodeEncoder) Adapter {
 	return Adapter{adapted: adapted}
 }
 
-// Unmarshal ...
+// Unmarshal unmarshals the input r into the reference pointer argument passed
+// to the parameter v.
 func (a *Adapter) Unmarshal(r io.Reader, v any) error {
-	return a.adapted.Decode(r, v)
+	err := a.adapted.Decode(r, v)
+	if err != nil {
+		err = errors.Join(ErrTOMLUnmarshal, err)
+		err = fmt.Errorf("TOML error: %w", err)
+	}
+	return err
 }
 
-// Marshal ...
+// Marshal marshals the argument passed to the parameter v to a slice of bytes.
 func (a *Adapter) Marshal(v any) ([]byte, error) {
-	return a.adapted.Encode(v)
+	bytes, err := a.adapted.Encode(v)
+	if err != nil {
+		err = errors.Join(ErrTOMLMarshal, err)
+		err = fmt.Errorf("TOML error: %w", err)
+	}
+	return bytes, err
 }
 
-// GoTOML ...
+// GoTOML exposes the go-toml/v2 package functionality to that satisfies the
+// decodeEncoder interface.
 type GoTOML struct {
 	conf GoTOMLConf
 }
 
-// NewGoTOML ...
+// NewGoTOML returns a struct exposing the go-toml/v2 package functionality to
+// that satisfies the decodeEncoder interface.
 func NewGoTOML(c GoTOMLConf) GoTOML {
 	return GoTOML{conf: c}
 }
 
-// Decode ...
+// Decode decodes the input r into the reference pointer argument passed to the
+// parameter v.
 func (t GoTOML) Decode(r io.Reader, v any) error {
 	d := toml.NewDecoder(r)
-	if t.conf.Decoder.Strict {
-		d.DisallowUnknownFields()
-	}
 	return d.Decode(v)
 }
 
-// Encode ...
+// Encode encodes the argument passed to the parameter v as a slice of bytes.
 func (t GoTOML) Encode(v any) ([]byte, error) {
 	var buf bytes.Buffer
 	e := toml.NewEncoder(&buf)
@@ -77,11 +88,8 @@ func (t GoTOML) Encode(v any) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// GoTOMLConf ...
+// GoTOMLConf specifies meaningful configuration for the go-toml/v2 package.
 type GoTOMLConf struct {
-	Decoder struct {
-		Strict bool
-	}
 	Encoder struct {
 		TablesInline    bool
 		ArraysMultiline bool
