@@ -1,5 +1,5 @@
 GO=go
-GOFLAGS=-race
+GOFLAGS=-race -mod=vendor
 COV_PROFILE=coverage.txt
 
 export CGO_ENABLED = 1
