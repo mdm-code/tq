@@ -23,12 +23,16 @@ var (
 
 Usage:
 
-	tq [-q|--query arg...] [file...]
+	tq [] [-q|--query arg...] [file...]
 
 Options:
 
-	-h, --help   show this help message and exit
-	-q, --query  specify the query to run against the input data (default: '.')
+	-h, --help         show this help message and exit
+	-q, --query        specify the query to run against the input data (default: '.')
+	--tablesInline     emit all tables inline (default: false)
+	--arraysMultiline  emit all arrays with one element per line (default: false)
+	--indentSymbol     provide the string for the indentation level (default: '  ')
+	--indentTables     indent tables and array tables literals (default: false)
 
 Example:
 
@@ -54,7 +58,11 @@ filters. It works as a regular Unix filter program reading input data from the
 standard input and producing results to the standard output.
 `
 
-	query string
+	query           string
+	tablesInline    bool
+	arraysMultiline bool
+	indentSymbol    string
+	indentTables    bool
 )
 
 func setupCLI(args []string) error {
@@ -63,31 +71,40 @@ func setupCLI(args []string) error {
 		w := flag.CommandLine.Output()
 		fmt.Fprint(w, usage)
 	}
+
 	queryDefault := "."
 	queryUsage := "specify the query to run against the input data"
-	fs.StringVar(&query, "q", queryDefault, queryUsage)
+	fs.StringVar(&query, "q", ".", queryUsage)
 	fs.StringVar(&query, "query", queryDefault, queryUsage)
+
+	tablesInlineUsage := "emit all tables inline"
+	fs.BoolVar(&tablesInline, "tablesInline", false, tablesInlineUsage)
+
+	arraysMultilineDefault := "emit all arrays with one element per line"
+	fs.BoolVar(&arraysMultiline, "arraysMultiline", false, arraysMultilineDefault)
+
+	indentSymbolDefault := "provide the string for the indentation level"
+	fs.StringVar(&indentSymbol, "indentSymbol", "  ", indentSymbolDefault)
+
+	indentTablesDefault := "indent tables and array tables literals"
+	fs.BoolVar(&indentTables, "indentTables", false, indentTablesDefault)
+
 	err := fs.Parse(args)
 	return err
 }
 
 func setupTOMLAdapter() toml.Adapter {
 	conf := toml.GoTOMLConf{
-		Decoder: struct {
-			Strict bool
-		}{
-			false,
-		},
 		Encoder: struct {
 			TablesInline    bool
 			ArraysMultiline bool
 			IndentSymbol    string
 			IndentTables    bool
 		}{
-			false,
-			false,
-			"  ",
-			false,
+			tablesInline,
+			arraysMultiline,
+			indentSymbol,
+			indentTables,
 		},
 	}
 
