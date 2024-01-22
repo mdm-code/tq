@@ -3,16 +3,16 @@ tq - query TOML configuration files
 
 Usage:
 
-	tq [-q|--query arg...] [file...]
+	tq [-qtmsi] [file...]
 
 Options:
 
-	-h, --help         show this help message and exit
-	-q, --query        specify the query to run against the input data (default: '.')
-	--tablesInline     emit all tables inline (default: false)
-	--arraysMultiline  emit all arrays with one element per line (default: false)
-	--indentSymbol     provide the string for the indentation level (default: '  ')
-	--indentTables     indent tables and array tables literals (default: false)
+	-h, --help              show this help message and exit
+	-q, --query             query to run against the input data (default: '.')
+	-t, --tables-inline     emit tables inline (default: false)
+	-m, --arrays-multiline  emit arrays one element per line (default: false)
+	-s, --indent-symbol     provide the indentation string (default: '  ')
+	-i, --indent-tables     indent tables and array tables (default: false)
 
 Example:
 

@@ -23,16 +23,16 @@ var (
 
 Usage:
 
-	tq [] [-q|--query arg...] [file...]
+	tq [-qtmsi] [file...]
 
 Options:
 
-	-h, --help         show this help message and exit
-	-q, --query        specify the query to run against the input data (default: '.')
-	--tablesInline     emit all tables inline (default: false)
-	--arraysMultiline  emit all arrays with one element per line (default: false)
-	--indentSymbol     provide the string for the indentation level (default: '  ')
-	--indentTables     indent tables and array tables literals (default: false)
+	-h, --help              show this help message and exit
+	-q, --query             query to run against the input data (default: '.')
+	-t, --tables-inline     emit tables inline (default: false)
+	-m, --arrays-multiline  emit arrays one element per line (default: false)
+	-s, --indent-symbol     provide the indentation string (default: '  ')
+	-i, --indent-tables     indent tables and array tables (default: false)
 
 Example:
 
@@ -72,22 +72,25 @@ func setupCLI(args []string) error {
 		fmt.Fprint(w, usage)
 	}
 
-	queryDefault := "."
 	queryUsage := "specify the query to run against the input data"
 	fs.StringVar(&query, "q", ".", queryUsage)
-	fs.StringVar(&query, "query", queryDefault, queryUsage)
+	fs.StringVar(&query, "query", ".", queryUsage)
 
 	tablesInlineUsage := "emit all tables inline"
-	fs.BoolVar(&tablesInline, "tablesInline", false, tablesInlineUsage)
+	fs.BoolVar(&tablesInline, "tables-inline", false, tablesInlineUsage)
+	fs.BoolVar(&tablesInline, "t", false, tablesInlineUsage)
 
 	arraysMultilineDefault := "emit all arrays with one element per line"
-	fs.BoolVar(&arraysMultiline, "arraysMultiline", false, arraysMultilineDefault)
+	fs.BoolVar(&arraysMultiline, "arrays-multiline", false, arraysMultilineDefault)
+	fs.BoolVar(&arraysMultiline, "m", false, arraysMultilineDefault)
 
 	indentSymbolDefault := "provide the string for the indentation level"
-	fs.StringVar(&indentSymbol, "indentSymbol", "  ", indentSymbolDefault)
+	fs.StringVar(&indentSymbol, "indent-symbol", "  ", indentSymbolDefault)
+	fs.StringVar(&indentSymbol, "s", "  ", indentSymbolDefault)
 
 	indentTablesDefault := "indent tables and array tables literals"
-	fs.BoolVar(&indentTables, "indentTables", false, indentTablesDefault)
+	fs.BoolVar(&indentTables, "indent-tables", false, indentTablesDefault)
+	fs.BoolVar(&indentTables, "i", false, indentTablesDefault)
 
 	err := fs.Parse(args)
 	return err
