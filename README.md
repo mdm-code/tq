@@ -4,7 +4,7 @@
       src="https://raw.githubusercontent.com/mdm-code/mdm-code.github.io/main/tq_logo.png"
       alt="logo"
       style="object-fit: contain"
-      width="40%"
+      width="30%"
     />
   </div>
 </h1>
