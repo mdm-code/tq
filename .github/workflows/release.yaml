@@ -38,6 +38,6 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          args: release ${{ inputs.args }} --rm-dist
+          args: release ${{ inputs.args }} --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
