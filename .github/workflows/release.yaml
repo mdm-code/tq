@@ -3,7 +3,7 @@ name: release
 on:
   push:
     tags:
-      - 'v.*'
+      - "v0.*"
   workflow_call:
     inputs:
       args:
