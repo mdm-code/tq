@@ -44,6 +44,6 @@ jobs:
         verbose: true
 
   release-check:
-    uses: mdm-code/tq/.github/workflows/release.yaml
+    uses: ./.github/workflows/release.yaml
     with:
       args: --snapshot
