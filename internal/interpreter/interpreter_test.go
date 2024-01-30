@@ -152,3 +152,67 @@ func TestInterpret(t *testing.T) {
 		})
 	}
 }
+
+// Check if filter function errors out when provided unsupported data input.
+func TestVisitError(t *testing.T) {
+	var data interface{}
+	i := New()
+	cases := []struct {
+		name string
+		node ast.Expr
+		fn   func(ast.Expr)
+	}{
+		{
+			"integerNode",
+			&ast.Integer{},
+			(*i).VisitInteger,
+		},
+		{
+			"stringNode",
+			&ast.String{},
+			(*i).VisitString,
+		},
+		{
+			"iteratorNode",
+			&ast.Iterator{},
+			(*i).VisitIterator,
+		},
+		{
+			"spanNode",
+			&ast.Span{},
+			(*i).VisitSpan,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			defer func() { i.filters = nil }()
+			c.fn(c.node)
+			filter := i.filters[0]
+			_, err := filter.inner(data)
+			if err == nil {
+				t.Errorf("filter function should error with data: %v", data)
+			}
+		})
+	}
+}
+
+// Verify if Interpret fails when provided unsupported data.
+func TestInterpretError(t *testing.T) {
+	var data interface{}
+	root := &ast.Root{
+		Query: &ast.Query{
+			Filters: []ast.Expr{
+				&ast.Filter{
+					Kind: &ast.Span{},
+				},
+			},
+		},
+	}
+	i := Interpreter{}
+	exec := i.Interpret(root)
+	_, err := exec(data)
+	if err == nil {
+		t.Errorf("Interpret should fail with data: %v", data)
+	}
+
+}
