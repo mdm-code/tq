@@ -2,7 +2,7 @@ GO=go
 GOFLAGS=-race -mod=vendor
 COV_PROFILE=coverage.txt
 
-export CGO_ENABLED = 1
+export CGO_ENABLED=0
 
 .DEFAULT_GOAL := build
 
