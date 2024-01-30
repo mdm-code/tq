@@ -169,7 +169,7 @@ func (s *String) Accept(v Visitor) {
 	v.VisitString(s)
 }
 
-// String ...
+// String provides the string representation of the AST expression.
 func (s *String) String() string {
 	return fmt.Sprintf("string %q", s.Trim())
 }
