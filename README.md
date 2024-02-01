@@ -55,6 +55,15 @@ go get github.com/mdm-code/tq
 ```
 
 
+## Development
+
+Go through the [Makefile](Makefile) to get an idea of the formatting, testing and
+linting that can be used locally for development purposes. Remember to install
+`golint` before you try to run tests and test the build or installation:
+
+```sh
+go install golang.org/x/lint/golint@latest
+```
 
 
 ## License
