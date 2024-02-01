@@ -36,3 +36,22 @@ intuitive filters. It works as a regular Unix filter program reading input data
 from the standard input and producing results to the standard output. Consult the
 [package documentation](https://pkg.go.dev/github.com/mdm-code/tq) or check the
 [Usage](#usage) section to see how you can use `tq`.
+
+
+## Installation
+
+Install the program to use the command-line `tq` to filter TOML files on the
+terminal.
+
+```sh
+go install github.com/mdm-code/tq/cmd/tq@latest
+```
+
+Here is how you can get the whole Go package downloaded to fiddle with, but it
+does not expose any public interfaces in code per se.
+
+```sh
+go get github.com/mdm-code/tq
+```
+
+
