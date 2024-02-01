@@ -31,6 +31,8 @@
 </p>
 </div>
 
-`tq` is a tool for querying TOML configuration files with a sequence of
+The `tq` program lets you query TOML configuration files with a sequence of
 intuitive filters. It works as a regular Unix filter program reading input data
-from the standard input and producing results to the standard output.
+from the standard input and producing results to the standard output. Consult the
+[package documentation](https://pkg.go.dev/github.com/mdm-code/tq) or check the
+[Usage](#usage) section to see how you can use `tq`.
