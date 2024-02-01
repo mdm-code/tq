@@ -9,7 +9,7 @@
   </div>
 </h1>
 
-<h4 align="center">Query TOML configuration files with the `tq` terminal utility</h4>
+<h4 align="center">Query TOML configuration files with the Tq terminal utility</h4>
 
 <div align="center">
 <p>
@@ -65,7 +65,7 @@ going on how to use `tq` in your workflow.
 ### Retrive IPs from a table of server tables
 
 In the example below, the TOML input file is (1) queried with the key
-`["servers"]`, then (2) the retrieved table is converted to an an iterator of
+`["servers"]`, then (2) the retrieved table is converted to an iterator of
 objects with `[]`, and then (3) the IP address is recovered from each of the
 objects with the key `["ip"]`.
 
@@ -86,7 +86,6 @@ Output:
 
 '10.0.0.1'
 '10.0.0.2'
-EOF
 ```
 
 Aside from the two query expressions used above, i.e., the key `["string"]` and
