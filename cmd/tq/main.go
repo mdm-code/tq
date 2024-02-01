@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -63,6 +64,9 @@ standard input and producing results to the standard output.
 	arraysMultiline bool
 	indentSymbol    string
 	indentTables    bool
+
+	input  = os.Stdin
+	output = os.Stdout
 )
 
 func setupCLI(args []string) error {
@@ -116,7 +120,7 @@ func setupTOMLAdapter() toml.Adapter {
 	return adapter
 }
 
-func run(args []string) (int, error) {
+func run(args []string, input io.Reader, output io.Writer) (int, error) {
 	err := setupCLI(args)
 	if err != nil {
 		return exitFailure, err
@@ -142,7 +146,7 @@ func run(args []string) (int, error) {
 	exec := interpreter.Interpret(ast)
 	var data any
 	tomlAdapter := setupTOMLAdapter()
-	err = tomlAdapter.Unmarshal(os.Stdin, &data)
+	err = tomlAdapter.Unmarshal(input, &data)
 	if err != nil {
 		return exitFailure, err
 	}
@@ -158,13 +162,13 @@ func run(args []string) (int, error) {
 		if len(bytes) == 0 {
 			continue
 		}
-		fmt.Fprintln(os.Stdout, string(bytes))
+		fmt.Fprintln(output, string(bytes))
 	}
 	return exitSuccess, nil
 }
 
 func main() {
-	exitCode, err := run(os.Args[1:])
+	exitCode, err := run(os.Args[1:], input, output)
 	if err != nil {
 		fmt.Printf("%v\n", err)
 	}
