@@ -55,6 +55,46 @@ go get github.com/mdm-code/tq
 ```
 
 
+## Usage
+
+Key in `tq -h` to get usage information and the list of options that can be
+used with the command on the command line. Here are some examples to get you
+going on how to use `tq` in your workflow.
+
+
+### Retrive IPs from a table of server tables
+
+In the example below, the TOML input file is (1) queried with the key
+`["servers"]`, then (2) the retrieved table is converted to an an iterator of
+objects with `[]`, and then (3) the IP address is recovered from each of the
+objects with the key `["ip"]`.
+
+```sh
+tq -q '["servers"][]["ip"]' <<EOF
+[servers]
+
+[servers.prod]
+ip = "10.0.0.1"
+role = "backend"
+
+[servers.staging]
+ip = "10.0.0.2"
+role = "backend"
+EOF
+
+Output:
+
+'10.0.0.1'
+'10.0.0.2'
+EOF
+```
+
+Aside from the two query expressions used above, i.e., the key `["string"]` and
+the `[]` iterator. The query also supports and identity filter `.`, an index
+used in lists `[int]` and a span `[start:end]` that can have the start and end
+index or both.
+
+
 ## Development
 
 Go through the [Makefile](Makefile) to get an idea of the formatting, testing and
