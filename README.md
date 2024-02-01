@@ -9,6 +9,8 @@
   </div>
 </h1>
 
+<h4 align="center">Query TOML configuration files with the `tq` terminal utility</h4>
+
 `tq` is a tool for querying TOML configuration files with a sequence of
 intuitive filters. It works as a regular Unix filter program reading input data
 from the standard input and producing results to the standard output.
