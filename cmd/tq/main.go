@@ -64,12 +64,9 @@ standard input and producing results to the standard output.
 	arraysMultiline bool
 	indentSymbol    string
 	indentTables    bool
-
-	input  = os.Stdin
-	output = os.Stdout
 )
 
-func setupCLI(args []string) error {
+func setupCLI(args []string) ([]string, error) {
 	fs := flag.NewFlagSet("tq", flag.ExitOnError)
 	fs.Usage = func() {
 		w := flag.CommandLine.Output()
@@ -97,7 +94,7 @@ func setupCLI(args []string) error {
 	fs.BoolVar(&indentTables, "i", false, indentTablesDefault)
 
 	err := fs.Parse(args)
-	return err
+	return fs.Args(), err
 }
 
 func setupTOMLAdapter() toml.Adapter {
@@ -121,9 +118,17 @@ func setupTOMLAdapter() toml.Adapter {
 }
 
 func run(args []string, input io.Reader, output io.Writer) (int, error) {
-	err := setupCLI(args)
+	args, err := setupCLI(args)
 	if err != nil {
 		return exitFailure, err
+	}
+	if len(args) > 0 {
+		f, err := os.Open(args[0])
+		input = f
+		defer func() { f.Close() }()
+		if err != nil {
+			return exitFailure, err
+		}
 	}
 	reader := strings.NewReader(query)
 	scanner, err := scanner.New(reader)
@@ -168,7 +173,7 @@ func run(args []string, input io.Reader, output io.Writer) (int, error) {
 }
 
 func main() {
-	exitCode, err := run(os.Args[1:], input, output)
+	exitCode, err := run(os.Args[1:], os.Stdin, os.Stdout)
 	if err != nil {
 		fmt.Printf("%v\n", err)
 	}
