@@ -58,8 +58,19 @@ go get github.com/mdm-code/tq
 ## Usage
 
 Enter `tq -h` to get usage information and the list of options that can be used
-with the command. Here are some examples to get you going on how to use `tq` in
-your workflow.
+with the command. Here is table with the supported filter expressions and some
+examples to get you going on how to use `tq` in your workflow.
+
+
+### Supported filters
+
+| <a href="#supported-filters"><img width="1000" height="0"></a><p>Filter</p> | <a href="#supported-filters"><img width="1000" height="0"></a><p>Expression</p> |
+| :-------------------------------------------------------------------------: | :-----------------------------------------------------------------------------: |
+| <b>Identity</b>                                                             | <kbd><b>.</b></kbd>                                                             |
+| <b>Key</b>                                                                  | <kbd><b>["string"]</b></kbd>                                                    |
+| <b>Index</b>                                                                | <kbd><b>[0]</b></kbd>                                                           |
+| <b>Iterator</b>                                                             | <kbd><b>[]</b></kbd>                                                            |
+| <b>Span</b>                                                                 | <kbd><b>[:]</b></kbd>                                                           |
 
 
 ### Retrieve IPs from a table of server tables
@@ -100,6 +111,7 @@ databases = [ {enabled = true, ports = [ 5432, 5433, 5434 ]} ]
 EOF
 
 Output:
+
 5433
 5434
 ```
