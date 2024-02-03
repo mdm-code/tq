@@ -66,11 +66,11 @@ examples to get you going on how to use `tq` in your workflow.
 
 | <a href="#supported-filters"><img width="1000" height="0"></a><p>Filter</p> | <a href="#supported-filters"><img width="1000" height="0"></a><p>Expression</p> |
 | :-------------------------------------------------------------------------: | :-----------------------------------------------------------------------------: |
-| <b>Identity</b>                                                             | <kbd><b>.</b></kbd>                                                             |
-| <b>Key</b>                                                                  | <kbd><b>["string"]</b></kbd>                                                    |
-| <b>Index</b>                                                                | <kbd><b>[0]</b></kbd>                                                           |
-| <b>Iterator</b>                                                             | <kbd><b>[]</b></kbd>                                                            |
-| <b>Span</b>                                                                 | <kbd><b>[:]</b></kbd>                                                           |
+| <kbd><b>identity</b></kbd>                                                  | <kbd><b>.</b></kbd>                                                             |
+| <kbd><b>key</b></kbd>                                                       | <kbd><b>["string"]</b></kbd>                                                    |
+| <kbd><b>index</b></kbd>                                                     | <kbd><b>[0]</b></kbd>                                                           |
+| <kbd><b>iterator</b></kbd>                                                  | <kbd><b>[]</b></kbd>                                                            |
+| <kbd><b>span</b></kbd>                                                      | <kbd><b>[:]</b></kbd>                                                           |
 
 
 ### Retrieve IPs from a table of server tables
@@ -106,7 +106,7 @@ This example queries the TOML input for the for the all ports aside from the
 first one assigned to the first database record on the list.
 
 ```sh
-tq -q '.["databases"][0]["ports"][1:][]' << EOF
+tq -q '.["databases"][0]["ports"][1:][]' <<EOF
 databases = [ {enabled = true, ports = [ 5432, 5433, 5434 ]} ]
 EOF
 
