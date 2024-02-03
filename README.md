@@ -40,15 +40,15 @@ from the standard input and producing results to the standard output. Consult th
 
 ## Installation
 
-Install the program to use the command-line `tq` to filter TOML files on the
-terminal.
+Install the program and use `tq` on the command-line to filter TOML files on
+the terminal.
 
 ```sh
 go install github.com/mdm-code/tq/cmd/tq@latest
 ```
 
 Here is how you can get the whole Go package downloaded to fiddle with, but it
-does not expose any public interfaces in code per se.
+does not expose any public interfaces in code.
 
 ```sh
 go get github.com/mdm-code/tq
@@ -57,12 +57,12 @@ go get github.com/mdm-code/tq
 
 ## Usage
 
-Key in `tq -h` to get usage information and the list of options that can be
-used with the command on the command line. Here are some examples to get you
-going on how to use `tq` in your workflow.
+Enter `tq -h` to get usage information and the list of options that can be used
+with the command. Here are some examples to get you going on how to use `tq` in
+your workflow.
 
 
-### Retrive IPs from a table of server tables
+### Retrieve IPs from a table of server tables
 
 In the example below, the TOML input file is (1) queried with the key
 `["servers"]`, then (2) the retrieved table is converted to an iterator of
@@ -88,10 +88,21 @@ Output:
 '10.0.0.2'
 ```
 
-Aside from the two query expressions used above, i.e., the key `["string"]` and
-the `[]` iterator. The query also supports and identity filter `.`, an index
-used in lists `[int]` and a span `[start:end]` that can have the start and end
-index or both.
+
+### Retrieve selected ports from a list of databases
+
+This example queries the TOML input for the for the all ports aside from the
+first one assigned to the first database record on the list.
+
+```sh
+tq -q '.["databases"][0]["ports"][1:][]' << EOF
+databases = [ {enabled = true, ports = [ 5432, 5433, 5434 ]} ]
+EOF
+
+Output:
+5433
+5434
+```
 
 
 ## Development
