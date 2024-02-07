@@ -117,6 +117,27 @@ Output:
 ```
 
 
+### Run inside of a container
+
+If you don't feel like installing `tq` with `go install`, you can test `tq` out
+running inside of a container with this command:
+
+```sh
+docker run -i ghcr.io/mdm-code/tq:latest tq -q "['dependencies']['ignore']" <<EOF
+[dependencies]
+anyhow = "1.0.75"
+bstr = "1.7.0"
+grep = { version = "0.3.1", path = "crates/grep" }
+ignore = { version = "0.4.22", path = "crates/ignore" }
+lexopt = "0.3.0"
+log = "0.4.5"
+serde_json = "1.0.23"
+termcolor = "1.1.0"
+textwrap = { version = "0.16.0", default-features = false }
+EOF
+```
+
+
 ## Development
 
 Go through the [Makefile](Makefile) to get an idea of the formatting, testing and
