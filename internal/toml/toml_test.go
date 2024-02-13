@@ -2,6 +2,7 @@ package toml
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -18,15 +19,14 @@ func TestAdapterUnmarshal(t *testing.T) {
 	goToml := NewGoTOML(conf)
 	a := NewAdapter(goToml)
 	r := strings.NewReader("number=13")
-	var v interface{}
-	err := a.Unmarshal(r, &v)
+	var have interface{}
+	err := a.Unmarshal(r, &have)
 	if err != nil {
 		t.Error("unmarshal should not return an error")
 	}
-	switch v.(type) {
-	case map[string]any:
-	default:
-		t.Error("unmarshal was to assign a map of interface values to v")
+	want := map[string]any{"number": int64(13)}
+	if !reflect.DeepEqual(have, want) {
+		t.Errorf("have: %v, want: %v", have, want)
 	}
 }
 
@@ -49,9 +49,13 @@ func TestAdapterMarshal(t *testing.T) {
 	goToml := NewGoTOML(conf)
 	a := NewAdapter(goToml)
 	v := map[string]any{"name": "Bob", "age": 32, "education": "higher"}
-	_, err := a.Marshal(v)
+	have, err := a.Marshal(v)
 	if err != nil {
 		t.Error("map encoding should not return an error")
+	}
+	want := []byte("age = 32\neducation = 'higher'\nname = 'Bob'\n")
+	if !reflect.DeepEqual(have, want) {
+		t.Errorf("have: %s; want: %s", string(have), string(want))
 	}
 }
 

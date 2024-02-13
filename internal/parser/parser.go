@@ -16,7 +16,6 @@ type Parser struct {
 // New returns a new Parser with the buffer populated with lexer tokens read
 // from the Lexer l.
 func New(l *lexer.Lexer) (*Parser, error) {
-	buf := []lexer.Token{}
 	buf, ok := l.ScanAll(true)
 	if !ok {
 		err := errors.Join(l.Errors...)
