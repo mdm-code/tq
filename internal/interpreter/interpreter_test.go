@@ -1,6 +1,7 @@
 package interpreter
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/mdm-code/tq/internal/ast"
@@ -9,10 +10,11 @@ import (
 // Test the public API of the Interpreter.
 func TestInterpret(t *testing.T) {
 	cases := []struct {
-		query string
-		want  []filter
-		root  ast.Expr
-		data  any
+		query        string
+		want         []filter
+		root         ast.Expr
+		data         any
+		filteredData any
 	}{
 		{
 			data: map[string]any{
@@ -33,7 +35,8 @@ func TestInterpret(t *testing.T) {
 					},
 				},
 			},
-			query: ".['students'][0:99][1][][0]['first'][]",
+			filteredData: []interface{}{2},
+			query:        ".['students'][0:99][1][][0]['first'][]",
 			want: []filter{
 				{name: "identity"},
 				{name: "string"},
@@ -110,6 +113,11 @@ func TestInterpret(t *testing.T) {
 					"1000", "2_000",
 				},
 			},
+			filteredData: []interface{}{
+				map[string]any{
+					"salaries": []any{"1000", "2_000"},
+				},
+			},
 			query: "",
 			want:  []filter{},
 			root: &ast.Root{
@@ -120,6 +128,13 @@ func TestInterpret(t *testing.T) {
 			data: map[string]any{
 				"employees": []any{
 					"Bob", "Mike",
+				},
+			},
+			filteredData: []interface{}{
+				map[string]any{
+					"employees": []any{
+						"Bob", "Mike",
+					},
 				},
 			},
 			query: ".",
@@ -145,9 +160,12 @@ func TestInterpret(t *testing.T) {
 					t.Errorf("have: %s; want: %s", f.name, have[i].name)
 				}
 			}
-			_, err := exec(c.data)
+			filtered, err := exec(c.data)
 			if err != nil {
 				t.Error("failed to filter data with declared filters")
+			}
+			if !reflect.DeepEqual(filtered, c.filteredData) {
+				t.Errorf("have: %v; want: %v", filtered, c.filteredData)
 			}
 		})
 	}
