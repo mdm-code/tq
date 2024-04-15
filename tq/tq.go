@@ -1,3 +1,8 @@
+/*
+Package tq encapsulates the logic of the Tq program behind a public interface.
+It reads input data from the input reader, processes it with the interpreted
+query string, and writes output data to the output writer.
+*/
 package tq
 
 import (
@@ -12,12 +17,18 @@ import (
 	"github.com/mdm-code/tq/internal/toml"
 )
 
+// Tq accepts TOML data from input and produces the result TOML data to output.
+// The process of data decoding and encoding is handled by the adapter. The
+// query passed to the Run method string is interpreted and executed against
+// the input data to produce the output data.
 type Tq struct {
 	input   io.Reader
 	output  io.Writer
 	adapter toml.Adapter
 }
 
+// New returns a new Tq struct with the input and output readers and writers
+// and the TOML adapter.
 func New(input io.Reader, output io.Writer, adapter toml.Adapter) *Tq {
 	return &Tq{
 		input:   input,
@@ -26,6 +37,8 @@ func New(input io.Reader, output io.Writer, adapter toml.Adapter) *Tq {
 	}
 }
 
+// Run executes the query string against the input data and writes the output
+// to the output writer.
 func (t *Tq) Run(query string) error {
 	reader := strings.NewReader(query)
 	scanner, err := scanner.New(reader)
