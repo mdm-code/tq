@@ -1,6 +1,7 @@
 package tq
 
 import (
+	"fmt"
 	"io"
 	"strings"
 
@@ -62,7 +63,7 @@ func (t *Tq) Run(query string) error {
 		if len(bytes) == 0 {
 			continue
 		}
-		_, err = t.output.Write(bytes)
+		fmt.Fprintln(t.output, string(bytes))
 	}
 	return nil
 }
