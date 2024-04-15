@@ -127,8 +127,8 @@ func run(args []string, input io.Reader, output io.Writer) (int, error) {
 		}
 	}
 	adapter := setupTOMLAdapter()
-	tq := tq.New(input, output, adapter)
-	err = tq.Run(query)
+	tq := tq.New(adapter)
+	err = tq.Run(input, output, query)
 	if err != nil {
 		return exitFailure, err
 	}
