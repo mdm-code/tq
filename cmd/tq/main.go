@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/mdm-code/tq/internal/toml"
+	"github.com/mdm-code/tq/toml"
 	"github.com/mdm-code/tq/tq"
 )
 

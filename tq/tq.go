@@ -14,7 +14,7 @@ import (
 	"github.com/mdm-code/tq/internal/interpreter"
 	"github.com/mdm-code/tq/internal/lexer"
 	"github.com/mdm-code/tq/internal/parser"
-	"github.com/mdm-code/tq/internal/toml"
+	"github.com/mdm-code/tq/toml"
 )
 
 // Tq accepts TOML data from input and produces the result TOML data to output.
