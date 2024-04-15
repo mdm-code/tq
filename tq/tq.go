@@ -22,24 +22,19 @@ import (
 // query passed to the Run method string is interpreted and executed against
 // the input data to produce the output data.
 type Tq struct {
-	input   io.Reader
-	output  io.Writer
 	adapter toml.Adapter
 }
 
-// New returns a new Tq struct with the input and output readers and writers
-// and the TOML adapter.
-func New(input io.Reader, output io.Writer, adapter toml.Adapter) *Tq {
+// New returns a new Tq struct with the provided TOML adapter.
+func New(adapter toml.Adapter) *Tq {
 	return &Tq{
-		input:   input,
-		output:  output,
 		adapter: adapter,
 	}
 }
 
 // Run executes the query string against the input data and writes the output
-// to the output writer.
-func (t *Tq) Run(query string) error {
+// data to the output writer.
+func (t *Tq) Run(input io.Reader, output io.Writer, query string) error {
 	reader := strings.NewReader(query)
 	scanner, err := scanner.New(reader)
 	if err != nil {
@@ -60,7 +55,7 @@ func (t *Tq) Run(query string) error {
 	interpreter := interpreter.New()
 	exec := interpreter.Interpret(ast)
 	var data any
-	err = t.adapter.Unmarshal(t.input, &data)
+	err = t.adapter.Unmarshal(input, &data)
 	if err != nil {
 		return err
 	}
@@ -76,7 +71,7 @@ func (t *Tq) Run(query string) error {
 		if len(bytes) == 0 {
 			continue
 		}
-		fmt.Fprintln(t.output, string(bytes))
+		fmt.Fprintln(output, string(bytes))
 	}
 	return nil
 }
