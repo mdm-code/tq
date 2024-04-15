@@ -9,27 +9,31 @@ import (
 	"github.com/pelletier/go-toml/v2"
 )
 
-type decoder interface {
+// Decoder defines the interface for decoding TOML data.
+type Decoder interface {
 	Decode(io.Reader, any) error
 }
 
-type encoder interface {
+// Encoder defines the interface for encoding TOML data.
+type Encoder interface {
 	Encode(any) ([]byte, error)
 }
 
-type decodeEncoder interface {
-	decoder
-	encoder
+// DecodeEncoder defines the combined interface for both decoding and encoding
+// TOML data.
+type DecodeEncoder interface {
+	Decoder
+	Encoder
 }
 
 // Adapter unifies the external TOML library interface to confine any changes
 // to external libraries confined to a particular place in code.
 type Adapter struct {
-	adapted decodeEncoder
+	adapted DecodeEncoder
 }
 
 // NewAdapter returns the adapted external library TOML functionalities.
-func NewAdapter(adapted decodeEncoder) Adapter {
+func NewAdapter(adapted DecodeEncoder) Adapter {
 	return Adapter{adapted: adapted}
 }
 
@@ -88,7 +92,7 @@ func (t GoTOML) Encode(v any) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// GoTOMLConf specifies meaningful configuration for the go-toml/v2 package.
+// GoTOMLConf specifies sensible configuration for the go-toml/v2 package.
 type GoTOMLConf struct {
 	Encoder struct {
 		TablesInline    bool
