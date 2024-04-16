@@ -5,13 +5,9 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 
-	"github.com/mdm-code/scanner"
-	"github.com/mdm-code/tq/internal/interpreter"
-	"github.com/mdm-code/tq/internal/lexer"
-	"github.com/mdm-code/tq/internal/parser"
-	"github.com/mdm-code/tq/internal/toml"
+	"github.com/mdm-code/tq/toml"
+	"github.com/mdm-code/tq/tq"
 )
 
 const (
@@ -130,44 +126,11 @@ func run(args []string, input io.Reader, output io.Writer) (int, error) {
 			return exitFailure, err
 		}
 	}
-	reader := strings.NewReader(query)
-	scanner, err := scanner.New(reader)
+	adapter := setupTOMLAdapter()
+	tq := tq.New(adapter)
+	err = tq.Run(input, output, query)
 	if err != nil {
 		return exitFailure, err
-	}
-	lexer, err := lexer.New(scanner)
-	if err != nil {
-		return exitFailure, err
-	}
-	parser, err := parser.New(lexer)
-	if err != nil {
-		return exitFailure, err
-	}
-	ast, err := parser.Parse()
-	if err != nil {
-		return exitFailure, err
-	}
-	interpreter := interpreter.New()
-	exec := interpreter.Interpret(ast)
-	var data any
-	tomlAdapter := setupTOMLAdapter()
-	err = tomlAdapter.Unmarshal(input, &data)
-	if err != nil {
-		return exitFailure, err
-	}
-	filteredData, err := exec(data)
-	if err != nil {
-		return exitFailure, err
-	}
-	for _, d := range filteredData {
-		bytes, err := tomlAdapter.Marshal(d)
-		if err != nil {
-			return exitFailure, err
-		}
-		if len(bytes) == 0 {
-			continue
-		}
-		fmt.Fprintln(output, string(bytes))
 	}
 	return exitSuccess, nil
 }
