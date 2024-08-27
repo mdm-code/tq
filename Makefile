@@ -6,7 +6,7 @@ export CGO_ENABLED=0
 
 .DEFAULT_GOAL := build
 
-.PHONY: fmt vet lint test install build cover clean
+.PHONY: fmt vet test install build cover clean
 
 fmt:
 	@$(GO) fmt ./...
@@ -14,10 +14,7 @@ fmt:
 vet: fmt
 	@$(GO) vet ./...
 
-lint: vet
-	@golint -set_exit_status=1 ./{tq,toml,internal,cmd}/...
-
-test: lint
+test: vet
 	@$(GO) clean -testcache
 	@$(GO) test ./... -v
 

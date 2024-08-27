@@ -140,13 +140,8 @@ EOF
 
 ## Development
 
-Go through the [Makefile](Makefile) to get an idea of the formatting, testing and
-linting that can be used locally for development purposes. Remember to install
-`golint` before you try to run tests and test the build or installation:
-
-```sh
-go install golang.org/x/lint/golint@latest
-```
+Go through the [Makefile](Makefile) to get an idea of the formatting, testing
+and linting that can be used locally for development purposes.
 
 
 ## License
