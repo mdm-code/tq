@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/mdm-code/tq"
 	"github.com/mdm-code/tq/toml"
-	"github.com/mdm-code/tq/tq"
 )
 
 // ExampleTq_Run demonstrates how to use the Tq struct to run a query against

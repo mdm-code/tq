@@ -7,8 +7,8 @@ import (
 	"io"
 	"os"
 
+	"github.com/mdm-code/tq"
 	"github.com/mdm-code/tq/toml"
-	"github.com/mdm-code/tq/tq"
 )
 
 const (
