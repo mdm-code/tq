@@ -36,3 +36,20 @@ role = "backend"
 	// Output:
 	// '10.0.0.2'
 }
+
+// ExampleTq_Validate shows how to use the Tq struct to validate whether a
+// given query is syntactically correct. The example shows how the error is
+// reported and represented as a string.
+func ExampleTq_Validate() {
+	query := "['servers'][['ip']"
+	config := toml.GoTOMLConf{}
+	goToml := toml.NewGoTOML(config)
+	adapter := toml.NewAdapter(goToml)
+	tq := tq.New(adapter)
+	err := tq.Validate(query)
+	fmt.Println(err)
+	// Output:
+	// ['servers'][['ip']
+	//             ^
+	// Parser error: expected ']' to terminate selector but got '['
+}

@@ -32,6 +32,28 @@ func New(adapter toml.Adapter) *Tq {
 	}
 }
 
+// Validate checks if the query string is syntactically correct.
+func (t *Tq) Validate(query string) error {
+	reader := strings.NewReader(query)
+	scanner, err := scanner.New(reader)
+	if err != nil {
+		return err
+	}
+	lexer, err := lexer.New(scanner)
+	if err != nil {
+		return err
+	}
+	parser, err := parser.New(lexer)
+	if err != nil {
+		return err
+	}
+	_, err = parser.Parse()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // Run executes the query string against the input data and writes the output
 // data to the output writer.
 func (t *Tq) Run(input io.Reader, output io.Writer, query string) error {
