@@ -22,11 +22,11 @@ import (
 // query passed to the Run method string is interpreted and executed against
 // the input data to produce the output data.
 type Tq struct {
-	adapter toml.Adapter
+	adapter *toml.Adapter
 }
 
 // New returns a new Tq struct with the provided TOML adapter.
-func New(adapter toml.Adapter) *Tq {
+func New(adapter *toml.Adapter) *Tq {
 	return &Tq{
 		adapter: adapter,
 	}
