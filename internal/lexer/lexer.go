@@ -60,6 +60,8 @@ func (l *Lexer) Scan() bool {
 		return l.scanString()
 	case isDigit(r):
 		return l.scanInteger()
+	case isChar(r):
+		return l.scanBareString()
 	case isWhitespace(r):
 		return l.scanWhitespace()
 	default:
@@ -132,6 +134,30 @@ func (l *Lexer) scanKeyChar() bool {
 	return true
 }
 
+func (l *Lexer) scanBareString() bool {
+	t := l.buffer[l.offset]
+	start := l.offset
+	l.advance()
+	for {
+		if l.offset > len(l.buffer)-1 {
+			break
+		}
+		t = l.buffer[l.offset]
+		if isNewline(t.Rune) {
+			l.setToken(Undefined, start, l.offset+1)
+			l.pushErr(ErrDisallowedChar, start)
+			return false
+		}
+		if !isChar(t.Rune) {
+			break
+		}
+		l.advance()
+	}
+	l.setToken(String, start, l.offset)
+	return true
+
+}
+
 func (l *Lexer) scanString() bool {
 	t := l.buffer[l.offset]
 	tq := t.Rune
@@ -139,6 +165,10 @@ func (l *Lexer) scanString() bool {
 	l.advance()
 	for {
 		if l.offset > len(l.buffer)-1 {
+			// NOTE: This error is reported because the string goes
+			// past the buffer without encountering the matching
+			// quote character that should terminate the quoted
+			// string.
 			l.setToken(Undefined, start, l.offset+1)
 			l.pushErr(ErrUnterminatedString, start)
 			return false

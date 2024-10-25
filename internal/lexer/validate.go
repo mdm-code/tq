@@ -27,3 +27,8 @@ func isKeyChar(r rune) bool {
 func isQuote(r rune) bool {
 	return r == '"' || r == '\''
 }
+
+// isChar checks if the rune r is an accepted TOML key character.
+func isChar(r rune) bool {
+	return unicode.IsLetter(r) || unicode.IsDigit(r)
+}
