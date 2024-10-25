@@ -66,6 +66,10 @@ func (p *Parser) filter() (ast.Filter, error) {
 		var s ast.Selector
 		s, err = p.selector()
 		expr.Kind = &s
+	case p.match(lexer.String):
+		var s ast.String
+		s, err = p.string()
+		expr.Kind = &s
 	default:
 		v, _ := p.peek()
 		err = &Error{v.Lexeme(), v.Buffer, v.Start, ErrQueryElement}
