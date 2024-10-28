@@ -28,7 +28,10 @@ func isQuote(r rune) bool {
 	return r == '"' || r == '\''
 }
 
-// isChar checks if the rune r is an accepted TOML key character.
-func isChar(r rune) bool {
-	return unicode.IsLetter(r) || unicode.IsDigit(r)
+// isBareChar checks if the rune r is an accepted TOML bare key character.
+func isBareChar(r rune) bool {
+	if (r < 'a' || r > 'z') && (r < 'A' || r > 'Z') && (r < '0' || r > '9') && r != '-' && r != '_' {
+		return false
+	}
+	return true
 }

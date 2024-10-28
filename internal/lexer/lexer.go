@@ -60,7 +60,7 @@ func (l *Lexer) Scan() bool {
 		return l.scanString()
 	case isDigit(r):
 		return l.scanInteger()
-	case isChar(r):
+	case isBareChar(r):
 		return l.scanBareString()
 	case isWhitespace(r):
 		return l.scanWhitespace()
@@ -148,7 +148,7 @@ func (l *Lexer) scanBareString() bool {
 			l.pushErr(ErrDisallowedChar, start)
 			return false
 		}
-		if !isChar(t.Rune) {
+		if !isBareChar(t.Rune) {
 			break
 		}
 		l.advance()
