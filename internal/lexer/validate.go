@@ -2,14 +2,9 @@ package lexer
 
 import "unicode"
 
-// isNewline verifies if the rune r is a newline character.
-func isNewline(r rune) bool {
-	return r == '\n' || r == '\r'
-}
-
 // isWhitespace verifies if the rune r is a whitespace character.
 func isWhitespace(r rune) bool {
-	return r == ' ' || r == '\t'
+	return unicode.IsSpace(r)
 }
 
 // isDigit verifies if the rune r is a digit character.

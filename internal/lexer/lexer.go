@@ -143,11 +143,6 @@ func (l *Lexer) scanBareString() bool {
 			break
 		}
 		t = l.buffer[l.offset]
-		if isNewline(t.Rune) {
-			l.setToken(Undefined, start, l.offset+1)
-			l.pushErr(ErrDisallowedChar, start)
-			return false
-		}
 		if !isBareChar(t.Rune) {
 			break
 		}
@@ -173,12 +168,13 @@ func (l *Lexer) scanString() bool {
 			l.pushErr(ErrUnterminatedString, start)
 			return false
 		}
+		// TODO: Add support for escape sequences in quoted strings.
+		// This could mean looking for \ rune and scanning one character
+		// ahead looking for the implemented type like n, r or b.
+		// For unicode, this could mean \uXXXX or \UXXXXXXXX.
+		// For regular escape sequences, a map can be used. For
+		// unicode, it should be something else.
 		t = l.buffer[l.offset]
-		if isNewline(t.Rune) {
-			l.setToken(Undefined, start, l.offset+1)
-			l.pushErr(ErrDisallowedChar, start)
-			return false
-		}
 		if t.Rune == tq {
 			l.advance()
 			break

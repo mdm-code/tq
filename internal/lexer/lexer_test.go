@@ -94,7 +94,7 @@ func TestLexerScanError(t *testing.T) {
 		},
 		{
 			name:  "dissallowed-char-in-string",
-			query: "['parent\r']",
+			query: "['parent'].$",
 			want:  ErrDisallowedChar,
 		},
 	}
