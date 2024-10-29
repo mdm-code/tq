@@ -45,9 +45,9 @@ type TokenType uint8
 
 // Token represents a single lexeme read from the Scanner token buffer.
 type Token struct {
-	Type       TokenType
-	Buffer     *[]scanner.Token
-	Start, End int
+	Type                   TokenType
+	Buffer                 *[]scanner.Token
+	Start, End, LineOffset int
 }
 
 // Lexeme returns the string representation of the Token.

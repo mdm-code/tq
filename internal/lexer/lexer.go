@@ -123,10 +123,11 @@ func (l *Lexer) resetLineOffsetOnLineBreak(r rune) {
 
 func (l *Lexer) setToken(tp TokenType, start, end int) {
 	l.curr = Token{
-		Buffer: &l.buffer,
-		Type:   tp,
-		Start:  start,
-		End:    end,
+		Buffer:     &l.buffer,
+		Type:       tp,
+		Start:      start,
+		End:        end,
+		LineOffset: l.lineOffset,
 	}
 }
 

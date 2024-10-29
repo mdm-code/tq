@@ -72,7 +72,7 @@ func (p *Parser) filter() (ast.Filter, error) {
 		expr.Kind = &s
 	default:
 		v, _ := p.peek()
-		err = &Error{v.Lexeme(), v.Buffer, v.Start, ErrQueryElement}
+		err = &Error{v.Lexeme(), v.Buffer, v.Start, v.LineOffset, ErrQueryElement}
 	}
 	return expr, err
 }
@@ -134,10 +134,11 @@ func (p *Parser) consume(t lexer.TokenType, e error) (lexer.Token, error) {
 	}
 	v, err := p.peek()
 	if err != nil {
-		err := &Error{"EOL", v.Buffer, len(*v.Buffer), e}
+		// NOTE: EOL is not something that can be pointed at hence +1.
+		err := &Error{"EOL", v.Buffer, len(*v.Buffer), v.LineOffset + 1, e}
 		return lexer.Token{}, err
 	}
-	err = &Error{v.Lexeme(), v.Buffer, v.Start, e}
+	err = &Error{v.Lexeme(), v.Buffer, v.Start, v.LineOffset, e}
 	return lexer.Token{}, err
 }
 

@@ -23,10 +23,11 @@ var (
 // Error wraps a concrete parser error to represent its context. It reports the
 // token where the error has occurred.
 type Error struct {
-	lexeme string
-	buffer *[]scanner.Token
-	offset int
-	err    error
+	lexeme     string
+	buffer     *[]scanner.Token
+	offset     int
+	lineOffset int
+	err        error
 }
 
 // Is allows to check if Error.err matches the target error.
@@ -78,8 +79,8 @@ func (e *Error) getErrorLine() string {
 // getIndent constructs the pointer indentation. Negative offsets result in an
 // empty string.
 func (e *Error) getIndent(indentChar string) string {
-	if e.offset > 0 {
-		return strings.Repeat(indentChar, e.offset)
+	if e.lineOffset > 0 {
+		return strings.Repeat(indentChar, e.lineOffset)
 	}
 	return ""
 }
