@@ -8,12 +8,21 @@ import (
 	"github.com/mdm-code/scanner"
 )
 
+const (
+	// lexerOffsetStart declares the initial Lexer offset.
+	lexerOffsetStart = 0
+
+	// lexerLineOffsetStart declares the inital Lexer line offset.
+	lexerLineOffsetStart = 0
+)
+
 // Lexer is the struct that tokenizes character input into tq lexemes.
 type Lexer struct {
-	buffer []scanner.Token
-	Errors []error // errors encountered in the course of lexer execution
-	offset int
-	curr   Token
+	buffer     []scanner.Token
+	Errors     []error // errors encountered in the course of lexer execution
+	offset     int
+	lineOffset int
+	curr       Token
 }
 
 // New returns a new Lexer with its buffer populated with scanner tokens read
@@ -28,8 +37,9 @@ func New(s *scanner.Scanner) (*Lexer, error) {
 		return nil, err
 	}
 	l := Lexer{
-		offset: 0,
-		buffer: buf,
+		offset:     lexerOffsetStart,
+		lineOffset: lexerLineOffsetStart,
+		buffer:     buf,
 		curr: Token{
 			Buffer: nil,
 			Type:   Undefined,
@@ -102,6 +112,13 @@ func (l *Lexer) Errored() bool {
 
 func (l *Lexer) advance() {
 	l.offset++
+	l.lineOffset++
+}
+
+func (l *Lexer) resetLineOffsetOnLineBreak(r rune) {
+	if isLineBreak(r) {
+		l.lineOffset = lexerLineOffsetStart
+	}
 }
 
 func (l *Lexer) setToken(tp TokenType, start, end int) {
@@ -116,8 +133,10 @@ func (l *Lexer) setToken(tp TokenType, start, end int) {
 func (l *Lexer) pushErr(err error, offset int) {
 	e := Error{
 		buffer: &l.buffer,
-		offset: offset,
-		err:    err,
+		// NOTE: potentially l.offset can be used and drop pushErr.
+		offset:     offset,
+		lineOffset: l.lineOffset,
+		err:        err,
 	}
 	l.Errors = append(l.Errors, &e)
 }
@@ -168,6 +187,7 @@ func (l *Lexer) scanString() bool {
 			l.pushErr(ErrUnterminatedString, start)
 			return false
 		}
+		l.resetLineOffsetOnLineBreak(t.Rune)
 		// TODO: Add support for escape sequences in quoted strings.
 		// This could mean looking for \ rune and scanning one character
 		// ahead looking for the implemented type like n, r or b.
@@ -211,6 +231,7 @@ func (l *Lexer) scanWhitespace() bool {
 		if l.offset > len(l.buffer)-1 {
 			break
 		}
+		l.resetLineOffsetOnLineBreak(t.Rune)
 		t = l.buffer[l.offset]
 		if !isWhitespace(t.Rune) {
 			break

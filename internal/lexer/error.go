@@ -25,9 +25,10 @@ var (
 // error message. It stores references to the Lexer buffer context and the
 // Lexer token start offset.
 type Error struct {
-	buffer *[]scanner.Token // Lexer buffer context pointer
-	offset int              // Lexer token start offset
-	err    error            // wrapped Lexer error
+	buffer     *[]scanner.Token // Lexer buffer context pointer
+	offset     int              // Lexer token start offset
+	lineOffset int              // Lexer line offset
+	err        error            // wrapped Lexer error
 }
 
 // Is allows to check if Error.err matches the target error.
@@ -80,7 +81,7 @@ func (e *Error) wrapErrorLine(line, pointer, indentChar string) string {
 // empty string.
 func (e *Error) getIndent(indentChar string) string {
 	if e.offset > 0 {
-		return strings.Repeat(indentChar, e.offset)
+		return strings.Repeat(indentChar, e.lineOffset)
 	}
 	return ""
 }

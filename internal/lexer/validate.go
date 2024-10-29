@@ -2,6 +2,8 @@ package lexer
 
 import "unicode"
 
+const lineBreak = '\n'
+
 // isWhitespace verifies if the rune r is a whitespace character.
 func isWhitespace(r rune) bool {
 	return unicode.IsSpace(r)
@@ -29,4 +31,9 @@ func isBareChar(r rune) bool {
 		return false
 	}
 	return true
+}
+
+// isLineBreak checks if the rune r is a newline character.
+func isLineBreak(r rune) bool {
+	return r == lineBreak
 }
