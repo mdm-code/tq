@@ -80,7 +80,7 @@ func (e *Error) wrapErrorLine(line, pointer, indentChar string) string {
 // getIndent constructs the pointer indentation. Negative offsets result in an
 // empty string.
 func (e *Error) getIndent(indentChar string) string {
-	if e.offset > 0 {
+	if e.lineOffset > 0 {
 		return strings.Repeat(indentChar, e.lineOffset)
 	}
 	return ""
