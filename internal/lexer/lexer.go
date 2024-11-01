@@ -133,11 +133,7 @@ func (l *Lexer) setToken(tp TokenType, start, end int) {
 
 func (l *Lexer) pushErr(err error) {
 	e := Error{
-		buffer: &l.buffer,
-		// TODO: If the error line is to be placed in the middle,
-		// then the offset should be the end of the token if possible.
-		// Could I use the start and end of the token when I set the
-		// token?
+		buffer:     &l.buffer,
 		offset:     l.offset,
 		lineOffset: l.lineOffset,
 		err:        err,

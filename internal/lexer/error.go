@@ -66,7 +66,6 @@ func (e *Error) wrapErrorLine(line, pointer, indentChar string) string {
 	var b strings.Builder
 	b.Grow(len(*e.buffer)*2 + 1)
 	curr := 0
-	b.WriteString("\n")
 	for _, t := range (*e.buffer)[:e.offset] {
 		b.WriteRune(t.Rune)
 		curr += 1
@@ -78,12 +77,14 @@ func (e *Error) wrapErrorLine(line, pointer, indentChar string) string {
 			break
 		}
 	}
+	b.WriteString("\n")
 	indent := e.getIndent(indentChar)
 	b.WriteString(indent)
 	b.WriteString(pointer)
 	b.WriteString("\n")
 	b.WriteString(line)
-	for _, t := range (*e.buffer)[e.offset+1:] {
+	b.WriteString("\n")
+	for _, t := range (*e.buffer)[curr:] {
 		b.WriteRune(t.Rune)
 	}
 	return b.String()
