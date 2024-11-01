@@ -65,15 +65,27 @@ func (e *Error) getErrorLine() string {
 func (e *Error) wrapErrorLine(line, pointer, indentChar string) string {
 	var b strings.Builder
 	b.Grow(len(*e.buffer)*2 + 1)
-	for _, t := range *e.buffer {
-		b.WriteRune(t.Rune)
-	}
+	curr := 0
 	b.WriteString("\n")
+	for _, t := range (*e.buffer)[:e.offset] {
+		b.WriteRune(t.Rune)
+		curr += 1
+	}
+	for _, t := range (*e.buffer)[curr:] {
+		b.WriteRune(t.Rune)
+		curr += 1
+		if t.Rune == '\n' {
+			break
+		}
+	}
 	indent := e.getIndent(indentChar)
 	b.WriteString(indent)
 	b.WriteString(pointer)
 	b.WriteString("\n")
 	b.WriteString(line)
+	for _, t := range (*e.buffer)[e.offset+1:] {
+		b.WriteRune(t.Rune)
+	}
 	return b.String()
 }
 
