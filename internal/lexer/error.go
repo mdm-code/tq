@@ -74,7 +74,7 @@ func (e *Error) wrapErrorLine(line, pointer, indentChar string) string {
 	for _, t := range (*e.buffer)[curr:] {
 		b.WriteRune(t.Rune)
 		curr += 1
-		if t.Rune == '\n' {
+		if isLineBreak(t.Rune) {
 			break
 		}
 	}
