@@ -232,5 +232,4 @@ func TestInterpretError(t *testing.T) {
 	if err == nil {
 		t.Errorf("Interpret should fail with data: %v", data)
 	}
-
 }
