@@ -36,7 +36,7 @@ func TestLexeme(t *testing.T) {
 				Start: 2,
 				End:   9,
 			},
-			want: "\"tools\"",
+			want: "tools",
 		},
 		{
 			name: "nil-buffer",
@@ -123,7 +123,7 @@ func TestLexeme(t *testing.T) {
 				Start: 0,
 				End:   8,
 			},
-			want: "'\tname'",
+			want: "\tname",
 		},
 	}
 	for _, c := range cases {

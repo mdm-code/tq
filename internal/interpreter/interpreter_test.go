@@ -61,7 +61,7 @@ func TestInterpret(t *testing.T) {
 						&ast.Filter{
 							Kind: &ast.Selector{
 								Value: &ast.String{
-									Value: "'students'",
+									Value: "students",
 								},
 							},
 						},
@@ -99,7 +99,7 @@ func TestInterpret(t *testing.T) {
 						&ast.Filter{
 							Kind: &ast.Selector{
 								Value: &ast.String{
-									Value: "'first'",
+									Value: "first",
 								},
 							},
 						},

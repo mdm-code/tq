@@ -85,7 +85,7 @@ func (t Token) reprString() string {
 	if end > len(*t.Buffer) {
 		end = len(*t.Buffer)
 	}
-	chars := make([]string, size)
+	chars := make([]string, 0, size)
 	for head != end {
 		token := (*t.Buffer)[head]
 		// NOTE: For quoted strings, check if the current token initiates an
@@ -104,10 +104,9 @@ func (t Token) reprString() string {
 		chars = append(chars, string(token.Rune))
 		head++
 	}
-	// NOTE: If a given string startswith ' or ", then trim the prefix and
-	// trim the suffix: chars = chars[1:len(chars)-1].
-	// TODO: Then remove Trim on the String from AST and use the regular Value.
-	// TODO: Lexer should be able to track whether a given quote is escaped.
+	if chars[0] == "'" || chars[0] == "\"" {
+		chars = chars[1 : len(chars)-1]
+	}
 	return strings.Join(chars, "")
 }
 

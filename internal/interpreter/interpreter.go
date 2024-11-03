@@ -164,7 +164,7 @@ func (i *Interpreter) VisitString(e ast.Expr) {
 			for _, d := range data {
 				switch v := d.(type) {
 				case map[string]any:
-					key := str.Trim()
+					key := str.Value
 					res, ok := v[key]
 					if ok {
 						result = append(result, res)
