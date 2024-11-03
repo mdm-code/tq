@@ -36,7 +36,12 @@ func TestInterpret(t *testing.T) {
 				},
 			},
 			filteredData: []interface{}{2},
-			query:        ".['students'][0:99][1][][0]['first'][]",
+			query: `
+	.['students']
+		[0:99] [1] [] [0]
+			['first']
+				[]
+`,
 			want: []filter{
 				{name: "identity"},
 				{name: "string"},

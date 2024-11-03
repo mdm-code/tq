@@ -91,6 +91,21 @@ func TestLexeme(t *testing.T) {
 			},
 			want: "8024",
 		},
+		{
+			name: "bare-string",
+			token: Token{
+				Buffer: &[]scanner.Token{
+					{Pos: scanner.Pos{Rune: 'n'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'a'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'm'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'e'}, Buffer: nil},
+				},
+				Type:  String,
+				Start: 0,
+				End:   4,
+			},
+			want: "name",
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
