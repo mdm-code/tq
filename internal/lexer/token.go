@@ -64,32 +64,62 @@ type Token struct {
 }
 
 // Lexeme returns the string representation of the Token.
-//
-// Escape sequence characters are converted to corresponding Unicode
-// characters.
 func (t Token) Lexeme() string {
+	var result string
 	if t.Buffer == nil || len(*t.Buffer) < 1 || t.Start > t.End {
-		return ""
+		return result
 	}
+	switch t.Type {
+	case String:
+		result = t.reprString()
+	default:
+		result = t.reprDefault()
+	}
+	return result
+}
+
+func (t Token) reprString() string {
 	end := t.End
-	start := t.Start
+	head := t.Start
+	size := t.End - t.Start
 	if end > len(*t.Buffer) {
 		end = len(*t.Buffer)
 	}
-	chars := make([]string, end-start)
-	for start != end {
-		token := (*t.Buffer)[start]
-		if token.Rune == '\\' && start+1 != end {
-			v, ok := escapeSequenceMap[(*t.Buffer)[start+1].Rune]
+	chars := make([]string, size)
+	for head != end {
+		token := (*t.Buffer)[head]
+		// NOTE: For quoted strings, check if the current token initiates an
+		// escape sequence and there is at least a single token left to look up
+		// followed by the terminating quote character. Bare strings may not
+		// contain escape sequence characters.
+		if token.Rune == '\\' && head+2 != end {
+			v, ok := escapeSequenceMap[(*t.Buffer)[head+1].Rune]
 			if ok {
-				token = (*t.Buffer)[start]
-				start += 2
+				token = (*t.Buffer)[head]
+				head += 2
 				chars = append(chars, v)
 				continue
 			}
 		}
 		chars = append(chars, string(token.Rune))
-		start++
+		head++
+	}
+	// NOTE: If a given string startswith ' or ", then trim the prefix and
+	// trim the suffix: chars = chars[1:len(chars)-1].
+	// TODO: Then remove Trim on the String from AST and use the regular Value.
+	// TODO: Lexer should be able to track whether a given quote is escaped.
+	return strings.Join(chars, "")
+}
+
+func (t Token) reprDefault() string {
+	end := t.End
+	size := t.End - t.Start
+	if end > len(*t.Buffer) {
+		end = len(*t.Buffer)
+	}
+	chars := make([]string, size)
+	for _, t := range (*t.Buffer)[t.Start:end] {
+		chars = append(chars, string(t.Rune))
 	}
 	return strings.Join(chars, "")
 }
