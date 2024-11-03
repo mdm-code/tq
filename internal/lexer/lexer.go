@@ -188,12 +188,6 @@ func (l *Lexer) scanString() bool {
 			return false
 		}
 		l.resetLineOffsetOnLineBreak(t.Rune)
-		// TODO: Add support for escape sequences in quoted strings.
-		// This could mean looking for \ rune and scanning one character
-		// ahead looking for the implemented type like n, r or b.
-		// For unicode, this could mean \uXXXX or \UXXXXXXXX.
-		// For regular escape sequences, a map can be used. For
-		// unicode, it should be something else.
 		t = l.buffer[l.offset]
 		if t.Rune == tq {
 			l.advance()

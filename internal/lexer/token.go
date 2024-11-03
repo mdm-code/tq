@@ -56,12 +56,28 @@ func (t Token) Lexeme() string {
 		return ""
 	}
 	end := t.End
+	start := t.Start
 	if end > len(*t.Buffer) {
 		end = len(*t.Buffer)
 	}
-	chars := make([]string, end-t.Start)
-	for _, t := range (*t.Buffer)[t.Start:end] {
-		chars = append(chars, string(t.Rune))
+	chars := make([]string, end-start)
+	m := map[rune]string{
+		't': "\t",
+		'n': "\n",
+	}
+	for start != end {
+		token := (*t.Buffer)[start]
+		if token.Rune == '\\' && start+1 != end {
+			v, ok := m[(*t.Buffer)[start+1].Rune]
+			if ok {
+				token = (*t.Buffer)[start]
+				start += 2
+				chars = append(chars, v)
+				continue
+			}
+		}
+		chars = append(chars, string(token.Rune))
+		start++
 	}
 	return strings.Join(chars, "")
 }

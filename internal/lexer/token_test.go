@@ -106,6 +106,25 @@ func TestLexeme(t *testing.T) {
 			},
 			want: "name",
 		},
+		{
+			name: "escape-seq-tab",
+			token: Token{
+				Buffer: &[]scanner.Token{
+					{Pos: scanner.Pos{Rune: '\''}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '\\'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 't'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'n'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'a'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'm'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'e'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '\''}, Buffer: nil},
+				},
+				Type:  String,
+				Start: 0,
+				End:   8,
+			},
+			want: "'\tname'",
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
