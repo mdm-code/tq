@@ -15,7 +15,7 @@ func TestErrorNilBuffer(t *testing.T) {
 		buffer: nil,
 		err:    ErrQueryElement,
 	}
-	want := fmt.Sprintf("Parser error: %s but got ''", err.err)
+	want := fmt.Sprintf("Parser error: %s; got ''", err.err)
 	have := err.Error()
 	if have != want {
 		t.Errorf("have: %s; want: %s", have, want)
@@ -28,7 +28,7 @@ func TestErrorEmptyBuffer(t *testing.T) {
 		buffer: &[]scanner.Token{},
 		err:    ErrSelectorUnterminated,
 	}
-	want := fmt.Sprintf("Parser error: %s but got ''", err.err)
+	want := fmt.Sprintf("Parser error: %s; got ''", err.err)
 	have := err.Error()
 	if have != want {
 		t.Errorf("have: %s; want: %s", have, want)
@@ -52,7 +52,7 @@ func TestErrorError(t *testing.T) {
 		},
 		{
 			name: "]",
-			want: ".['foo']]\n        ^\nParser error: expected '.' or '[' to parse query element but got ']'",
+			want: ".['foo']]\n        ^\nParser error: failed to parse query filter element; got ']'\n",
 			err: &Error{
 				lexeme: "]",
 				buffer: &[]scanner.Token{
@@ -66,13 +66,14 @@ func TestErrorError(t *testing.T) {
 					{Pos: scanner.Pos{Rune: ']', Start: 7, End: 8}, Buffer: nil},
 					{Pos: scanner.Pos{Rune: ']', Start: 8, End: 9}, Buffer: nil},
 				},
-				offset: 8,
-				err:    ErrQueryElement,
+				offset:     8,
+				lineOffset: 8,
+				err:        ErrQueryElement,
 			},
 		},
 		{
 			name: "persons",
-			want: "Parser error: expected ']' to terminate selector but got 'persons'",
+			want: "Parser error: expected ']' to terminate selector; got 'persons'",
 			err: &Error{
 				lexeme: "persons",
 				err:    ErrSelectorUnterminated,
@@ -100,7 +101,7 @@ func TestErrorIs(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			token := lexer.Token{}
-			err := &Error{"", token.Buffer, token.Start, c.want}
+			err := &Error{"", token.Buffer, token.Start, token.LineOffset, c.want}
 			if !errors.Is(err, c.want) {
 				t.Error("expected the underlying error to match parser error")
 			}

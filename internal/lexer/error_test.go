@@ -44,7 +44,7 @@ func TestErrorError(t *testing.T) {
 	}{
 		{
 			"nil error",
-			".['foo]\n  ^\nLexer error: nil",
+			".['foo]\n  ^\nLexer error: nil\n",
 			&Error{
 				buffer: &[]scanner.Token{
 					{Pos: scanner.Pos{Rune: '.', Start: 0, End: 1}, Buffer: nil},
@@ -55,54 +55,47 @@ func TestErrorError(t *testing.T) {
 					{Pos: scanner.Pos{Rune: 'o', Start: 5, End: 6}, Buffer: nil},
 					{Pos: scanner.Pos{Rune: ']', Start: 6, End: 7}, Buffer: nil},
 				},
-				offset: 2,
-				err:    nil,
-			},
-		},
-		{
-			"negative offset",
-			".\n^\nLexer error: nil",
-			&Error{
-				buffer: &[]scanner.Token{
-					{Pos: scanner.Pos{Rune: '.', Start: 0, End: 1}, Buffer: nil},
-				},
-				offset: -1,
-				err:    nil,
+				offset:     2,
+				lineOffset: 2,
+				err:        nil,
 			},
 		},
 		{
 			"empty buffer",
 			"Lexer error: nil",
 			&Error{
-				buffer: &[]scanner.Token{},
-				offset: 0,
-				err:    nil,
+				buffer:     &[]scanner.Token{},
+				offset:     0,
+				lineOffset: 0,
+				err:        nil,
 			},
 		},
 		{
 			"nil buffer",
 			"Lexer error: nil",
 			&Error{
-				buffer: nil,
-				offset: 0,
-				err:    nil,
+				buffer:     nil,
+				offset:     0,
+				lineOffset: 0,
+				err:        nil,
 			},
 		},
 		{
 			"disallowed character error",
-			".?\n ^\nLexer error: disallowed character",
+			".?\n ^\nLexer error: disallowed character\n",
 			&Error{
 				buffer: &[]scanner.Token{
 					{Pos: scanner.Pos{Rune: '.', Start: 0, End: 1}, Buffer: nil},
 					{Pos: scanner.Pos{Rune: '?', Start: 1, End: 2}, Buffer: nil},
 				},
-				offset: 1,
-				err:    ErrDisallowedChar,
+				offset:     1,
+				lineOffset: 1,
+				err:        ErrDisallowedChar,
 			},
 		},
 		{
 			"unterminated string error",
-			".['g\n  ^\nLexer error: unterminated string literal",
+			".['g\n  ^\nLexer error: unterminated string literal\n",
 			&Error{
 				buffer: &[]scanner.Token{
 					{Pos: scanner.Pos{Rune: '.', Start: 0, End: 1}, Buffer: nil},
@@ -110,8 +103,9 @@ func TestErrorError(t *testing.T) {
 					{Pos: scanner.Pos{Rune: '\'', Start: 2, End: 3}, Buffer: nil},
 					{Pos: scanner.Pos{Rune: 'g', Start: 3, End: 4}, Buffer: nil},
 				},
-				offset: 2,
-				err:    ErrUnterminatedString,
+				offset:     2,
+				lineOffset: 2,
+				err:        ErrUnterminatedString,
 			},
 		},
 	}

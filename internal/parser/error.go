@@ -10,7 +10,7 @@ import (
 
 var (
 	// ErrQueryElement indicates an unprocessable query filter element.
-	ErrQueryElement = errors.New("failed to parse query filter")
+	ErrQueryElement = errors.New("failed to parse query filter element")
 
 	// ErrSelectorUnterminated indicates an unterminated selector element.
 	ErrSelectorUnterminated = errors.New("expected ']' to terminate selector")

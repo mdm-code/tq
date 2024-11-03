@@ -51,5 +51,5 @@ func ExampleTq_Validate() {
 	// Output:
 	// ['servers'][['ip']
 	//             ^
-	// Parser error: expected ']' to terminate selector but got '['
+	// Parser error: expected ']' to terminate selector; got '['
 }
