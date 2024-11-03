@@ -173,9 +173,11 @@ func (l *Lexer) scanBareString() bool {
 }
 
 func (l *Lexer) scanString() bool {
+	var prev scanner.Token
 	t := l.buffer[l.offset]
 	tq := t.Rune
 	start := l.offset
+	prev = t
 	l.advance()
 	for {
 		if l.offset > len(l.buffer)-1 {
@@ -189,10 +191,12 @@ func (l *Lexer) scanString() bool {
 		}
 		l.resetLineOffsetOnLineBreak(t.Rune)
 		t = l.buffer[l.offset]
-		if t.Rune == tq {
+		if t.Rune == tq && prev.Rune != '\\' {
+			prev = t
 			l.advance()
 			break
 		}
+		prev = t
 		l.advance()
 	}
 	l.setToken(String, start, l.offset)
