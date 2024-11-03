@@ -40,6 +40,19 @@ var keyCharMap = map[rune]TokenType{
 	']': ArrayClose,
 }
 
+// escapeSequenceMap maps popular escape sequence characters onto its Go string
+// Unicode representation.
+var escapeSequenceMap = map[rune]string{
+	'b':  "\b",
+	't':  "\t",
+	'n':  "\n",
+	'f':  "\f",
+	'r':  "\r",
+	'"':  "\"",
+	'\'': "'",
+	'\\': "\\",
+}
+
 // TokenType indicates the type of the lexer Token.
 type TokenType uint8
 
@@ -51,6 +64,9 @@ type Token struct {
 }
 
 // Lexeme returns the string representation of the Token.
+//
+// Escape sequence characters are converted to corresponding Unicode
+// characters.
 func (t Token) Lexeme() string {
 	if t.Buffer == nil || len(*t.Buffer) < 1 || t.Start > t.End {
 		return ""
@@ -61,14 +77,10 @@ func (t Token) Lexeme() string {
 		end = len(*t.Buffer)
 	}
 	chars := make([]string, end-start)
-	m := map[rune]string{
-		't': "\t",
-		'n': "\n",
-	}
 	for start != end {
 		token := (*t.Buffer)[start]
 		if token.Rune == '\\' && start+1 != end {
-			v, ok := m[(*t.Buffer)[start+1].Rune]
+			v, ok := escapeSequenceMap[(*t.Buffer)[start+1].Rune]
 			if ok {
 				token = (*t.Buffer)[start]
 				start += 2
