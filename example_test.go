@@ -11,7 +11,7 @@ import (
 
 // ExampleTq_Run demonstrates how to use the Tq struct to run a query against
 // TOML data. The example uses a TOML configuration file with two servers and
-// queries for IP addresses on both server. The output is written to the
+// queries for IP addresses on the first server. The output is written to the
 // standard output.
 func ExampleTq_Run() {
 	input := strings.NewReader(`
@@ -27,8 +27,9 @@ role = "backend"
 `)
 	var output bytes.Buffer
 	query := `
-    .servers[]
-        .ip
+    .servers
+        .alpha
+            .ip
 `
 	config := toml.GoTOMLConf{}
 	goToml := toml.NewGoTOML(config)
@@ -38,7 +39,6 @@ role = "backend"
 	fmt.Println(output.String())
 	// Output:
 	// '10.0.0.1'
-	// '10.0.0.2'
 }
 
 // ExampleTq_Validate shows how to use the Tq struct to validate whether a
