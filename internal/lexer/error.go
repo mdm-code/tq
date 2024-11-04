@@ -25,9 +25,10 @@ var (
 // error message. It stores references to the Lexer buffer context and the
 // Lexer token start offset.
 type Error struct {
-	buffer *[]scanner.Token // Lexer buffer context pointer
-	offset int              // Lexer token start offset
-	err    error            // wrapped Lexer error
+	buffer     *[]scanner.Token // Lexer buffer context pointer
+	offset     int              // Lexer token start offset
+	lineOffset int              // Lexer line offset
+	err        error            // wrapped Lexer error
 }
 
 // Is allows to check if Error.err matches the target error.
@@ -64,8 +65,17 @@ func (e *Error) getErrorLine() string {
 func (e *Error) wrapErrorLine(line, pointer, indentChar string) string {
 	var b strings.Builder
 	b.Grow(len(*e.buffer)*2 + 1)
-	for _, t := range *e.buffer {
+	curr := 0
+	for _, t := range (*e.buffer)[:e.offset] {
 		b.WriteRune(t.Rune)
+		curr += 1
+	}
+	for _, t := range (*e.buffer)[curr:] {
+		b.WriteRune(t.Rune)
+		curr += 1
+		if isLineBreak(t.Rune) {
+			break
+		}
 	}
 	b.WriteString("\n")
 	indent := e.getIndent(indentChar)
@@ -73,14 +83,18 @@ func (e *Error) wrapErrorLine(line, pointer, indentChar string) string {
 	b.WriteString(pointer)
 	b.WriteString("\n")
 	b.WriteString(line)
+	b.WriteString("\n")
+	for _, t := range (*e.buffer)[curr:] {
+		b.WriteRune(t.Rune)
+	}
 	return b.String()
 }
 
 // getIndent constructs the pointer indentation. Negative offsets result in an
 // empty string.
 func (e *Error) getIndent(indentChar string) string {
-	if e.offset > 0 {
-		return strings.Repeat(indentChar, e.offset)
+	if e.lineOffset > 0 {
+		return strings.Repeat(indentChar, e.lineOffset)
 	}
 	return ""
 }

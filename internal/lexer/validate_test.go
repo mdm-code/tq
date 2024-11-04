@@ -4,35 +4,6 @@ import (
 	"testing"
 )
 
-// Check if newline characters are correctly identified.
-func TestIsNewline(t *testing.T) {
-	cases := []struct {
-		input rune
-		want  bool
-		name  string
-	}{
-		{'\n', true, "\\n"},
-		{'\r', true, "\\r"},
-		{'a', false, "a"},
-		{'0', false, "0"},
-		{'\t', false, "\\t"},
-		{' ', false, " "},
-		{'"', false, "\""},
-		{'\'', false, "'"},
-		{'.', false, "."},
-		{':', false, ":"},
-		{'[', false, "["},
-		{']', false, "]"},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			if have := isNewline(c.input); have != c.want {
-				t.Errorf("want: %t; have: %t", c.want, have)
-			}
-		})
-	}
-}
-
 // Test if whitespace characters are correctly identified.
 func TestIsWhitespace(t *testing.T) {
 	cases := []struct {
@@ -42,8 +13,8 @@ func TestIsWhitespace(t *testing.T) {
 	}{
 		{'\t', true, "\\t"},
 		{' ', true, " "},
-		{'\r', false, "\\r"},
-		{'\n', false, "\\n"},
+		{'\r', true, "\\r"},
+		{'\n', true, "\\n"},
 		{'a', false, "a"},
 		{'0', false, "0"},
 		{'"', false, "\""},

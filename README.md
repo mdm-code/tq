@@ -47,8 +47,9 @@ the terminal.
 go install github.com/mdm-code/tq/cmd/tq@latest
 ```
 
-Here is how you can get the whole Go package downloaded to fiddle with, but it
-does not expose any public interfaces in code.
+Here is how you can get the whole Go package downloaded to fiddle with, but
+it exposes only the public interfaces for `tq` and the TOML adapter so that
+the latter can be swapped out.
 
 ```sh
 go get github.com/mdm-code/tq
@@ -61,27 +62,129 @@ Enter `tq -h` to get usage information and the list of options that can be used
 with the command. Here is table with the supported filter expressions and some
 examples to get you going on how to use `tq` in your workflow.
 
+Some effort has been made to make queries less clunky to type out on the
+command line and the syntax for queries more aligned with the TOML syntax and
+semantics. It's been decided to drop the requirement for square brackets for
+selectors and quotation marks for bare strings. Queries can now span across
+multiple lines so that they are still legible as their complexity increases.
+Longer queries run in a shell script might benefit for it. As for quoted
+strings, both inverted commas and quotes can be used. A note of caution though
+that these should be used such that they do not interfere with shell quoting.
+
 
 ### Supported filters
 
-| <a href="#supported-filters"><img width="1000" height="0"></a><p>Filter</p> | <a href="#supported-filters"><img width="1000" height="0"></a><p>Expression</p> |
-| :-------------------------------------------------------------------------: | :-----------------------------------------------------------------------------: |
-| <kbd><b>identity</b></kbd>                                                  | <kbd><b>.</b></kbd>                                                             |
-| <kbd><b>key</b></kbd>                                                       | <kbd><b>["string"]</b></kbd>                                                    |
-| <kbd><b>index</b></kbd>                                                     | <kbd><b>[0]</b></kbd>                                                           |
-| <kbd><b>iterator</b></kbd>                                                  | <kbd><b>[]</b></kbd>                                                            |
-| <kbd><b>span</b></kbd>                                                      | <kbd><b>[:]</b></kbd>                                                           |
+| <a href="#supported-filters"><img width="1000" height="0"></a><p>Filter</p> | <a href="#supported-filters"><img width="1000" height="0"></a><p>Expression</p>                     |
+| :-------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------: |
+| <kbd><b>identity</b></kbd>                                                  | <kbd><b>.</b></kbd>                                                                                 |
+| <kbd><b>key</b></kbd>                                                       | <kbd><b>["string"]</b></kbd> or <kbd><b>"quoted string"</b></kbd> or <kbd><b>bare-string</b></kbd>  |
+| <kbd><b>index</b></kbd>                                                     | <kbd><b>[0]</b></kbd> or <kbd><b>0</b></kbd>                                                        |
+| <kbd><b>iterator</b></kbd>                                                  | <kbd><b>[]</b></kbd>                                                                                |
+| <kbd><b>span</b></kbd>                                                      | <kbd><b>[:]</b></kbd>                                                                               |
+
+
+### Supported escape sequences for quoted strings
+
+Commonly found characters are mapped onto often used escaped sequences. These
+can be used in quoted strings mostly the same way one would use them in a TOML
+file though the specification for the TOML language advises against the use of
+funky keys unless there is a good reason to use them. Tq does not support
+Unicode escape sequences in quoted strings as of today, but there are plans to
+add it in the future.
+
+```txt
+\b  - backspace
+\t  - tab
+\n  - linefeed
+\f  - form feed
+\r  - carriage return
+\"  - double quote
+\'  - single quote
+\\  - backslash
+```
+
+
+### Multiline query with bare strings
+
+Here is a dummy configuration file in TOML found on the web for Gitlab
+connected to a Kubernetes. The file attempts to configure some Gitlab runners.
+The file is (1) queried with the key `runners` to access the table that is then
+(2) converted to an iterator with `[]`. Then (3) the query goes for
+`kubernetes`, `volumes`, and `host_path` in this order to (4) turn the last one
+to an iterator with `[]`, and then (5) query each element of the iterator for
+`"host path"`. Mind the quoted string with the space.
+
+
+```sh
+tq -q '
+    .runners[]
+        .kubernetes
+        .volumes
+        .host_path[]
+            ."host path"
+' << EOF
+[session_server]
+  session_timeout = 1800
+
+[[runners]]
+  name = ""
+  url = ""
+  token = ""
+  executor = "kubernetes"
+  cache_dir = "/tmp/gitlab/cache"
+  [runners.kubernetes]
+    host = ""
+    bearer_token_overwrite_allowed = false
+    image = ""
+    namespace = ""
+    namespace_overwrite_allowed = ""
+    privileged = false
+    memory_limit = "1Gi"
+    service_account_overwrite_allowed = ""
+    pod_annotations_overwrite_allowed = ""
+    [runners.kubernetes.node_selector]
+      gitlab = "true"
+    [runners.kubernetes.volumes]
+      [[runners.kubernetes.volumes.host_path]]
+        name = "gitlab-cache"
+        mount_path = "/tmp/gitlab/cache"
+        "host path" = "/home/core/data/gitlab-runner/data"
+
+[[runners]]
+  name = "runner-gitlab-runner-xxx-xxx"
+  url = "https://gitlab.com/"
+  token = "<my-token>"
+  executor = "kubernetes"
+  [runners.cache]
+    [runners.cache.s3]
+    [runners.cache.gcs]
+  [runners.kubernetes]
+    host = ""
+    bearer_token_overwrite_allowed = false
+    image = "ubuntu:16.04"
+    namespace = "gitlab-managed-apps"
+    namespace_overwrite_allowed = ""
+    privileged = true
+    service_account_overwrite_allowed = ""
+    pod_annotations_overwrite_allowed = ""
+    [runners.kubernetes.volumes]
+EOF
+
+Output:
+
+'/home/core/data/gitlab-runner/data'
+```
 
 
 ### Retrieve IPs from a table of server tables
 
 In the example below, the TOML input file is (1) queried with the key
-`["servers"]`, then (2) the retrieved table is converted to an iterator of
-objects with `[]`, and then (3) the IP address is recovered from each of the
-objects with the key `["ip"]`.
+`servers`, then (2) the retrieved table is converted to an iterator of objects
+with `[]`, and then (3) the IP address is recovered from each of the objects
+with the quoted key `"ip"`.
 
 ```sh
-tq -q '["servers"][]["ip"]' <<EOF
+tq -q '.servers[]."ip"' <<EOF
 [servers]
 
 [servers.prod]
@@ -102,8 +205,9 @@ Output:
 
 ### Retrieve selected ports from a list of databases
 
-This example queries the TOML input for the for the all ports aside from the
-first one assigned to the first database record on the list.
+This example uses the older syntax and queries the TOML input for the for the
+all ports aside from the first one assigned to the first database record on the
+list.
 
 ```sh
 tq -q '.["databases"][0]["ports"][1:][]' <<EOF
@@ -123,7 +227,7 @@ If you don't feel like installing `tq` with `go install`, you can test `tq` out
 running inside of a container with this command:
 
 ```sh
-docker run -i ghcr.io/mdm-code/tq:latest tq -q "['dependencies']['ignore']" <<EOF
+docker run -i ghcr.io/mdm-code/tq:latest tq -q ".dependencies.ignore" <<EOF
 [dependencies]
 anyhow = "1.0.75"
 bstr = "1.7.0"

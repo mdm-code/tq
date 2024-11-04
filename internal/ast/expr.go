@@ -3,7 +3,6 @@ package ast
 import (
 	"fmt"
 	"strconv"
-	"strings"
 )
 
 // Expr defines the expression interface for the visitor to operate on the
@@ -171,17 +170,7 @@ func (s *String) Accept(v Visitor) {
 
 // String provides the string representation of the AST expression.
 func (s *String) String() string {
-	return fmt.Sprintf("string %q", s.Trim())
-}
-
-// Trim returns the value of the String expression node with the surrounding
-// quotation marks stripped off.
-func (s *String) Trim() string {
-	result := s.Value
-	for _, c := range `'"` {
-		result = strings.Trim(result, string(c))
-	}
-	return result
+	return fmt.Sprintf("string %q", s.Value)
 }
 
 // Accept implements the Expr interface for the visitor design pattern.

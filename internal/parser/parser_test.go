@@ -72,7 +72,7 @@ func TestParse(t *testing.T) {
 						&ast.Filter{
 							Kind: &ast.Selector{
 								Value: &ast.String{
-									Value: "'students'",
+									Value: "students",
 								},
 							},
 						},
@@ -98,7 +98,7 @@ func TestParse(t *testing.T) {
 						&ast.Filter{
 							Kind: &ast.Selector{
 								Value: &ast.String{
-									Value: "'grades'",
+									Value: "grades",
 								},
 							},
 						},
@@ -129,7 +129,7 @@ func TestParse(t *testing.T) {
 						&ast.Filter{
 							Kind: &ast.Selector{
 								Value: &ast.String{
-									Value: "\"employees\"",
+									Value: "employees",
 								},
 							},
 						},
@@ -151,7 +151,7 @@ func TestParse(t *testing.T) {
 						&ast.Filter{
 							Kind: &ast.Selector{
 								Value: &ast.String{
-									Value: "\"salary\"",
+									Value: "salary",
 								},
 							},
 						},
@@ -182,7 +182,7 @@ func TestParse(t *testing.T) {
 						&ast.Filter{
 							Kind: &ast.Selector{
 								Value: &ast.String{
-									Value: "'sentences'",
+									Value: "sentences",
 								},
 							},
 						},
@@ -204,7 +204,7 @@ func TestParse(t *testing.T) {
 						&ast.Filter{
 							Kind: &ast.Selector{
 								Value: &ast.String{
-									Value: "'words'",
+									Value: "words",
 								},
 							},
 						},

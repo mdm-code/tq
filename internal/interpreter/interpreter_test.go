@@ -36,7 +36,12 @@ func TestInterpret(t *testing.T) {
 				},
 			},
 			filteredData: []interface{}{2},
-			query:        ".['students'][0:99][1][][0]['first'][]",
+			query: `
+	.['students']
+		[0:99] [1] [] [0]
+			['first']
+				[]
+`,
 			want: []filter{
 				{name: "identity"},
 				{name: "string"},
@@ -56,7 +61,7 @@ func TestInterpret(t *testing.T) {
 						&ast.Filter{
 							Kind: &ast.Selector{
 								Value: &ast.String{
-									Value: "'students'",
+									Value: "students",
 								},
 							},
 						},
@@ -94,7 +99,7 @@ func TestInterpret(t *testing.T) {
 						&ast.Filter{
 							Kind: &ast.Selector{
 								Value: &ast.String{
-									Value: "'first'",
+									Value: "first",
 								},
 							},
 						},
@@ -232,5 +237,4 @@ func TestInterpretError(t *testing.T) {
 	if err == nil {
 		t.Errorf("Interpret should fail with data: %v", data)
 	}
-
 }

@@ -36,7 +36,7 @@ func TestLexeme(t *testing.T) {
 				Start: 2,
 				End:   9,
 			},
-			want: "\"tools\"",
+			want: "tools",
 		},
 		{
 			name: "nil-buffer",
@@ -90,6 +90,58 @@ func TestLexeme(t *testing.T) {
 				End:   8,
 			},
 			want: "8024",
+		},
+		{
+			name: "bare-string",
+			token: Token{
+				Buffer: &[]scanner.Token{
+					{Pos: scanner.Pos{Rune: 'n'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'a'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'm'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'e'}, Buffer: nil},
+				},
+				Type:  String,
+				Start: 0,
+				End:   4,
+			},
+			want: "name",
+		},
+		{
+			name: "escape-seq-tab",
+			token: Token{
+				Buffer: &[]scanner.Token{
+					{Pos: scanner.Pos{Rune: '\''}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '\\'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 't'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'n'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'a'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'm'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'e'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '\''}, Buffer: nil},
+				},
+				Type:  String,
+				Start: 0,
+				End:   8,
+			},
+			want: "\tname",
+		},
+		{
+			name: "escape-seq-quote",
+			token: Token{
+				Buffer: &[]scanner.Token{
+					{Pos: scanner.Pos{Rune: '\''}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'f'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'o'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'o'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '\\'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '"'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '\''}, Buffer: nil},
+				},
+				Type:  String,
+				Start: 0,
+				End:   7,
+			},
+			want: "foo\"",
 		},
 	}
 	for _, c := range cases {

@@ -9,7 +9,7 @@ import (
 func TestMain(t *testing.T) {
 	args := []string{
 		"-q",
-		".['fruit'][0]['color'][]['name']",
+		".fruit[0].color[].name",
 		"-i",
 		"-m",
 		"-t",

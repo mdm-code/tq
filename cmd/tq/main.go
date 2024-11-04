@@ -58,7 +58,7 @@ func setupCLI(args []string) ([]string, error) {
 	return fs.Args(), err
 }
 
-func setupTOMLAdapter() toml.Adapter {
+func setupTOMLAdapter() *toml.Adapter {
 	conf := toml.GoTOMLConf{
 		Encoder: struct {
 			TablesInline    bool

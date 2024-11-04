@@ -8,12 +8,21 @@ import (
 	"github.com/mdm-code/scanner"
 )
 
+const (
+	// lexerOffsetStart declares the initial Lexer offset.
+	lexerOffsetStart = 0
+
+	// lexerLineOffsetStart declares the inital Lexer line offset.
+	lexerLineOffsetStart = 0
+)
+
 // Lexer is the struct that tokenizes character input into tq lexemes.
 type Lexer struct {
-	buffer []scanner.Token
-	Errors []error // errors encountered in the course of lexer execution
-	offset int
-	curr   Token
+	buffer     []scanner.Token
+	Errors     []error // errors encountered in the course of lexer execution
+	offset     int
+	lineOffset int
+	curr       Token
 }
 
 // New returns a new Lexer with its buffer populated with scanner tokens read
@@ -28,8 +37,9 @@ func New(s *scanner.Scanner) (*Lexer, error) {
 		return nil, err
 	}
 	l := Lexer{
-		offset: 0,
-		buffer: buf,
+		offset:     lexerOffsetStart,
+		lineOffset: lexerLineOffsetStart,
+		buffer:     buf,
 		curr: Token{
 			Buffer: nil,
 			Type:   Undefined,
@@ -60,11 +70,13 @@ func (l *Lexer) Scan() bool {
 		return l.scanString()
 	case isDigit(r):
 		return l.scanInteger()
+	case isBareChar(r):
+		return l.scanBareString()
 	case isWhitespace(r):
 		return l.scanWhitespace()
 	default:
 		l.setToken(Undefined, l.offset, l.offset+1)
-		l.pushErr(ErrDisallowedChar, l.offset)
+		l.pushErr(ErrDisallowedChar)
 		return false
 	}
 }
@@ -100,22 +112,31 @@ func (l *Lexer) Errored() bool {
 
 func (l *Lexer) advance() {
 	l.offset++
+	l.lineOffset++
+}
+
+func (l *Lexer) resetLineOffsetOnLineBreak(r rune) {
+	if isLineBreak(r) {
+		l.lineOffset = lexerLineOffsetStart
+	}
 }
 
 func (l *Lexer) setToken(tp TokenType, start, end int) {
 	l.curr = Token{
-		Buffer: &l.buffer,
-		Type:   tp,
-		Start:  start,
-		End:    end,
+		Buffer:     &l.buffer,
+		Type:       tp,
+		Start:      start,
+		End:        end,
+		LineOffset: l.lineOffset,
 	}
 }
 
-func (l *Lexer) pushErr(err error, offset int) {
+func (l *Lexer) pushErr(err error) {
 	e := Error{
-		buffer: &l.buffer,
-		offset: offset,
-		err:    err,
+		buffer:     &l.buffer,
+		offset:     l.offset,
+		lineOffset: l.lineOffset,
+		err:        err,
 	}
 	l.Errors = append(l.Errors, &e)
 }
@@ -124,7 +145,7 @@ func (l *Lexer) scanKeyChar() bool {
 	t := l.buffer[l.offset]
 	tp, ok := keyCharMap[t.Rune]
 	if !ok {
-		l.pushErr(ErrKeyCharUnsupported, l.offset)
+		l.pushErr(ErrKeyCharUnsupported)
 		return false
 	}
 	l.setToken(tp, l.offset, l.offset+1)
@@ -132,27 +153,50 @@ func (l *Lexer) scanKeyChar() bool {
 	return true
 }
 
-func (l *Lexer) scanString() bool {
+func (l *Lexer) scanBareString() bool {
 	t := l.buffer[l.offset]
-	tq := t.Rune
 	start := l.offset
 	l.advance()
 	for {
 		if l.offset > len(l.buffer)-1 {
-			l.setToken(Undefined, start, l.offset+1)
-			l.pushErr(ErrUnterminatedString, start)
-			return false
+			break
 		}
 		t = l.buffer[l.offset]
-		if isNewline(t.Rune) {
+		if !isBareChar(t.Rune) {
+			break
+		}
+		l.advance()
+	}
+	l.setToken(String, start, l.offset)
+	return true
+
+}
+
+func (l *Lexer) scanString() bool {
+	var prev scanner.Token
+	t := l.buffer[l.offset]
+	tq := t.Rune
+	start := l.offset
+	prev = t
+	l.advance()
+	for {
+		if l.offset > len(l.buffer)-1 {
+			// NOTE: This error is reported because the string goes
+			// past the buffer without encountering the matching
+			// quote character that should terminate the quoted
+			// string.
 			l.setToken(Undefined, start, l.offset+1)
-			l.pushErr(ErrDisallowedChar, start)
+			l.pushErr(ErrUnterminatedString)
 			return false
 		}
-		if t.Rune == tq {
+		l.resetLineOffsetOnLineBreak(t.Rune)
+		t = l.buffer[l.offset]
+		if t.Rune == tq && prev.Rune != '\\' {
+			prev = t
 			l.advance()
 			break
 		}
+		prev = t
 		l.advance()
 	}
 	l.setToken(String, start, l.offset)
@@ -185,6 +229,7 @@ func (l *Lexer) scanWhitespace() bool {
 		if l.offset > len(l.buffer)-1 {
 			break
 		}
+		l.resetLineOffsetOnLineBreak(t.Rune)
 		t = l.buffer[l.offset]
 		if !isWhitespace(t.Rune) {
 			break

@@ -33,8 +33,8 @@ type Adapter struct {
 }
 
 // NewAdapter returns the adapted external library TOML functionalities.
-func NewAdapter(adapted DecodeEncoder) Adapter {
-	return Adapter{adapted: adapted}
+func NewAdapter(adapted DecodeEncoder) *Adapter {
+	return &Adapter{adapted: adapted}
 }
 
 // Unmarshal unmarshals the input r into the reference pointer argument passed

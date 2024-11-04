@@ -10,7 +10,7 @@ import (
 
 var (
 	// ErrQueryElement indicates an unprocessable query filter element.
-	ErrQueryElement = errors.New("expected '.' or '[' to parse query element")
+	ErrQueryElement = errors.New("failed to parse query filter element")
 
 	// ErrSelectorUnterminated indicates an unterminated selector element.
 	ErrSelectorUnterminated = errors.New("expected ']' to terminate selector")
@@ -23,10 +23,11 @@ var (
 // Error wraps a concrete parser error to represent its context. It reports the
 // token where the error has occurred.
 type Error struct {
-	lexeme string
-	buffer *[]scanner.Token
-	offset int
-	err    error
+	lexeme     string
+	buffer     *[]scanner.Token
+	offset     int
+	lineOffset int
+	err        error
 }
 
 // Is allows to check if Error.err matches the target error.
@@ -50,8 +51,17 @@ func (e *Error) Error() string {
 func (e *Error) wrapErrorLine(line, pointer, indentChar string) string {
 	var b strings.Builder
 	b.Grow(len(*e.buffer)*2 + 1)
-	for _, t := range *e.buffer {
+	curr := 0
+	for _, t := range (*e.buffer)[:e.offset] {
 		b.WriteRune(t.Rune)
+		curr += 1
+	}
+	for _, t := range (*e.buffer)[curr:] {
+		b.WriteRune(t.Rune)
+		curr += 1
+		if t.Rune == '\n' {
+			break
+		}
 	}
 	b.WriteString("\n")
 	indent := e.getIndent(indentChar)
@@ -59,6 +69,10 @@ func (e *Error) wrapErrorLine(line, pointer, indentChar string) string {
 	b.WriteString(pointer)
 	b.WriteString("\n")
 	b.WriteString(line)
+	b.WriteString("\n")
+	for _, t := range (*e.buffer)[curr:] {
+		b.WriteRune(t.Rune)
+	}
 	return b.String()
 }
 
@@ -68,7 +82,7 @@ func (e *Error) getErrorLine() string {
 	b.WriteString("Parser error: ")
 	if e.err != nil {
 		b.WriteString(e.err.Error())
-		b.WriteString(fmt.Sprintf(" but got '%s'", e.lexeme))
+		b.WriteString(fmt.Sprintf("; got '%s'", e.lexeme))
 		return b.String()
 	}
 	b.WriteString("nil")
@@ -78,8 +92,8 @@ func (e *Error) getErrorLine() string {
 // getIndent constructs the pointer indentation. Negative offsets result in an
 // empty string.
 func (e *Error) getIndent(indentChar string) string {
-	if e.offset > 0 {
-		return strings.Repeat(indentChar, e.offset)
+	if e.lineOffset > 0 {
+		return strings.Repeat(indentChar, e.lineOffset)
 	}
 	return ""
 }

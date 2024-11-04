@@ -10,7 +10,8 @@ var (
 	ErrTOMLDataType = errors.New("wrong type error")
 )
 
-// Error ...
+// Error wraps an interpreter error to show how a given data type and value
+// cannot be queried with the user-specified filter.
 type Error struct {
 	data   any
 	filter string
