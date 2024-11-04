@@ -125,6 +125,24 @@ func TestLexeme(t *testing.T) {
 			},
 			want: "\tname",
 		},
+		{
+			name: "escape-seq-quote",
+			token: Token{
+				Buffer: &[]scanner.Token{
+					{Pos: scanner.Pos{Rune: '\''}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'f'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'o'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'o'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '\\'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '"'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '\''}, Buffer: nil},
+				},
+				Type:  String,
+				Start: 0,
+				End:   7,
+			},
+			want: "foo\"",
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
