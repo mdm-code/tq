@@ -78,7 +78,7 @@ that these should be used such that they do not interfere with shell quoting.
 | :-------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------: |
 | <kbd><b>identity</b></kbd>                                                  | <kbd><b>.</b></kbd>                                                                                 |
 | <kbd><b>key</b></kbd>                                                       | <kbd><b>["string"]</b></kbd> or <kbd><b>"quoted string"</b></kbd> or <kbd><b>bare-string</b></kbd>  |
-| <kbd><b>index</b></kbd>                                                     | <kbd><b>[0]</b></kbd> or <kbd><b>0</b></kbd>                                                        |
+| <kbd><b>index</b></kbd>                                                     | <kbd><b>[0]</b></kbd>                                                                               |
 | <kbd><b>iterator</b></kbd>                                                  | <kbd><b>[]</b></kbd>                                                                                |
 | <kbd><b>span</b></kbd>                                                      | <kbd><b>[:]</b></kbd>                                                                               |
 
