@@ -3,7 +3,7 @@ package interpreter
 import (
 	"fmt"
 
-	"github.com/mdm-code/tq/internal/ast"
+	"github.com/mdm-code/tq/v2/internal/ast"
 )
 
 // FilterFunc specifies the data transformation function type.

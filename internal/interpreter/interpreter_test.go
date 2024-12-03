@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/mdm-code/tq/internal/ast"
+	"github.com/mdm-code/tq/v2/internal/ast"
 )
 
 // Test the public API of the Interpreter.

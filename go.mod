@@ -1,4 +1,4 @@
-module github.com/mdm-code/tq
+module github.com/mdm-code/tq/v2
 
 go 1.23
 

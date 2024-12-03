@@ -25,7 +25,7 @@
     <a href="https://goreportcard.com/report/github.com/mdm-code/tq">
         <img alt="Go report card" src="https://goreportcard.com/badge/github.com/mdm-code/tq">
     </a>
-    <a href="https://pkg.go.dev/github.com/mdm-code/tq">
+    <a href="https://pkg.go.dev/github.com/mdm-code/tq/v2">
         <img alt="Go package docs" src="https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white">
     </a>
 </p>
@@ -34,7 +34,7 @@
 The `tq` program lets you query TOML configuration files with a sequence of
 intuitive filters. It works as a regular Unix filter program reading input data
 from the standard input and producing results to the standard output. Consult the
-[package documentation](https://pkg.go.dev/github.com/mdm-code/tq) or check the
+[package documentation](https://pkg.go.dev/github.com/mdm-code/tq/v2) or check the
 [Usage](#usage) section to see how you can use `tq`.
 
 
@@ -44,7 +44,7 @@ Install the program and use `tq` on the command-line to filter TOML files on
 the terminal.
 
 ```sh
-go install github.com/mdm-code/tq/cmd/tq@latest
+go install github.com/mdm-code/tq/v2/cmd/tq@latest
 ```
 
 Here is how you can get the whole Go package downloaded to fiddle with, but
@@ -52,7 +52,7 @@ it exposes only the public interfaces for `tq` and the TOML adapter so that
 the latter can be swapped out.
 
 ```sh
-go get github.com/mdm-code/tq
+go get github.com/mdm-code/tq/v2
 ```
 
 
