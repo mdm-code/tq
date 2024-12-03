@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/mdm-code/scanner"
-	"github.com/mdm-code/tq/internal/lexer"
+	"github.com/mdm-code/tq/v2/internal/lexer"
 )
 
 // Check if the nil buffer results in a bare error line.

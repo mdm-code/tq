@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/mdm-code/scanner"
-	"github.com/mdm-code/tq/internal/ast"
-	"github.com/mdm-code/tq/internal/lexer"
+	"github.com/mdm-code/tq/v2/internal/ast"
+	"github.com/mdm-code/tq/v2/internal/lexer"
 )
 
 // Test the failing Parser New() constructor.
