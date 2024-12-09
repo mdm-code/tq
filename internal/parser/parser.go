@@ -171,10 +171,7 @@ func (p *Parser) advance() lexer.Token {
 }
 
 func (p *Parser) isAtEnd() bool {
-	if p.current > len(p.buffer)-1 {
-		return true
-	}
-	return false
+	return p.current > len(p.buffer)-1
 }
 
 func (p *Parser) previous() lexer.Token {
