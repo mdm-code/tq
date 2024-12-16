@@ -169,7 +169,6 @@ func (l *Lexer) scanBareString() bool {
 	}
 	l.setToken(String, start, l.offset)
 	return true
-
 }
 
 func (l *Lexer) scanString() bool {

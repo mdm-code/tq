@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/mdm-code/scanner"
@@ -87,17 +88,39 @@ func (t Token) reprString() string {
 	}
 	chars := make([]string, 0, size)
 	for head != end {
-		token := (*t.Buffer)[head]
 		// NOTE: For quoted strings, check if the current token initiates an
 		// escape sequence and there is at least a single token left to look up
 		// followed by the terminating quote character. Bare strings may not
-		// contain escape sequence characters.
-		if token.Rune == '\\' && head+2 != end {
+		// contain escape sequence characters, because forward slash is a
+		// disallowed character in bare strings.
+		token := (*t.Buffer)[head]
+		if token.Rune == '\\' && head+1 != end {
 			v, ok := escapeSequenceMap[(*t.Buffer)[head+1].Rune]
 			if ok {
-				token = (*t.Buffer)[head]
 				head += 2
 				chars = append(chars, v)
+				continue
+			}
+			if (*t.Buffer)[head+1].Rune == 'u' && head+5 != end {
+				rr := []rune{}
+				for _, t := range (*t.Buffer)[head+2 : head+6] {
+					rr = append(rr, t.Rune)
+				}
+				i, _ := strconv.ParseInt(string(rr), 16, 32)
+				r := rune(i)
+				head += 6
+				chars = append(chars, string(r))
+				continue
+			}
+			if (*t.Buffer)[head+1].Rune == 'U' && head+9 != end {
+				rr := []rune{}
+				for _, t := range (*t.Buffer)[head+2 : head+10] {
+					rr = append(rr, t.Rune)
+				}
+				i, _ := strconv.ParseInt(string(rr), 16, 64)
+				r := rune(i)
+				head += 10
+				chars = append(chars, string(r))
 				continue
 			}
 		}
