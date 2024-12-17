@@ -102,25 +102,15 @@ func (t Token) reprString() string {
 				continue
 			}
 			if (*t.Buffer)[head+1].Rune == 'u' && head+5 != end {
-				rr := []rune{}
-				for _, t := range (*t.Buffer)[head+2 : head+6] {
-					rr = append(rr, t.Rune)
-				}
-				i, _ := strconv.ParseInt(string(rr), 16, 32)
-				r := rune(i)
+				char := t.parseUnicode(head, 2, 6)
 				head += 6
-				chars = append(chars, string(r))
+				chars = append(chars, char)
 				continue
 			}
 			if (*t.Buffer)[head+1].Rune == 'U' && head+9 != end {
-				rr := []rune{}
-				for _, t := range (*t.Buffer)[head+2 : head+10] {
-					rr = append(rr, t.Rune)
-				}
-				i, _ := strconv.ParseInt(string(rr), 16, 64)
-				r := rune(i)
+				char := t.parseUnicode(head, 2, 10)
 				head += 10
-				chars = append(chars, string(r))
+				chars = append(chars, char)
 				continue
 			}
 		}
@@ -131,6 +121,18 @@ func (t Token) reprString() string {
 		chars = chars[1 : len(chars)-1]
 	}
 	return strings.Join(chars, "")
+}
+
+func (t Token) parseUnicode(head, start, end int) string {
+	size := end - start
+	rr := make([]rune, 0, size)
+	for _, t := range (*t.Buffer)[head+start : head+end] {
+		rr = append(rr, t.Rune)
+	}
+	i, _ := strconv.ParseInt(string(rr), 16, 32)
+	r := rune(i) // NOTE: Make sure it fits into rune/int32.
+	result := string(r)
+	return result
 }
 
 func (t Token) reprDefault() string {
