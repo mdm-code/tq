@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/mdm-code/scanner"
@@ -87,17 +88,29 @@ func (t Token) reprString() string {
 	}
 	chars := make([]string, 0, size)
 	for head != end {
-		token := (*t.Buffer)[head]
 		// NOTE: For quoted strings, check if the current token initiates an
 		// escape sequence and there is at least a single token left to look up
 		// followed by the terminating quote character. Bare strings may not
-		// contain escape sequence characters.
-		if token.Rune == '\\' && head+2 != end {
+		// contain escape sequence characters, because forward slash is a
+		// disallowed character in bare strings.
+		token := (*t.Buffer)[head]
+		if token.Rune == '\\' && head+1 != end {
 			v, ok := escapeSequenceMap[(*t.Buffer)[head+1].Rune]
 			if ok {
-				token = (*t.Buffer)[head]
 				head += 2
 				chars = append(chars, v)
+				continue
+			}
+			if (*t.Buffer)[head+1].Rune == 'u' && head+5 != end {
+				char := t.parseUnicode(head, 2, 6)
+				head += 6
+				chars = append(chars, char)
+				continue
+			}
+			if (*t.Buffer)[head+1].Rune == 'U' && head+9 != end {
+				char := t.parseUnicode(head, 2, 10)
+				head += 10
+				chars = append(chars, char)
 				continue
 			}
 		}
@@ -108,6 +121,18 @@ func (t Token) reprString() string {
 		chars = chars[1 : len(chars)-1]
 	}
 	return strings.Join(chars, "")
+}
+
+func (t Token) parseUnicode(head, start, end int) string {
+	size := end - start
+	rr := make([]rune, 0, size)
+	for _, t := range (*t.Buffer)[head+start : head+end] {
+		rr = append(rr, t.Rune)
+	}
+	i, _ := strconv.ParseInt(string(rr), 16, 32)
+	r := rune(i) // NOTE: Make sure it fits into rune/int32.
+	result := string(r)
+	return result
 }
 
 func (t Token) reprDefault() string {

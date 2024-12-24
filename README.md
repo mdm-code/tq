@@ -88,19 +88,19 @@ that these should be used such that they do not interfere with shell quoting.
 Commonly found characters are mapped onto often used escaped sequences. These
 can be used in quoted strings mostly the same way one would use them in a TOML
 file though the specification for the TOML language advises against the use of
-funky keys unless there is a good reason to use them. Tq does not support
-Unicode escape sequences in quoted strings as of today, but there are plans to
-add it in the future.
+funky keys unless there is a good reason to use them.
 
 ```txt
-\b  - backspace
-\t  - tab
-\n  - linefeed
-\f  - form feed
-\r  - carriage return
-\"  - double quote
-\'  - single quote
-\\  - backslash
+\b          - backspace
+\t          - tab
+\n          - linefeed
+\f          - form feed
+\r          - carriage return
+\"          - double quote
+\'          - single quote
+\\          - backslash
+\uhhhh      - short 16-bit hexadecimal form
+\Uhhhhhhhh  - long 32-bit hexadecimal form
 ```
 
 
