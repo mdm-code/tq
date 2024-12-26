@@ -157,10 +157,7 @@ func (l *Lexer) scanBareString() bool {
 	t := l.buffer[l.offset]
 	start := l.offset
 	l.advance()
-	for {
-		if l.offset > len(l.buffer)-1 {
-			break
-		}
+	for l.offset <= len(l.buffer)-1 {
 		t = l.buffer[l.offset]
 		if !isBareChar(t.Rune) {
 			break
@@ -180,10 +177,9 @@ func (l *Lexer) scanString() bool {
 	l.advance()
 	for {
 		if l.offset > len(l.buffer)-1 {
-			// NOTE: This error is reported because the string goes
-			// past the buffer without encountering the matching
-			// quote character that should terminate the quoted
-			// string.
+			// NOTE: This error is reported because the string goes past the
+			// buffer without encountering the matching quote character that
+			// should terminate the quoted string.
 			l.setToken(Undefined, start, l.offset+1)
 			l.pushErr(ErrUnterminatedString)
 			return false
@@ -206,10 +202,7 @@ func (l *Lexer) scanInteger() bool {
 	t := l.buffer[l.offset]
 	start := l.offset
 	l.advance()
-	for {
-		if l.offset > len(l.buffer)-1 {
-			break
-		}
+	for l.offset <= len(l.buffer)-1 {
 		t = l.buffer[l.offset]
 		if !isDigit(t.Rune) {
 			break
@@ -224,10 +217,7 @@ func (l *Lexer) scanWhitespace() bool {
 	t := l.buffer[l.offset]
 	start := l.offset
 	l.advance()
-	for {
-		if l.offset > len(l.buffer)-1 {
-			break
-		}
+	for l.offset <= len(l.buffer)-1 {
 		l.resetLineOffsetOnLineBreak(t.Rune)
 		t = l.buffer[l.offset]
 		if !isWhitespace(t.Rune) {
