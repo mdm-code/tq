@@ -104,6 +104,27 @@ funky keys unless there is a good reason to use them.
 ```
 
 
+### Conversion caveats
+
+Given the current implementation, *most* values are represented exactly the way
+they are spelled out in the input file after they're queried for. The following
+value notations will be converted to a different notation related to the
+backing Go type:
+
+```txt
+1_000       => 1000   # Underscores are not retained.
+0xFFFF      => 65535  # Hexadecimal is converted to decimal.
+0o755       => 493    # Octal is converted to decimal.
+0b1111_1111 => 255    # Binary is converted to decimal.
++100        => 100    # The plus sign is dropped.
+5e-3        => 0.005  # The exponential notation is not kept.
+
+# Other relevant notations like date, time, date-time, with and without the
+# offset, inf, nan, negative numbers, stay the way they're written in the
+# input file.
+```
+
+
 ### Multiline query with bare strings
 
 Here is a dummy configuration file in TOML found on the web for Gitlab
