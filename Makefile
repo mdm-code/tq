@@ -6,30 +6,34 @@ export CGO_ENABLED=0
 
 .DEFAULT_GOAL := build
 
+ifndef VERBOSE
+.SILENT:
+endif
+
 .PHONY: fmt vet test install build cover clean
 
 fmt:
-	@$(GO) fmt ./...
+	$(GO) fmt ./...
 
 vet: fmt
-	@$(GO) vet ./...
+	$(GO) vet ./...
 
 test: vet
-	@$(GO) clean -testcache
-	@$(GO) test ./... -v
+	$(GO) clean -testcache
+	$(GO) test ./... -v
 
 install: test
-	@$(GO) install ./...
+	$(GO) install ./...
 
 build: test
-	@$(GO) build $(GOFLAGS) github.com/mdm-code/tq/...
+	$(GO) build $(GOFLAGS) github.com/mdm-code/tq/...
 
 cover:
-	@$(GO) test -coverprofile=$(COV_PROFILE) -covermode=atomic ./...
-	@$(GO) tool cover -html=$(COV_PROFILE)
+	$(GO) test -coverprofile=$(COV_PROFILE) -covermode=atomic ./...
+	$(GO) tool cover -html=$(COV_PROFILE)
 
 clean:
-	@$(GO) clean github.com/mdm-code/tq/...
-	@$(GO) mod tidy
-	@$(GO) clean -testcache
-	@rm -f $(COV_PROFILE)
+	$(GO) clean github.com/mdm-code/tq/...
+	$(GO) mod tidy
+	$(GO) clean -testcache
+	rm -f $(COV_PROFILE)
