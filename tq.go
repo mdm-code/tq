@@ -93,7 +93,7 @@ func (t *Tq) Run(input io.Reader, output io.Writer, query string) error {
 		if len(bytes) == 0 {
 			continue
 		}
-		fmt.Fprintln(output, string(bytes))
+		fmt.Fprintf(output, "%s\n", strings.TrimSpace(string(bytes)))
 	}
 	return nil
 }
