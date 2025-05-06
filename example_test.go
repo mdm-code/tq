@@ -38,7 +38,7 @@ role = "backend"
 	_ = tq.Run(input, &output, query)
 	fmt.Println(output.String())
 	// Output:
-	// '10.0.0.1'
+	// 10.0.0.1
 }
 
 // ExampleTq_Validate shows how to use the Tq struct to validate whether a
