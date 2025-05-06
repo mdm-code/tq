@@ -12,6 +12,9 @@ endif
 
 .PHONY: fmt vet test install build cover clean
 
+.PHONY: .ONESHELL
+.ONESHELL:
+
 fmt:
 	$(GO) fmt ./...
 
