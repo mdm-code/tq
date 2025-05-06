@@ -193,7 +193,7 @@ EOF
 
 Output:
 
-'/home/core/data/gitlab-runner/data'
+/home/core/data/gitlab-runner/data
 ```
 
 
@@ -219,8 +219,8 @@ EOF
 
 Output:
 
-'10.0.0.1'
-'10.0.0.2'
+10.0.0.1
+10.0.0.2
 ```
 
 
