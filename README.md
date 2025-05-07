@@ -137,13 +137,13 @@ to an iterator with `[]`, and then (5) query each element of the iterator for
 
 
 ```sh
-tq -q '
+<< EOF tq -q '
     .runners[]
         .kubernetes
         .volumes
         .host_path[]
             ."host path"
-' << EOF
+'
 [session_server]
   session_timeout = 1800
 
@@ -190,7 +190,9 @@ tq -q '
     pod_annotations_overwrite_allowed = ""
     [runners.kubernetes.volumes]
 EOF
+```
 
+```txt
 Output:
 
 /home/core/data/gitlab-runner/data
@@ -205,7 +207,7 @@ with `[]`, and then (3) the IP address is recovered from each of the objects
 with the quoted key `"ip"`.
 
 ```sh
-tq -q '.servers[]."ip"' <<EOF
+<<EOF tq -q '.servers[]."ip"'
 [servers]
 
 [servers.prod]
@@ -216,7 +218,9 @@ role = "backend"
 ip = "10.0.0.2"
 role = "backend"
 EOF
+```
 
+```txt
 Output:
 
 10.0.0.1
@@ -231,10 +235,12 @@ all ports aside from the first one assigned to the first database record on the
 list.
 
 ```sh
-tq -q '.["databases"][0]["ports"][1:][]' <<EOF
+<<EOF tq -q '.["databases"][0]["ports"][1:][]'
 databases = [ {enabled = true, ports = [ 5432, 5433, 5434 ]} ]
 EOF
+```
 
+```txt
 Output:
 
 5433
@@ -248,7 +254,7 @@ If you don't feel like installing `tq` with `go install`, you can test `tq` out
 running inside of a container with this command:
 
 ```sh
-docker run -i ghcr.io/mdm-code/tq:latest tq -q ".dependencies.ignore" <<EOF
+<<EOF docker run -i ghcr.io/mdm-code/tq:latest tq -q ".dependencies.ignore"
 [dependencies]
 anyhow = "1.0.75"
 bstr = "1.7.0"
@@ -260,6 +266,13 @@ serde_json = "1.0.23"
 termcolor = "1.1.0"
 textwrap = { version = "0.16.0", default-features = false }
 EOF
+```
+
+```txt
+Output:
+
+path = 'crates/ignore'
+version = '0.4.22'
 ```
 
 

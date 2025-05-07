@@ -16,7 +16,7 @@ Options:
 
 Example:
 
-	tq -q '.servers[].ip' <<EOF
+	<<EOF tq -q .servers[].ip
 	[servers]
 
 	[servers.prod]
