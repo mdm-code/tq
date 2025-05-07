@@ -86,14 +86,19 @@ func (t *Tq) Run(input io.Reader, output io.Writer, query string) error {
 		return err
 	}
 	for _, d := range filteredData {
-		bytes, err := t.adapter.Marshal(d)
-		if err != nil {
-			return err
+		var bytes []byte
+		var err error
+		switch v := d.(type) {
+		// NOTE: Single strings get quoted when marshalled, and it is misleading.
+		case string:
+			bytes = []byte(v)
+		default:
+			bytes, err = t.adapter.Marshal(v)
+			if err != nil {
+				return err
+			}
 		}
-		if len(bytes) == 0 {
-			continue
-		}
-		fmt.Fprintln(output, string(bytes))
+		fmt.Fprintf(output, "%s\n", strings.TrimSpace(string(bytes)))
 	}
 	return nil
 }

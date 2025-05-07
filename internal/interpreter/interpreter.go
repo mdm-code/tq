@@ -1,8 +1,6 @@
 package interpreter
 
 import (
-	"fmt"
-
 	"github.com/mdm-code/tq/v2/internal/ast"
 )
 
@@ -110,7 +108,7 @@ func (i *Interpreter) VisitSpan(e ast.Expr) {
 				default:
 					err = &Error{
 						data:   d,
-						filter: fmt.Sprintf("%s", span),
+						filter: span.String(),
 						err:    ErrTOMLDataType,
 					}
 				}
@@ -136,13 +134,11 @@ func (i *Interpreter) VisitIterator(e ast.Expr) {
 						result = append(result, val)
 					}
 				case []any:
-					for _, val := range v {
-						result = append(result, val)
-					}
+					result = append(result, v...)
 				default:
 					err = &Error{
 						data:   d,
-						filter: fmt.Sprintf("%s", iter),
+						filter: iter.String(),
 						err:    ErrTOMLDataType,
 					}
 				}
@@ -172,7 +168,7 @@ func (i *Interpreter) VisitString(e ast.Expr) {
 				default:
 					err = &Error{
 						data:   d,
-						filter: fmt.Sprintf("%s", str),
+						filter: str.String(),
 						err:    ErrTOMLDataType,
 					}
 				}
@@ -201,7 +197,7 @@ func (i *Interpreter) VisitInteger(e ast.Expr) {
 				default:
 					err = &Error{
 						data:   d,
-						filter: fmt.Sprintf("%s", integer),
+						filter: integer.String(),
 						err:    ErrTOMLDataType,
 					}
 				}

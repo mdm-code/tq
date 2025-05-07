@@ -12,7 +12,7 @@ const (
 	// lexerOffsetStart declares the initial Lexer offset.
 	lexerOffsetStart = 0
 
-	// lexerLineOffsetStart declares the inital Lexer line offset.
+	// lexerLineOffsetStart declares the initial Lexer line offset.
 	lexerLineOffsetStart = 0
 )
 

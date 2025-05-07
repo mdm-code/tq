@@ -44,8 +44,8 @@ func TestMain(t *testing.T) {
 	if err != nil {
 		t.Errorf("should not return an error: %s", err)
 	}
-	want := `'red'
-'green'
+	want := `red
+green
 `
 	if have := output.String(); have != want {
 		t.Errorf("have: %s\nwant: %s", have, want)
