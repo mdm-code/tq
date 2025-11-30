@@ -1,3 +1,4 @@
+## workspace
 # github.com/mdm-code/scanner v1.2.1
 ## explicit; go 1.21
 github.com/mdm-code/scanner
