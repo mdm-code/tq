@@ -2,6 +2,8 @@ module github.com/mdm-code/tqweb
 
 go 1.24.0
 
+require github.com/nlepage/go-wasm-http-server/v2 v2.2.1
+
 require (
 	github.com/a-h/parse v0.0.0-20250122154542-74294addb73e // indirect
 	github.com/a-h/templ v0.3.960 // indirect
@@ -15,7 +17,9 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/natefinch/atomic v1.0.1 // indirect
 	github.com/nlepage/go-js-promise v1.0.0 // indirect
-	github.com/nlepage/go-wasm-http-server/v2 v2.2.1 // indirect
+	github.com/shurcooL/go v0.0.0-20200502201357-93f07166e636 // indirect
+	github.com/shurcooL/go-goon v1.0.0 // indirect
+	github.com/shurcooL/goexec v0.0.0-20230709021537-96bada04ea2b // indirect
 	golang.org/x/mod v0.26.0 // indirect
 	golang.org/x/net v0.42.0 // indirect
 	golang.org/x/sync v0.16.0 // indirect
@@ -23,4 +27,7 @@ require (
 	golang.org/x/tools v0.35.0 // indirect
 )
 
-tool github.com/a-h/templ/cmd/templ
+tool (
+	github.com/a-h/templ/cmd/templ
+	github.com/shurcooL/goexec
+)
