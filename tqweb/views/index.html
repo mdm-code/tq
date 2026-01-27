@@ -9,6 +9,7 @@
     </script>
   </head>
   <body>
+    {{ block "form" . }}
     <form class="box" id="tq-form">
       <div class="field" id="tq-form-field-query">
         <label class="label">Query</label>
@@ -23,9 +24,10 @@
             hx-swap="outerHTML"
             hx-target="#tq-form"
             placeholder="Enter the query:"
-          >.</textarea>
+          >{{ .query }}</textarea>
         </div>
       </div>
     </form>
+    {{ end }}
   </body>
 </html>
