@@ -7,6 +7,8 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/mdm-code/tq/v2"
+	"github.com/mdm-code/tq/v2/toml"
 	wasmhttp "github.com/nlepage/go-wasm-http-server/v2"
 )
 
@@ -46,6 +48,17 @@ func main() {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
+
+	// Instantiate TQ.
+	// var err error
+	conf := toml.GoTOMLConf{}
+	goToml := toml.NewGoTOML(conf)
+	adapter := toml.NewAdapter(goToml)
+	_ = tq.New(adapter)
+	// err = tq.Run(input, output, query)
+	// The error from the parser, lexer, scanner, toml adapter etc. -- all of these can be passed to the template in place of the output.
+	// This way the user is able to see that, first, he gets an error without any flashy effects on the front end, and second, the output
+	// is placed in a visible place.
 
 	wasmhttp.Serve(nil)
 
