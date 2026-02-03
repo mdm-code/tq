@@ -12,6 +12,7 @@
   <body>
     {{ block "form" . }}
     <form class="box" id="tq-form">
+
       <div class="field" id="tq-form-field-query">
         <label class="label">Query</label>
         <div class="control">
@@ -20,14 +21,45 @@
             name="query"
             id="query"
             hx-post="api/process"
-            hx-trigger="input changed delay:500ms"
+            hx-trigger="input changed delay:1000ms"
             hx-sync="this:replace"
             hx-swap="outerHTML"
             hx-target="#tq-form"
             placeholder="Enter the query:"
-          >{{ .query }}</textarea>
+          >{{ .Query }}</textarea>
         </div>
       </div>
+
+      <div class="field" id="tq-form-field-input">
+        <label class="label">TOML</label>
+        <div class="control">
+          <textarea
+            class="textarea"
+            name="input"
+            id="input"
+            hx-post="api/process"
+            hx-trigger="input changed delay:1000ms"
+            hx-sync="this:replace"
+            hx-swap="outerHTML"
+            hx-target="#tq-form"
+            placeholder="Enter the data:"
+          >{{ .Input }}</textarea>
+        </div>
+      </div>
+
+      <div class="field" id="tq-form-field-output">
+        <label class="label">Output</label>
+        <div class="control">
+          <textarea
+            class="textarea"
+            name="output"
+            id="output"
+            placeholder=""
+            readonly
+            >{{ .Output }}</textarea>
+        </div>
+      </div>
+
     </form>
     {{ end }}
   </body>
