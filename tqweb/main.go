@@ -16,25 +16,11 @@ import (
 
 /*
 TODO:
-1. Index has to be rewritten imediately using htmx and the index api endpoint.
-2. I can use structs with templates pretty much the same way it's done with templ.
-3. Change in query or input triggers processing action with short debounce.
-4. The output and ALL errors are displayed in the output box.
-5. If there's an error, it's printed out the same way as in the terminal.
--------------------------
-|          |            |
-|  query   |            |
-|          |            |
-|          |            |
-------------   output   |
-|          |            |
-|  input   |            |
-|          |            |
-|          |            |
--------------------------
-6. It seems the only thing I need to replace is the output box; query and input can stay as is.
-7. That said, I don't need to add any hightlight to query and input or output for that matter.
-8, Output stays read-only.
+1. Tq config for GoTOML is sent from the frontend selection component.
+- Checkboxes: send true if checked.
+- Buttons: on click, keep highlighted and add to the payload.
+2. The config and TQ has to be instantiated with each call.
+3. Curl tailwind css scripts.
 */
 
 var (
@@ -51,23 +37,16 @@ func main() {
 
 	http.HandleFunc("/process", func(w http.ResponseWriter, r *http.Request) {
 		var output bytes.Buffer
-		var outputStr string
+		var data struct{ Output string }
 		input := r.FormValue("input")
 		query := r.FormValue("query")
 		err := tq.Run(strings.NewReader(input), &output, query)
 		if err != nil {
-			outputStr = err.Error()
+			data.Output = err.Error()
 		} else {
-			outputStr = output.String()
+			data.Output = output.String()
 		}
-		data := struct {
-			Query, Input, Output string
-		}{
-			Query:  query,
-			Output: outputStr,
-			Input:  input,
-		}
-		if err := indexT.ExecuteTemplate(w, "form", data); err != nil {
+		if err := indexT.ExecuteTemplate(w, "output", data); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})

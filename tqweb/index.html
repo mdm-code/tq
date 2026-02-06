@@ -3,62 +3,75 @@
   <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <link rel="stylesheet" href="style.css"/>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="htmx.min.js"></script>
     <script>
       navigator.serviceWorker.register("worker.js");
     </script>
   </head>
-  <body>
-    <form class="box" id="tq-form">
-
-      <div class="field" id="tq-form-field-query">
-        <label class="label">Query</label>
-        <div class="control">
-          <textarea
-            class="textarea"
-            name="query"
-            id="query"
-            hx-post="api/process"
-            hx-trigger="input changed delay:1000ms"
-            hx-sync="this:replace"
-            hx-swap="outerHTML"
-            hx-target="#tq-form"
-            placeholder="Enter the query:"
-          >.</textarea>
-        </div>
-      </div>
-
-      <div class="field" id="tq-form-field-input">
-        <label class="label">TOML</label>
-        <div class="control">
-          <textarea
-            class="textarea"
-            name="input"
-            id="input"
-            hx-post="api/process"
-            hx-trigger="input changed delay:1000ms"
-            hx-sync="this:replace"
-            hx-swap="outerHTML"
-            hx-target="#tq-form"
-            placeholder="Enter the data:"
-          >.</textarea>
-        </div>
-      </div>
-
-      <div class="field" id="tq-form-field-output">
-        <label class="label">Output</label>
-        <div class="control">
-          <textarea
-            class="textarea"
-            name="output"
-            id="output"
-            placeholder="output..."
-            readonly
-          ></textarea>
-        </div>
-      </div>
-
-    </form>
+  <body class="bg-[#000000] text-gray-100 min-h-screen">
+    <div class="flex flex-col min-h-screen">
+      <main class="flex flex-1 overflow-hidden">
+        <form class="flex w-full" id="tq-form">
+          <section class="w-1/2 border-r border-gray-700 flex flex-col gap-4 p-4">
+            <div class="border border border-gray-700 bg-[#171717] rounded" id="tq-form-field-query">
+              <header class="border-b border-gray-700 px-4 py-2">
+                <h2 class="text-sm font-semibold tracking-widest text-gray-200">
+                  QUERY
+                </h2>
+              </header>
+              <div class="h-32">
+                <textarea
+                  class="w-full h-full bg-transparent text-sm text-gray-100 px-4 py-2 resize-none focus:outline-none"
+                  name="query"
+                  id="query"
+                  hx-post="api/process"
+                  hx-trigger="input changed delay:1000ms"
+                  hx-sync="this:replace"
+                  hx-swap="outerHTML"
+                  hx-target="#output"
+                ></textarea>
+              </div>
+            </div>
+            <div class="flex-1 border border-gray-700 bg-[#171717] rouded flex flex-col" id="tq-form-field-input">
+              <header class="border-b border-gray-700 px-4 py-2">
+                <h2 class="text-sm font-semibold tracking-widest text-gray-200">
+                  TOML
+                </h2>
+              </header>
+              <div class="flex-1">
+                <textarea
+                  class="w-full h-full bg-transparent text-sm text-gray-100 px-4 py-2 resize-none focus:outline-none"
+                  name="input"
+                  id="input"
+                  hx-post="api/process"
+                  hx-trigger="input changed delay:1000ms"
+                  hx-sync="this:replace"
+                  hx-swap="outerHTML"
+                  hx-target="#output"
+                ></textarea>
+              </div>
+            </div>
+          </section>
+          <section class="w-1/2 flex flex-col p-4">
+            <div class="flex-1 border border-gray-700 bg-[#171717] rounded flex flex-col" id="tq-form-field-output">
+              <header class="border-b border-gray-700 px-4 py-2">
+                <h2 class="text-sm font-semibold tracking-widest text-gray-200">
+                  OUTPUT
+                </h2>
+              </header>
+              <div class="flex-1">
+                <textarea
+                  class="w-full h-full bg-transparent text-sm text-gray-100 px-4 py-2 resize-none focus:outline-none"
+                  name="output"
+                  id="output"
+                  readonly
+                ></textarea>
+              </div>
+            </div>
+          </section>
+        </form>
+      </main>
+    </div>
   </body>
 </html>

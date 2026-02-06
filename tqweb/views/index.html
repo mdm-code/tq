@@ -1,66 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <link rel="stylesheet" href="style.css"/>
-    <script src="htmx.min.js"></script>
-    <script>
-      navigator.serviceWorker.register("worker.js");
-    </script>
-  </head>
-  <body>
-    {{ block "form" . }}
-    <form class="box" id="tq-form">
-
-      <div class="field" id="tq-form-field-query">
-        <label class="label">Query</label>
-        <div class="control">
-          <textarea
-            class="textarea"
-            name="query"
-            id="query"
-            hx-post="api/process"
-            hx-trigger="input changed delay:1000ms"
-            hx-sync="this:replace"
-            hx-swap="outerHTML"
-            hx-target="#tq-form"
-            placeholder="Enter the query:"
-          >{{ .Query }}</textarea>
-        </div>
-      </div>
-
-      <div class="field" id="tq-form-field-input">
-        <label class="label">TOML</label>
-        <div class="control">
-          <textarea
-            class="textarea"
-            name="input"
-            id="input"
-            hx-post="api/process"
-            hx-trigger="input changed delay:1000ms"
-            hx-sync="this:replace"
-            hx-swap="outerHTML"
-            hx-target="#tq-form"
-            placeholder="Enter the data:"
-          >{{ .Input }}</textarea>
-        </div>
-      </div>
-
-      <div class="field" id="tq-form-field-output">
-        <label class="label">Output</label>
-        <div class="control">
-          <textarea
-            class="textarea"
-            name="output"
-            id="output"
-            placeholder=""
-            readonly
-            >{{ .Output }}</textarea>
-        </div>
-      </div>
-
-    </form>
-    {{ end }}
-  </body>
-</html>
+{{ block "output" . }}
+  <textarea
+    class="w-full h-full bg-transparent text-sm text-gray-100 px-4 py-2 resize-none focus:outline-none"
+    name="output"
+    id="output"
+    readonly
+  >{{ .Output }}</textarea>
+{{ end }}
