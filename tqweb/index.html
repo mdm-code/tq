@@ -5,24 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="htmx.min.js"></script>
+    <script src="copy.js"></script>
     <script>
       navigator.serviceWorker.register("worker.js");
     </script>
   </head>
-  <body class="bg-[#000000] text-gray-100 min-h-screen">
+  <body class="bg-[#000000] text-[#9cd0f4] min-h-screen font-mono">
     <div class="flex flex-col min-h-screen">
+      <nav class="flex items-center justify-between px-4 py-3 bg-gray-700">
+        <div class="flex items-center space-x-2">
+          <a href="https://github.com/mdm-code/tq">
+            <img class="w-6" src="tq.svg" alt="TQ">
+          </a>
+          <span class="text-base font-bold">
+            <h1>
+              playground
+            </h1>
+          </span>
+        </div>
+        <div class="flex fill-[#9cd0f4] items-center space-x-4 me-4 text-xl">
+          <div class="flex relative group">
+            <button
+              onclick="onCopyClick(document.querySelector('#query').value, document.querySelector('#input').value)"
+              class="hover:fill-gray-900"
+            >
+              <svg class="w-6" viewBox="0 0 24 24">
+                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"/>
+              </svg>
+            </button>
+            <div class="absolute mt-9 text-xs left-1/2 -translate-x-1/2 hidden group-hover:block bg-gray-800 text-sm px-2 py-1 rounded">copy</div>
+          </div>
+          <div class="flex relative group">
+            <button class="hover:fill-gray-900">
+              <a href="https://github.com/mdm-code/tq">
+                <svg class="w-6" viewBox="0 0 24 24">
+                  <path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"/>
+                </svg>
+              </a>
+            </button>
+              <div class="absolute mt-9 text-xs left-1/2 -translate-x-1/2 hidden group-hover:block bg-gray-800 text-sm px-2 py-1 rounded">source</div>
+          </div>
+        </div>
+      </nav>
       <main class="flex flex-1 overflow-hidden">
         <form class="flex w-full" id="tq-form">
           <section class="w-1/2 border-r border-gray-700 flex flex-col gap-4 p-4">
             <div class="border border border-gray-700 bg-[#171717] rounded" id="tq-form-field-query">
               <header class="border-b border-gray-700 px-4 py-2">
-                <h2 class="text-sm font-semibold tracking-widest text-gray-200">
+                <h2 class="text-sm font-bold tracking-widest">
                   QUERY
                 </h2>
               </header>
               <div class="h-32">
                 <textarea
-                  class="w-full h-full bg-transparent text-sm text-gray-100 px-4 py-2 resize-none focus:outline-none"
+                  spellcheck="false"
+                  class="w-full h-full bg-transparent text-sm px-4 py-2 resize-none focus:outline-none"
                   name="query"
                   id="query"
                   hx-post="api/process"
@@ -35,13 +72,14 @@
             </div>
             <div class="flex-1 border border-gray-700 bg-[#171717] rouded flex flex-col" id="tq-form-field-input">
               <header class="border-b border-gray-700 px-4 py-2">
-                <h2 class="text-sm font-semibold tracking-widest text-gray-200">
+                <h2 class="text-sm font-bold tracking-widest">
                   TOML
                 </h2>
               </header>
               <div class="flex-1">
                 <textarea
-                  class="w-full h-full bg-transparent text-sm text-gray-100 px-4 py-2 resize-none focus:outline-none"
+                  spellcheck="false"
+                  class="w-full h-full bg-transparent text-sm px-4 py-2 resize-none focus:outline-none"
                   name="input"
                   id="input"
                   hx-post="api/process"
@@ -56,13 +94,14 @@
           <section class="w-1/2 flex flex-col p-4">
             <div class="flex-1 border border-gray-700 bg-[#171717] rounded flex flex-col" id="tq-form-field-output">
               <header class="border-b border-gray-700 px-4 py-2">
-                <h2 class="text-sm font-semibold tracking-widest text-gray-200">
+                <h2 class="text-sm font-bold tracking-widest">
                   OUTPUT
                 </h2>
               </header>
               <div class="flex-1">
                 <textarea
-                  class="w-full h-full bg-transparent text-sm text-gray-100 px-4 py-2 resize-none focus:outline-none"
+                  spellcheck="false"
+                  class="w-full h-full bg-transparent text-sm px-4 py-2 resize-none focus:outline-none"
                   name="output"
                   id="output"
                   readonly
