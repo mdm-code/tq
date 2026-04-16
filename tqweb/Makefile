@@ -8,13 +8,14 @@ HTMX_VERSION?=2.0.8
 # to revert to the version used in Go code, here is a quick shell script to
 # pull the version from the go.mod file.
 #
+# GO_WASM_HTTP_SERVER_VERSION?=master
+#
 # #2 The master version seems not to work right with Go 1.24.0.
 #
 GO_WASM_HTTP_SERVER_VERSION?=$(shell\
   grep go-wasm-http-server go.mod |\
   cut -d' ' -f3\
 )
-# GO_WASM_HTTP_SERVER_VERSION?=master
 # ====
 
 # export CGO_ENABLED=0
@@ -39,4 +40,4 @@ build:
 	$(GO) build $(GOFLAGS) -o api.wasm .
 
 serve:
-	$(shell goexec 'http.ListenAndServe(`:18080`, http.FileServer(http.Dir(`.`)))')
+	python3 -m http.server 8000
