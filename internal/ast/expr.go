@@ -31,7 +31,8 @@ type Query struct {
 // Filter stands for a single tq filter. It the fundamental building block of
 // the tq query.
 type Filter struct {
-	Kind Expr
+	Optional bool
+	Kind     Expr
 }
 
 // Identity specifies the identity data transformation that returns the
