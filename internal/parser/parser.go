@@ -2,6 +2,7 @@ package parser
 
 import (
 	"errors"
+	"slices"
 
 	"github.com/mdm-code/tq/v2/internal/ast"
 	"github.com/mdm-code/tq/v2/internal/lexer"
@@ -146,13 +147,13 @@ func (p *Parser) consume(t lexer.TokenType, e error) (lexer.Token, error) {
 }
 
 func (p *Parser) match(tt ...lexer.TokenType) bool {
-	for _, t := range tt {
+	return slices.ContainsFunc(tt, func(t lexer.TokenType) bool {
 		if p.check(t) {
 			p.advance()
 			return true
 		}
-	}
-	return false
+		return false
+	})
 }
 
 func (p *Parser) check(t lexer.TokenType) bool {
