@@ -62,7 +62,7 @@ func TestParse(t *testing.T) {
 		want  ast.Expr
 	}{
 		{
-			query: ".['students'][2:4][0]['grades'][:6][]",
+			query: ".['students'][2:4][0]['grades'][:6][]?",
 			want: &ast.Root{
 				Query: &ast.Query{
 					Filters: []ast.Expr{
@@ -113,6 +113,7 @@ func TestParse(t *testing.T) {
 							},
 						},
 						&ast.Filter{
+							Optional: true,
 							Kind: &ast.Selector{
 								Value: &ast.Iterator{},
 							},

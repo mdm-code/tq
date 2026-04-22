@@ -74,6 +74,9 @@ func (p *Parser) filter() (ast.Filter, error) {
 		v, _ := p.peek()
 		err = &Error{v.Lexeme(), v.Buffer, v.Start, v.LineOffset, ErrQueryElement}
 	}
+	if p.match(lexer.Optional) {
+		expr.Optional = true
+	}
 	return expr, err
 }
 
