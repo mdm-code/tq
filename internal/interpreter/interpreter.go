@@ -8,8 +8,9 @@ import (
 type FilterFunc func(data ...any) ([]any, error)
 
 type filter struct {
-	name  string
-	inner FilterFunc
+	name     string
+	inner    FilterFunc
+	optional bool
 }
 
 func (f *filter) call(data ...any) ([]any, error) {
@@ -43,7 +44,7 @@ func (i *Interpreter) Interpret(root ast.Expr) FilterFunc {
 		var err error
 		for _, f := range i.filters {
 			data, err = f.call(data...)
-			if err != nil {
+			if err != nil && !f.optional {
 				return data, err
 			}
 		}
@@ -67,6 +68,7 @@ func (i *Interpreter) VisitQuery(e ast.Expr) {
 func (i *Interpreter) VisitFilter(e ast.Expr) {
 	f := e.(*ast.Filter)
 	i.eval(f.Kind)
+	i.filters[len(i.filters)-1].optional = f.Optional
 }
 
 // VisitIdentity interprets the Identity AST node.
