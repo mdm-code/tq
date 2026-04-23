@@ -7,15 +7,15 @@ import (
 
 type mockVisitor struct{}
 
-func (mockVisitor) VisitRoot(e Expr)     {}
-func (mockVisitor) VisitQuery(e Expr)    {}
-func (mockVisitor) VisitFilter(e Expr)   {}
-func (mockVisitor) VisitIdentity(e Expr) {}
-func (mockVisitor) VisitSelector(e Expr) {}
-func (mockVisitor) VisitIterator(e Expr) {}
-func (mockVisitor) VisitSpan(e Expr)     {}
-func (mockVisitor) VisitString(e Expr)   {}
-func (mockVisitor) VisitInteger(e Expr)  {}
+func (mockVisitor) VisitRoot(e *Root)         {}
+func (mockVisitor) VisitQuery(e *Query)       {}
+func (mockVisitor) VisitFilter(e *Filter)     {}
+func (mockVisitor) VisitIdentity(e *Identity) {}
+func (mockVisitor) VisitSelector(e *Selector) {}
+func (mockVisitor) VisitIterator(e *Iterator) {}
+func (mockVisitor) VisitSpan(e *Span)         {}
+func (mockVisitor) VisitString(e *String)     {}
+func (mockVisitor) VisitInteger(e *Integer)   {}
 
 // Test the Expr Accept public method required by the visitor design pattern.
 func TestExprAccept(t *testing.T) {

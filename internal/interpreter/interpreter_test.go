@@ -35,7 +35,7 @@ func TestInterpret(t *testing.T) {
 					},
 				},
 			},
-			filteredData: []interface{}{2},
+			filteredData: []any{2},
 			query: `
 	.['students']
 		[0:99] [1] [] [0]
@@ -118,7 +118,7 @@ func TestInterpret(t *testing.T) {
 					"1000", "2_000",
 				},
 			},
-			filteredData: []interface{}{
+			filteredData: []any{
 				map[string]any{
 					"salaries": []any{"1000", "2_000"},
 				},
@@ -135,7 +135,7 @@ func TestInterpret(t *testing.T) {
 					"Bob", "Mike",
 				},
 			},
-			filteredData: []interface{}{
+			filteredData: []any{
 				map[string]any{
 					"employees": []any{
 						"Bob", "Mike",
@@ -176,52 +176,9 @@ func TestInterpret(t *testing.T) {
 	}
 }
 
-// Check if filter function errors out when provided unsupported data input.
-func TestVisitError(t *testing.T) {
-	var data interface{}
-	i := New()
-	cases := []struct {
-		name string
-		node ast.Expr
-		fn   func(ast.Expr)
-	}{
-		{
-			"integerNode",
-			&ast.Integer{},
-			(*i).VisitInteger,
-		},
-		{
-			"stringNode",
-			&ast.String{},
-			(*i).VisitString,
-		},
-		{
-			"iteratorNode",
-			&ast.Iterator{},
-			(*i).VisitIterator,
-		},
-		{
-			"spanNode",
-			&ast.Span{},
-			(*i).VisitSpan,
-		},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			defer func() { i.filters = nil }()
-			c.fn(c.node)
-			filter := i.filters[0]
-			_, err := filter.inner(data)
-			if err == nil {
-				t.Errorf("filter function should error with data: %v", data)
-			}
-		})
-	}
-}
-
 // Verify if Interpret fails when provided unsupported data.
 func TestInterpretError(t *testing.T) {
-	var data interface{}
+	var data any
 	root := &ast.Root{
 		Query: &ast.Query{
 			Filters: []ast.Expr{

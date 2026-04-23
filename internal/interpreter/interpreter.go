@@ -28,8 +28,8 @@ func New() *Interpreter {
 	return &Interpreter{}
 }
 
-func (i *Interpreter) eval(es ...ast.Expr) {
-	for _, e := range es {
+func (i *Interpreter) eval(exprs ...ast.Expr) {
+	for _, e := range exprs {
 		e.Accept(i)
 	}
 }
@@ -37,9 +37,9 @@ func (i *Interpreter) eval(es ...ast.Expr) {
 // Interpret extracts a sequence of filtering functions by traversing the AST.
 // It returns an entry function that takes in deserialized TOML data and
 // applies filtering functions in the sequence provided by the Interpreter.
-func (i *Interpreter) Interpret(root ast.Expr) FilterFunc {
+func (i *Interpreter) Interpret(expr ast.Expr) FilterFunc {
 	i.filters = nil // clear out previously accumulated filtering functions
-	i.eval(root)
+	i.eval(expr)
 	return func(data ...any) ([]any, error) {
 		var err error
 		for _, f := range i.filters {
@@ -53,26 +53,23 @@ func (i *Interpreter) Interpret(root ast.Expr) FilterFunc {
 }
 
 // VisitRoot interprets the Root AST node.
-func (i *Interpreter) VisitRoot(e ast.Expr) {
-	r := e.(*ast.Root)
-	i.eval(r.Query)
+func (i *Interpreter) VisitRoot(root *ast.Root) {
+	i.eval(root.Query)
 }
 
 // VisitQuery interprets the Query AST node.
-func (i *Interpreter) VisitQuery(e ast.Expr) {
-	q := e.(*ast.Query)
-	i.eval(q.Filters...)
+func (i *Interpreter) VisitQuery(query *ast.Query) {
+	i.eval(query.Filters...)
 }
 
 // VisitFilter interprets the Filter AST node.
-func (i *Interpreter) VisitFilter(e ast.Expr) {
-	f := e.(*ast.Filter)
-	i.eval(f.Kind)
-	i.filters[len(i.filters)-1].optional = f.Optional
+func (i *Interpreter) VisitFilter(filter *ast.Filter) {
+	i.eval(filter.Kind)
+	i.filters[len(i.filters)-1].optional = filter.Optional
 }
 
 // VisitIdentity interprets the Identity AST node.
-func (i *Interpreter) VisitIdentity(e ast.Expr) {
+func (i *Interpreter) VisitIdentity(identity *ast.Identity) {
 	f := filter{
 		name: "identity",
 		inner: func(data ...any) ([]any, error) {
@@ -83,14 +80,12 @@ func (i *Interpreter) VisitIdentity(e ast.Expr) {
 }
 
 // VisitSelector interprets the Selector AST node.
-func (i *Interpreter) VisitSelector(e ast.Expr) {
-	s := e.(*ast.Selector)
-	i.eval(s.Value)
+func (i *Interpreter) VisitSelector(selector *ast.Selector) {
+	i.eval(selector.Value)
 }
 
 // VisitSpan interprets the Span AST node.
-func (i *Interpreter) VisitSpan(e ast.Expr) {
-	span := e.(*ast.Span)
+func (i *Interpreter) VisitSpan(span *ast.Span) {
 	f := filter{
 		name: "span",
 		inner: func(data ...any) ([]any, error) {
@@ -122,8 +117,7 @@ func (i *Interpreter) VisitSpan(e ast.Expr) {
 }
 
 // VisitIterator interprets the Iterator AST node.
-func (i *Interpreter) VisitIterator(e ast.Expr) {
-	iter := e.(*ast.Iterator)
+func (i *Interpreter) VisitIterator(iterator *ast.Iterator) {
 	f := filter{
 		name: "iterator",
 		inner: func(data ...any) ([]any, error) {
@@ -140,7 +134,7 @@ func (i *Interpreter) VisitIterator(e ast.Expr) {
 				default:
 					err = &Error{
 						data:   d,
-						filter: iter.String(),
+						filter: iterator.String(),
 						err:    ErrTOMLDataType,
 					}
 				}
@@ -152,8 +146,7 @@ func (i *Interpreter) VisitIterator(e ast.Expr) {
 }
 
 // VisitString interprets the String AST node.
-func (i *Interpreter) VisitString(e ast.Expr) {
-	str := e.(*ast.String)
+func (i *Interpreter) VisitString(str *ast.String) {
 	f := filter{
 		name: "string",
 		inner: func(data ...any) ([]any, error) {
@@ -182,8 +175,7 @@ func (i *Interpreter) VisitString(e ast.Expr) {
 }
 
 // VisitInteger interprets the Integer AST node.
-func (i *Interpreter) VisitInteger(e ast.Expr) {
-	integer := e.(*ast.Integer)
+func (i *Interpreter) VisitInteger(integer *ast.Integer) {
 	f := filter{
 		name: "integer",
 		inner: func(data ...any) ([]any, error) {
