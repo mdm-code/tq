@@ -30,12 +30,12 @@ type Error struct {
 	err        error
 }
 
-// Is allows to check if Error.err matches the target error.
+// Is allows checking whether Error.err matches the target error.
 func (e *Error) Is(target error) bool {
 	return e.err == target
 }
 
-// Error reports the parser error wrapped inside of the custom context.
+// Error reports the parser error wrapped in custom context.
 func (e *Error) Error() string {
 	line := e.getErrorLine()
 	if e.buffer == nil || len(*e.buffer) < 1 {

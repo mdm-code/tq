@@ -1,5 +1,5 @@
 /*
-Package tq encapsulates the logic of the Tq program behind a public interface.
+Package tq encapsulates the logic of the tq program behind a public interface.
 It reads input data from the input reader, processes it with the interpreted
 query string, and writes output data to the output writer.
 */
@@ -19,7 +19,7 @@ import (
 
 // Tq accepts TOML data from input and produces the result TOML data to output.
 // The process of data decoding and encoding is handled by the adapter. The
-// query passed to the Run method string is interpreted and executed against
+// query string passed to the Run method is interpreted and executed against
 // the input data to produce the output data.
 type Tq struct {
 	adapter *toml.Adapter

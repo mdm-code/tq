@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	// ErrTOMLDataType indicates unexpected data type passed to the function.
+	// ErrTOMLDataType indicates an unexpected TOML data type.
 	ErrTOMLDataType = errors.New("wrong type error")
 )
 
@@ -18,13 +18,13 @@ type Error struct {
 	err    error
 }
 
-// Is allows to check if Error.err matches the target error.
+// Is allows checking whether Error.err matches the target error.
 func (e *Error) Is(target error) bool {
 	return e.err == target
 }
 
-// Error reports the Interpreter error with the data type and value followed
-// by the name of the data filter that was to be applied to this data.
+// Error reports the interpreter error with the data type and value followed
+// by the name of the data filter that was to be applied.
 func (e *Error) Error() string {
 	return fmt.Sprintf(
 		"Interpreter error: cannot query [ %T ] ( %v ) with ( %s )",

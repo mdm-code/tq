@@ -17,7 +17,7 @@ var (
 	// ErrUnterminatedString indicates that the string literal is not terminated.
 	ErrUnterminatedString = errors.New("unterminated string literal")
 
-	// ErrDisallowedChar indcates the the character is disallowed.
+	// ErrDisallowedChar indicates that the character is disallowed.
 	ErrDisallowedChar = errors.New("disallowed character")
 )
 
@@ -31,13 +31,13 @@ type Error struct {
 	err        error            // wrapped Lexer error
 }
 
-// Is allows to check if Error.err matches the target error.
+// Is allows checking whether Error.err matches the target error.
 func (e *Error) Is(target error) bool {
 	return e.err == target
 }
 
 // Error reports the Lexer error wrapped inside the Lexer buffer context with
-// a marker indicating the start of the Lexer token at which the occurred.
+// a marker indicating the start of the Lexer token where it occurred.
 func (e *Error) Error() string {
 	line := e.getErrorLine()
 	if e.buffer == nil || len(*e.buffer) < 1 {

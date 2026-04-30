@@ -59,7 +59,7 @@ go get github.com/mdm-code/tq/v2
 ## Usage
 
 Enter `tq -h` to get usage information and the list of options that can be used
-with the command. Here is table with the supported filter expressions and some
+with the command. Here is a table with the supported filter expressions and some
 examples to get you going on how to use `tq` in your workflow.
 
 Some effort has been made to make queries less clunky to type out on the
@@ -67,7 +67,7 @@ command line and the syntax for queries more aligned with the TOML syntax and
 semantics. It's been decided to drop the requirement for square brackets for
 selectors and quotation marks for bare strings. Queries can now span across
 multiple lines so that they are still legible as their complexity increases.
-Longer queries run in a shell script might benefit for it. As for quoted
+Longer queries run in a shell script might benefit from it. As for quoted
 strings, both inverted commas and quotes can be used. A note of caution though
 that these should be used such that they do not interfere with shell quoting.
 
@@ -133,12 +133,11 @@ backing Go type:
 
 ### Multiline query with bare strings
 
-Here is a dummy configuration file in TOML found on the web for Gitlab
-connected to a Kubernetes. The file attempts to configure some Gitlab runners.
+Here is a sample TOML configuration file for GitLab runners on Kubernetes.
 The file is (1) queried with the key `runners` to access the table that is then
 (2) converted to an iterator with `[]`. Then (3) the query goes for
 `kubernetes`, `volumes`, and `host_path` in this order, where `host_path[]?`
-skips entries that are missing or not iterable, and then (4) query each element
+skips entries that are missing or not iterable, and then (4) queries each element
 for `"host path"`; here entries missing that key are also skipped.
 
 
@@ -215,10 +214,10 @@ Output:
 ```
 
 
-### Run inside of a container
+### Run inside a container
 
 If you don't feel like installing `tq` with `go install`, you can test `tq` out
-running inside of a container with this command:
+running inside a container with this command:
 
 ```sh
 <<EOF docker run -i ghcr.io/mdm-code/tq:latest tq -q ".dependencies.ignore"
