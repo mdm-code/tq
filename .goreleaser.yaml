@@ -13,7 +13,7 @@ builds:
     flags:
       - -trimpath
     ldflags:
-      - -X main.version={{ .Version }} -X main.commit={{ .Commit }} -X main.date={{ .CommitDate }}
+      - -s -w -X main.version={{ .Version }} -X main.commit={{ .Commit }} -X main.date={{ .CommitDate }}
     mod_timestamp: '{{ .CommitTimestamp }}'
     targets:
       - linux_amd64
