@@ -134,7 +134,7 @@ func TestLexerScanAll(t *testing.T) {
 	}{
 		{
 			name:             "whitespace ignored",
-			query:            ". [ 'package' ][][ 9 ] ",
+			query:            ". [ 'package' ][][ 9 ]?",
 			ignoreWhitespace: true,
 			want: []Token{
 				{Dot, nil, 0, 1, 0},
@@ -146,6 +146,7 @@ func TestLexerScanAll(t *testing.T) {
 				{ArrayOpen, nil, 17, 18, 17},
 				{Integer, nil, 19, 20, 20},
 				{ArrayClose, nil, 21, 22, 21},
+				{Optional, nil, 23, 24, 23},
 			},
 		},
 		{

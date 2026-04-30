@@ -31,6 +31,9 @@ const (
 
 	// Whitespace represents a white space token type.
 	Whitespace
+
+	// Optional represents an optional token type.
+	Optional
 )
 
 // keyCharMap maps runes onto TokenTypes.
@@ -39,6 +42,7 @@ var keyCharMap = map[rune]TokenType{
 	':': Colon,
 	'[': ArrayOpen,
 	']': ArrayClose,
+	'?': Optional,
 }
 
 // escapeSequenceMap maps popular escape sequence characters onto its Go string

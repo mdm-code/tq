@@ -11,27 +11,28 @@ type Expr interface {
 	Accept(v Visitor)
 }
 
-// Root stands for the top-level root node of the tq query. This version of
+// Root is the top-level root node of the tq query. This version of
 // the tq parser allows a single query, but extending the root to span
-// multiple queries in always an option.
+// multiple queries is always an option.
 type Root struct {
 	Query Expr
 }
 
-// Query represents a single tq query that can be run against a de-serialized
-// TOML data object. It potentially comprises of zero or more filters used to
+// Query represents a single tq query that can be run against a deserialized
+// TOML data object. It potentially comprises zero or more filters used to
 // filter the TOML data. Although filters are stored in a slice implying a
-// sequence, the order in not enforced neither by the expression nor the
+// sequence, the order is not enforced by either the expression or the
 // parser. It is the responsibility of the visiting interpreter run against the
 // AST to provide the filtering mechanism.
 type Query struct {
 	Filters []Expr
 }
 
-// Filter stands for a single tq filter. It the fundamental building block of
+// Filter stands for a single tq filter. It is the fundamental building block of
 // the tq query.
 type Filter struct {
-	Kind Expr
+	Optional bool
+	Kind     Expr
 }
 
 // Identity specifies the identity data transformation that returns the
@@ -48,7 +49,7 @@ type Span struct {
 	Left, Right *Integer
 }
 
-// Iterator represents a sequeced iterator. The implementation of the iterator
+// Iterator represents a sequenced iterator. The implementation of the iterator
 // for TOML data types is to be provided by the visiting interpreter.
 type Iterator struct{}
 

@@ -59,7 +59,7 @@ go get github.com/mdm-code/tq/v2
 ## Usage
 
 Enter `tq -h` to get usage information and the list of options that can be used
-with the command. Here is table with the supported filter expressions and some
+with the command. Here is a table with the supported filter expressions and some
 examples to get you going on how to use `tq` in your workflow.
 
 Some effort has been made to make queries less clunky to type out on the
@@ -67,7 +67,7 @@ command line and the syntax for queries more aligned with the TOML syntax and
 semantics. It's been decided to drop the requirement for square brackets for
 selectors and quotation marks for bare strings. Queries can now span across
 multiple lines so that they are still legible as their complexity increases.
-Longer queries run in a shell script might benefit for it. As for quoted
+Longer queries run in a shell script might benefit from it. As for quoted
 strings, both inverted commas and quotes can be used. A note of caution though
 that these should be used such that they do not interfere with shell quoting.
 
@@ -81,6 +81,11 @@ that these should be used such that they do not interfere with shell quoting.
 | <kbd><b>index</b></kbd>                                                     | <kbd><b>[0]</b></kbd>                                                                               |
 | <kbd><b>iterator</b></kbd>                                                  | <kbd><b>[]</b></kbd>                                                                                |
 | <kbd><b>span</b></kbd>                                                      | <kbd><b>[:]</b></kbd>                                                                               |
+
+> [!NOTE]
+> `?` is not a standalone filter. It is a modifier for the preceding filter
+> expression (for example `[]?` or `.key?`) and makes that filter optional
+> by skipping incompatible inputs instead of failing the whole query.
 
 
 ### Supported escape sequences for quoted strings
@@ -118,22 +123,22 @@ backing Go type:
 0b1111_1111 => 255    # Binary is converted to decimal.
 +100        => 100    # The plus sign is dropped.
 5e-3        => 0.005  # The exponential notation is not kept.
-
-# Other relevant notations like date, time, date-time, with and without the
-# offset, inf, nan, negative numbers, stay the way they're written in the
-# input file.
 ```
+
+> [!NOTE]
+> Other relevant notations like date, time, date-time, with and without the
+> offset, inf, nan, negative numbers, stay the way they're written in the
+> input file.
 
 
 ### Multiline query with bare strings
 
-Here is a dummy configuration file in TOML found on the web for Gitlab
-connected to a Kubernetes. The file attempts to configure some Gitlab runners.
+Here is a sample TOML configuration file for GitLab runners on Kubernetes.
 The file is (1) queried with the key `runners` to access the table that is then
 (2) converted to an iterator with `[]`. Then (3) the query goes for
-`kubernetes`, `volumes`, and `host_path` in this order to (4) turn the last one
-to an iterator with `[]`, and then (5) query each element of the iterator for
-`"host path"`. Mind the quoted string with the space.
+`kubernetes`, `volumes`, and `host_path` in this order, where `host_path[]?`
+skips entries that are missing or not iterable, and then (4) queries each element
+for `"host path"`; here entries missing that key are also skipped.
 
 
 ```sh
@@ -141,7 +146,7 @@ to an iterator with `[]`, and then (5) query each element of the iterator for
     .runners[]
         .kubernetes
         .volumes
-        .host_path[]
+        .host_path[]?
             ."host path"
 '
 [session_server]
@@ -170,6 +175,9 @@ to an iterator with `[]`, and then (5) query each element of the iterator for
         name = "gitlab-cache"
         mount_path = "/tmp/gitlab/cache"
         "host path" = "/home/core/data/gitlab-runner/data"
+      [[runners.kubernetes.volumes.host_path]]
+        name = "gitlab-cache-2"
+        mount_path = "/tmp/gitlab/cache-2"
 
 [[runners]]
   name = "runner-gitlab-runner-xxx-xxx"
@@ -189,6 +197,13 @@ to an iterator with `[]`, and then (5) query each element of the iterator for
     service_account_overwrite_allowed = ""
     pod_annotations_overwrite_allowed = ""
     [runners.kubernetes.volumes]
+      host_path = "disabled"
+
+[[runners]]
+  name = "runner-without-kubernetes-volumes"
+  executor = "kubernetes"
+  [runners.kubernetes]
+    namespace = "gitlab-managed-apps"
 EOF
 ```
 
@@ -199,59 +214,10 @@ Output:
 ```
 
 
-### Retrieve IPs from a table of server tables
-
-In the example below, the TOML input file is (1) queried with the key
-`servers`, then (2) the retrieved table is converted to an iterator of objects
-with `[]`, and then (3) the IP address is recovered from each of the objects
-with the quoted key `"ip"`.
-
-```sh
-<<EOF tq -q '.servers[]."ip"'
-[servers]
-
-[servers.prod]
-ip = "10.0.0.1"
-role = "backend"
-
-[servers.staging]
-ip = "10.0.0.2"
-role = "backend"
-EOF
-```
-
-```txt
-Output:
-
-10.0.0.1
-10.0.0.2
-```
-
-
-### Retrieve selected ports from a list of databases
-
-This example uses the older syntax and queries the TOML input for the for the
-all ports aside from the first one assigned to the first database record on the
-list.
-
-```sh
-<<EOF tq -q '.["databases"][0]["ports"][1:][]'
-databases = [ {enabled = true, ports = [ 5432, 5433, 5434 ]} ]
-EOF
-```
-
-```txt
-Output:
-
-5433
-5434
-```
-
-
-### Run inside of a container
+### Run inside a container
 
 If you don't feel like installing `tq` with `go install`, you can test `tq` out
-running inside of a container with this command:
+running inside a container with this command:
 
 ```sh
 <<EOF docker run -i ghcr.io/mdm-code/tq:latest tq -q ".dependencies.ignore"
@@ -278,13 +244,15 @@ version = '0.4.22'
 
 ## Development
 
+Development and local builds require Go 1.26 or newer.
+
 Go through the [Makefile](Makefile) to get an idea of the formatting, testing
 and linting that can be used locally for development purposes.
 
 
 ## License
 
-Copyright (c) 2025 Michał Adamczyk.
+Copyright (c) 2026 Michał Adamczyk.
 
 This project is licensed under the [MIT license](https://opensource.org/licenses/MIT).
 See [LICENSE](LICENSE) for more details.
