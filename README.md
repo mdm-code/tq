@@ -245,6 +245,8 @@ version = '0.4.22'
 
 ## Development
 
+Development and local builds require Go 1.26 or newer.
+
 Go through the [Makefile](Makefile) to get an idea of the formatting, testing
 and linting that can be used locally for development purposes.
 
