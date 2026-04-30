@@ -81,7 +81,11 @@ that these should be used such that they do not interfere with shell quoting.
 | <kbd><b>index</b></kbd>                                                     | <kbd><b>[0]</b></kbd>                                                                               |
 | <kbd><b>iterator</b></kbd>                                                  | <kbd><b>[]</b></kbd>                                                                                |
 | <kbd><b>span</b></kbd>                                                      | <kbd><b>[:]</b></kbd>                                                                               |
-| <kbd><b>optional</b></kbd>                                                  | <kbd><b>&lt;filter&gt;?</b></kbd> (for example <kbd><b>[]?</b></kbd>, <kbd><b>."key"?</b></kbd>) |
+
+> [!NOTE]
+> `?` is not a standalone filter. It is a modifier for the preceding filter
+> expression (for example `[]?` or `.key?`) and makes that filter optional
+> by skipping incompatible inputs instead of failing the whole query.
 
 
 ### Supported escape sequences for quoted strings
