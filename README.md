@@ -133,9 +133,9 @@ Here is a dummy configuration file in TOML found on the web for Gitlab
 connected to a Kubernetes. The file attempts to configure some Gitlab runners.
 The file is (1) queried with the key `runners` to access the table that is then
 (2) converted to an iterator with `[]`. Then (3) the query goes for
-`kubernetes`, `volumes`, and `host_path` in this order to (4) turn the last one
-to an iterator with `[]`, and then (5) query each element of the iterator for
-`"host path"`. Mind the quoted string with the space.
+`kubernetes`, `volumes`, and `host_path` in this order, where `host_path[]?`
+skips entries that are missing or not iterable, and then (4) query each element
+for `"host path"`; here entries missing that key are also skipped.
 
 
 ```sh
@@ -143,7 +143,7 @@ to an iterator with `[]`, and then (5) query each element of the iterator for
     .runners[]
         .kubernetes
         .volumes
-        .host_path[]
+        .host_path[]?
             ."host path"
 '
 [session_server]
@@ -172,6 +172,9 @@ to an iterator with `[]`, and then (5) query each element of the iterator for
         name = "gitlab-cache"
         mount_path = "/tmp/gitlab/cache"
         "host path" = "/home/core/data/gitlab-runner/data"
+      [[runners.kubernetes.volumes.host_path]]
+        name = "gitlab-cache-2"
+        mount_path = "/tmp/gitlab/cache-2"
 
 [[runners]]
   name = "runner-gitlab-runner-xxx-xxx"
@@ -191,6 +194,13 @@ to an iterator with `[]`, and then (5) query each element of the iterator for
     service_account_overwrite_allowed = ""
     pod_annotations_overwrite_allowed = ""
     [runners.kubernetes.volumes]
+      host_path = "disabled"
+
+[[runners]]
+  name = "runner-without-kubernetes-volumes"
+  executor = "kubernetes"
+  [runners.kubernetes]
+    namespace = "gitlab-managed-apps"
 EOF
 ```
 
@@ -198,79 +208,6 @@ EOF
 Output:
 
 /home/core/data/gitlab-runner/data
-```
-
-
-### Retrieve IPs from a table of server tables
-
-In the example below, the TOML input file is (1) queried with the key
-`servers`, then (2) the retrieved table is converted to an iterator of objects
-with `[]`, and then (3) the IP address is recovered from each of the objects
-with the quoted key `"ip"`.
-
-```sh
-<<EOF tq -q '.servers[]."ip"'
-[servers]
-
-[servers.prod]
-ip = "10.0.0.1"
-role = "backend"
-
-[servers.staging]
-ip = "10.0.0.2"
-role = "backend"
-EOF
-```
-
-```txt
-Output:
-
-10.0.0.1
-10.0.0.2
-```
-
-
-### Retrieve selected ports from a list of databases
-
-This example uses the older syntax and queries the TOML input for the for the
-all ports aside from the first one assigned to the first database record on the
-list.
-
-```sh
-<<EOF tq -q '.["databases"][0]["ports"][1:][]'
-databases = [ {enabled = true, ports = [ 5432, 5433, 5434 ]} ]
-EOF
-```
-
-```txt
-Output:
-
-5433
-5434
-```
-
-
-### Optional filter with `?`
-
-Append `?` to a filter to make it optional. If that filter errors for a value,
-`tq` skips the error and continues with the rest of the query.
-
-```sh
-<<EOF tq -q '.services[].ports[]?'
-services = [
-  { name = "api", ports = [80, 443] },
-  { name = "worker", ports = "disabled" },
-  { name = "admin", ports = [8080] }
-]
-EOF
-```
-
-```txt
-Output:
-
-80
-443
-8080
 ```
 
 
