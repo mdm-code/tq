@@ -81,6 +81,7 @@ that these should be used such that they do not interfere with shell quoting.
 | <kbd><b>index</b></kbd>                                                     | <kbd><b>[0]</b></kbd>                                                                               |
 | <kbd><b>iterator</b></kbd>                                                  | <kbd><b>[]</b></kbd>                                                                                |
 | <kbd><b>span</b></kbd>                                                      | <kbd><b>[:]</b></kbd>                                                                               |
+| <kbd><b>optional</b></kbd>                                                  | <kbd><b>&lt;filter&gt;?</b></kbd> (for example <kbd><b>[]?</b></kbd>, <kbd><b>."key"?</b></kbd>) |
 
 
 ### Supported escape sequences for quoted strings
@@ -245,6 +246,30 @@ Output:
 
 5433
 5434
+```
+
+
+### Optional filter with `?`
+
+Append `?` to a filter to make it optional. If that filter errors for a value,
+`tq` skips the error and continues with the rest of the query.
+
+```sh
+<<EOF tq -q '.services[].ports[]?'
+services = [
+  { name = "api", ports = [80, 443] },
+  { name = "worker", ports = "disabled" },
+  { name = "admin", ports = [8080] }
+]
+EOF
+```
+
+```txt
+Output:
+
+80
+443
+8080
 ```
 
 
