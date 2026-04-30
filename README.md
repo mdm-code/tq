@@ -119,11 +119,12 @@ backing Go type:
 0b1111_1111 => 255    # Binary is converted to decimal.
 +100        => 100    # The plus sign is dropped.
 5e-3        => 0.005  # The exponential notation is not kept.
-
-# Other relevant notations like date, time, date-time, with and without the
-# offset, inf, nan, negative numbers, stay the way they're written in the
-# input file.
 ```
+
+> [!NOTE]
+> Other relevant notations like date, time, date-time, with and without the
+> offset, inf, nan, negative numbers, stay the way they're written in the
+> input file.
 
 
 ### Multiline query with bare strings
