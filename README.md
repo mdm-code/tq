@@ -253,7 +253,7 @@ and linting that can be used locally for development purposes.
 
 ## License
 
-Copyright (c) 2025 Michał Adamczyk.
+Copyright (c) 2026 Michał Adamczyk.
 
 This project is licensed under the [MIT license](https://opensource.org/licenses/MIT).
 See [LICENSE](LICENSE) for more details.
