@@ -1,3 +1,5 @@
+version: 2
+
 before:
   hooks:
     - go mod tidy
@@ -33,11 +35,12 @@ universal_binaries:
 
 archives:
 - id: tq
-  format: tar.gz
-  builds:
+  formats:
+    - tar.gz
+  ids:
     - tq
   files:
-  - none*
+    - none*
   name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 
 dockers:
@@ -56,7 +59,7 @@ checksum:
   name_template: 'sha256sums.txt'
 
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  version_template: "{{ incpatch .Version }}-next"
 
 release:
   github:
