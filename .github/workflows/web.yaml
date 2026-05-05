@@ -39,4 +39,4 @@ jobs:
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         BRANCH: gh-pages
-        FOLDER: .  # NOTE: Might be better to copy the files to be deployed to a specific catalog first.
+        FOLDER: tqweb  # NOTE: Might be better to copy the files to be deployed to a specific catalog first.
