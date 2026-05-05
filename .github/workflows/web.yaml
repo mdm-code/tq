@@ -29,7 +29,7 @@ jobs:
       run: make build
 
     - name: Change base tag in index.html from / to tq
-      run: sed -i -e 's/<base href="\/" \/>/<base href="\/tq\/" \/>/g' index.html
+      run: sed -i 's/<base href="\/" \/>/<base href="\/tq\/" \/>/g' index.html
 
     - name: Copy index.html to 404.html
       run: cp index.html 404.html
