@@ -8,7 +8,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     defaults:
-      run:
+      run:  # NOTE: This only applies to 'run' steps like make, sed, cp; not to actions.
         working-directory: './tqweb'
     steps:
     - name: Set up Go
