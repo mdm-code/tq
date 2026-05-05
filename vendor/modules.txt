@@ -7,8 +7,8 @@ github.com/hack-pad/safejs/internal/stackerr
 # github.com/mdm-code/scanner v1.2.1
 ## explicit; go 1.21
 github.com/mdm-code/scanner
-# github.com/mdm-code/tq/v2 v2.4.0
-## explicit; go 1.24
+# github.com/mdm-code/tq/v2 v2.5.1
+## explicit; go 1.26
 # github.com/nlepage/go-js-promise v1.0.0
 ## explicit; go 1.12
 github.com/nlepage/go-js-promise

@@ -1,5 +1,5 @@
 GO=go
-GOFLAGS=-mod=vendor
+GOFLAGS=-mod=vendor -trimpath
 HTMX_VERSION?=2.0.8
 # NOTE
 # ====
@@ -18,7 +18,7 @@ GO_WASM_HTTP_SERVER_VERSION?=$(shell\
 )
 # ====
 
-# export CGO_ENABLED=0
+export CGO_ENABLED=0
 export GOOS=js
 export GOARCH=wasm
 
@@ -37,7 +37,7 @@ assets:
 	curl https://cdn.jsdelivr.net/gh/nlepage/go-wasm-http-server@$(GO_WASM_HTTP_SERVER_VERSION)/sw.js > sw.js
 
 build:
-	$(GO) build $(GOFLAGS) -o api.wasm .
+	$(GO) build $(GOFLAGS) -ldflags '-s -w' -o api.wasm .
 
 serve:
 	python3 -m http.server 8000

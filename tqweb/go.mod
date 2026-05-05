@@ -1,9 +1,9 @@
 module github.com/mdm-code/tqweb
 
-go 1.24.0
+go 1.26.0
 
 require (
-	github.com/mdm-code/tq/v2 v2.4.0
+	github.com/mdm-code/tq/v2 v2.5.1
 	github.com/nlepage/go-wasm-http-server/v2 v2.2.1
 )
 
