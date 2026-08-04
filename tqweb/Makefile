@@ -10,11 +10,11 @@ HTMX_VERSION?=2.0.8
 #
 # GO_WASM_HTTP_SERVER_VERSION?=master
 #
-# #2 The master version seems not to work right with Go 1.24.0.
+# #2 The master version seems not to work right with Go 1.26.
 #
 GO_WASM_HTTP_SERVER_VERSION?=$(shell\
   grep go-wasm-http-server go.mod |\
-  cut -d' ' -f3\
+  cut -d' ' -f2\
 )
 # ====
 
