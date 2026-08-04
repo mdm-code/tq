@@ -19,3 +19,10 @@
 
 # Go workspace file
 # go.work
+
+# Project specific files that should not be committed to the repository
+# Built WASM binaries (unversioned and content-hashed)
+api.wasm
+api.*.wasm
+# Worker file generated from worker.js.in
+worker.js

@@ -26,7 +26,7 @@ ifndef VERBOSE
 .SILENT:
 endif
 
-.PHONY: assets build serve
+.PHONY: assets build serve clean
 
 .PHONY: .ONESHELL
 .ONESHELL:
@@ -36,8 +36,20 @@ assets:
 	curl https://cdn.jsdelivr.net/npm/htmx.org@$(HTMX_VERSION)/dist/htmx.min.js > htmx.min.js
 	curl https://cdn.jsdelivr.net/gh/nlepage/go-wasm-http-server@$(GO_WASM_HTTP_SERVER_VERSION)/sw.js > sw.js
 
-build:
+build: clean
 	$(GO) build $(GOFLAGS) -ldflags '-s -w' -o api.wasm .
+	if command -v sha256sum >/dev/null 2>&1; then \
+		VERSION=$$(sha256sum api.wasm | cut -c1-8); \
+	else \
+		VERSION=$$(shasum -a 256 api.wasm | cut -c1-8); \
+	fi; \
+	mv api.wasm api.$${VERSION}.wasm; \
+	sed -e "s|__WASM__|api.$${VERSION}.wasm|g" \
+	    -e "s|__CACHE__|api-$${VERSION}|g" \
+	    worker.js.in > worker.js
+
+clean:
+	rm -f api.wasm api.*.wasm worker.js
 
 serve:
 	python3 -m http.server 8000
