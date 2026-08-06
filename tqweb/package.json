@@ -1,0 +1,8 @@
+{
+  "name": "tqweb",
+  "private": true,
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.11",
+    "tailwindcss": "^4.1.11"
+  }
+}

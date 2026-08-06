@@ -20,7 +20,6 @@ TODO:
 - Checkboxes: send true if checked.
 - Buttons: on click, keep highlighted and add to the payload.
 2. The config and TQ has to be instantiated with each call.
-3. Curl tailwind css scripts.
 */
 
 var (

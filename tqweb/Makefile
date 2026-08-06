@@ -26,7 +26,7 @@ ifndef VERBOSE
 .SILENT:
 endif
 
-.PHONY: assets build serve clean
+.PHONY: assets npm css build serve clean
 
 .PHONY: .ONESHELL
 .ONESHELL:
@@ -36,7 +36,13 @@ assets:
 	curl https://cdn.jsdelivr.net/npm/htmx.org@$(HTMX_VERSION)/dist/htmx.min.js > htmx.min.js
 	curl https://cdn.jsdelivr.net/gh/nlepage/go-wasm-http-server@$(GO_WASM_HTTP_SERVER_VERSION)/sw.js > sw.js
 
-build: clean
+npm:
+	npm ci
+
+css: npm
+	npx @tailwindcss/cli -i ./input.css -o ./styles.css --minify
+
+build: clean css
 	$(GO) build $(GOFLAGS) -ldflags '-s -w' -o api.wasm .
 	if command -v sha256sum >/dev/null 2>&1; then \
 		VERSION=$$(sha256sum api.wasm | cut -c1-8); \
@@ -49,7 +55,7 @@ build: clean
 	    worker.js.in > worker.js
 
 clean:
-	rm -f api.wasm api.*.wasm worker.js
+	rm -f api.wasm api.*.wasm worker.js styles.css
 
 serve:
 	python3 -m http.server 8000
