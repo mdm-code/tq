@@ -27,7 +27,7 @@
         <div class="flex fill-[#9cd0f4] items-center space-x-4 me-4 text-xl">
           <div class="flex relative group">
             <button
-              onclick="onCopyClick(document.querySelector('#query').value, document.querySelector('#input').value)"
+              onclick="onCopyClick(document.querySelector('#query').value, document.querySelector('#input').value, document.querySelector('#tq-form'))"
               class="hover:fill-gray-900"
             >
               <svg class="w-6" viewBox="0 0 24 24">
@@ -69,6 +69,78 @@
                   hx-swap="outerHTML"
                   hx-target="#output"
                 ></textarea>
+              </div>
+            </div>
+            <div class="border border-gray-700 bg-[#171717] rounded" id="tq-form-field-options">
+              <header class="border-b border-gray-700 px-4 py-2">
+                <h2 class="text-sm font-bold tracking-widest">
+                  OPTIONS
+                </h2>
+              </header>
+              <div class="flex flex-wrap gap-2 px-4 py-3">
+                <label class="cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    name="tables-inline"
+                    value="true"
+                    class="peer sr-only"
+                    hx-post="api/process"
+                    hx-trigger="change"
+                    hx-sync="this:replace"
+                    hx-swap="outerHTML"
+                    hx-target="#output"
+                  />
+                  <span
+                    class="inline-block border border-gray-700 px-3 py-1 text-xs tracking-wide peer-checked:border-[#9cd0f4] peer-checked:bg-[#9cd0f4] peer-checked:text-gray-900"
+                  >--tables-inline</span>
+                </label>
+                <label class="cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    name="arrays-multiline"
+                    value="true"
+                    class="peer sr-only"
+                    hx-post="api/process"
+                    hx-trigger="change"
+                    hx-sync="this:replace"
+                    hx-swap="outerHTML"
+                    hx-target="#output"
+                  />
+                  <span
+                    class="inline-block border border-gray-700 px-3 py-1 text-xs tracking-wide peer-checked:border-[#9cd0f4] peer-checked:bg-[#9cd0f4] peer-checked:text-gray-900"
+                  >--arrays-multiline</span>
+                </label>
+                <label class="cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    name="indent-tables"
+                    value="true"
+                    class="peer sr-only"
+                    hx-post="api/process"
+                    hx-trigger="change"
+                    hx-sync="this:replace"
+                    hx-swap="outerHTML"
+                    hx-target="#output"
+                  />
+                  <span
+                    class="inline-block border border-gray-700 px-3 py-1 text-xs tracking-wide peer-checked:border-[#9cd0f4] peer-checked:bg-[#9cd0f4] peer-checked:text-gray-900"
+                  >--indent-tables</span>
+                </label>
+                <label class="inline-flex items-center gap-2 border border-gray-700 px-3 py-1 text-xs tracking-wide">
+                  <span>--indent-symbol</span>
+                  <input
+                    type="text"
+                    name="indent-symbol"
+                    value="  "
+                    spellcheck="false"
+                    class="w-12 bg-transparent border-b border-gray-700 focus:outline-none focus:border-[#9cd0f4]"
+                    hx-post="api/process"
+                    hx-trigger="input changed delay:1000ms"
+                    hx-sync="this:replace"
+                    hx-swap="outerHTML"
+                    hx-target="#output"
+                  />
+                </label>
               </div>
             </div>
             <div class="flex-1 border border-gray-700 bg-[#171717] rouded flex flex-col" id="tq-form-field-input">
