@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ frontend ]  # NOTE: Switch to 'main' when confirmed it's working.
+    branches: [ main ]
 
 permissions:
   contents: read
