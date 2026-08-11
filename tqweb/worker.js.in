@@ -1,0 +1,18 @@
+importScripts('wasm_exec.js');
+importScripts('sw.js');
+
+const wasm = '__WASM__';
+
+addEventListener('install', (event) => {
+  event.waitUntil(caches.open('__CACHE__').then((cache) => cache.add(wasm)));
+});
+
+addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== '__CACHE__').map((k) => caches.delete(k)))
+    ).then(() => clients.claim())
+  );
+});
+
+registerWasmHTTPListener(wasm, { base: 'api', cacheName: '__CACHE__' });

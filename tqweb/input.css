@@ -1,0 +1,34 @@
+@import "tailwindcss";
+@source "./index.html";
+@source "./views/**/*.html";
+
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-wave {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  background: rgb(156 208 244 / 0.35);
+  transform: scale(0);
+  animation: ripple-wave 500ms ease-out forwards;
+}
+
+.peer:checked ~ .ripple .ripple-wave {
+  background: rgb(0 0 0 / 0.2);
+}
+
+@keyframes ripple-wave {
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ripple-wave {
+    animation: none;
+  }
+}

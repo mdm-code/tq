@@ -18,4 +18,15 @@
 # vendor/
 
 # Go workspace file
-go.work
+# go.work
+
+# Project specific files that should not be committed to the repository
+# Built WASM binaries (unversioned and content-hashed)
+api.wasm
+api.*.wasm
+# Worker file generated from worker.js.in
+worker.js
+
+# Files related to tailwind
+node_modules/
+styles.css

@@ -1,0 +1,9 @@
+{{ block "output" . }}
+  <textarea
+    spellcheck="false"
+    class="w-full h-full bg-transparent text-sm px-4 py-2 resize-none focus:outline-none"
+    name="output"
+    id="output"
+    readonly
+  >{{ .Output }}</textarea>
+{{ end }}
