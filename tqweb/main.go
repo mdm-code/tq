@@ -15,9 +15,9 @@ import (
 )
 
 var (
-	//go:embed views/index.html
-	index  string
-	indexT = template.Must(template.New("index").Parse(index))
+	//go:embed views/output.html
+	outputHtml  string
+	outputTempl = template.Must(template.New("index").Parse(outputHtml))
 )
 
 func setupTomlAdapter(r *http.Request) *toml.Adapter {
@@ -62,7 +62,7 @@ func main() {
 		} else {
 			data.Output = output.String()
 		}
-		if err := indexT.ExecuteTemplate(w, "output", data); err != nil {
+		if err := outputTempl.ExecuteTemplate(w, "output", data); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
