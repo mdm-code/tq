@@ -42,17 +42,20 @@ archives:
     - none*
   name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 
-dockers:
+dockers_v2:
   - id: tools
-    goos: linux
-    goarch: amd64
     ids:
       - tq
-    image_templates:
-      - "ghcr.io/mdm-code/tq:latest"
-      - "ghcr.io/mdm-code/tq:{{ .Tag }}"
-      - "ghcr.io/mdm-code/tq:v{{ .Major }}"
-    skip_push: false
+    dockerfile: Dockerfile
+    images:
+      - "ghcr.io/mdm-code/tq"
+    tags:
+      - "latest"
+      - "{{ .Tag }}"
+      - "{{ .Major }}"
+    platforms:
+      - linux/amd64
+      - linux/arm64
 
 checksum:
   name_template: 'sha256sums.txt'
