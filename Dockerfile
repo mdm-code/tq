@@ -1,3 +1,4 @@
 FROM scratch
+ARG TARGETPLATFORM
 ENV PATH "$PATH:/bin"
-COPY tq /bin/tq
+COPY $TARGETPLATFORM/tq /bin/tq
