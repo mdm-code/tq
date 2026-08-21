@@ -249,6 +249,9 @@ Development and local builds require Go 1.26 or newer.
 Go through the [Makefile](Makefile) to get an idea of the formatting, testing
 and linting that can be used locally for development purposes.
 
+This project uses `golangci-lint`. [Here](https://golangci-lint.run/docs/welcome/install/local/)
+is how to install it on your local machine.
+
 
 ## License
 
