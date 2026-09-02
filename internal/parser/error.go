@@ -82,7 +82,7 @@ func (e *Error) getErrorLine() string {
 	b.WriteString("Parser error: ")
 	if e.err != nil {
 		b.WriteString(e.err.Error())
-		b.WriteString(fmt.Sprintf("; got '%s'", e.lexeme))
+		fmt.Fprintf(&b, "; got '%s'", e.lexeme)
 		return b.String()
 	}
 	b.WriteString("nil")

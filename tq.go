@@ -98,7 +98,10 @@ func (t *Tq) Run(input io.Reader, output io.Writer, query string) error {
 				return err
 			}
 		}
-		fmt.Fprintf(output, "%s\n", strings.TrimSpace(string(bytes)))
+		_, err = fmt.Fprintf(output, "%s\n", strings.TrimSpace(string(bytes)))
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
