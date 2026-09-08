@@ -31,7 +31,7 @@ jobs:
         go version
 
     - name: Build
-      run: make build
+      run: go build -mod=vendor github.com/mdm-code/tq/...
 
     - name: Test
       run: go test -v -coverprofile='coverage.txt' -covermode='atomic' ./...
