@@ -17,8 +17,6 @@ enable = [
 	"goimports",
 	"gci",
 ]
-disable = [
-]
 
 [run]
 timeout = "5m"
