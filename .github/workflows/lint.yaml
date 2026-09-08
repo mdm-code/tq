@@ -1,10 +1,9 @@
 name: Lint
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  workflow_run:
+    workflows: [ Test ]
+    types: [ completed ]
 
 jobs:
   lint:
@@ -29,4 +28,9 @@ jobs:
     - name: Run linters with golangci-lint
       uses: golangci/golangci-lint-action@v9
       with:
-        version: 2.13.1
+        version: v2.13.1
+
+  release-check:
+    uses: ./.github/workflows/release.yaml
+    with:
+      args: --snapshot
