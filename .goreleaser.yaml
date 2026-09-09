@@ -52,7 +52,7 @@ dockers_v2:
     tags:
       - "latest"
       - "{{ .Tag }}"
-      - "{{ .Major }}"
+      - "v{{ .Major }}"
     platforms:
       - linux/amd64
       - linux/arm64

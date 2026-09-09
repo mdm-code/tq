@@ -5,10 +5,8 @@ import (
 	"fmt"
 )
 
-var (
-	// ErrTOMLDataType indicates an unexpected TOML data type.
-	ErrTOMLDataType = errors.New("wrong type error")
-)
+// ErrTOMLDataType indicates an unexpected TOML data type.
+var ErrTOMLDataType = errors.New("wrong type error")
 
 // Error wraps an interpreter error to show how a given data type and value
 // cannot be queried with the user-specified filter.

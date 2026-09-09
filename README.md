@@ -13,20 +13,20 @@
 
 <div align="center">
 <p>
-    <a href="https://github.com/mdm-code/tq/actions?query=workflow%3ACI">
-        <img alt="Build status" src="https://github.com/mdm-code/tq/workflows/CI/badge.svg">
-    </a>
-    <a href="https://app.codecov.io/gh/mdm-code/tq">
-        <img alt="Code coverage" src="https://codecov.io/gh/mdm-code/tq/branch/main/graphs/badge.svg?branch=main">
+    <a href="https://pkg.go.dev/github.com/mdm-code/tq/v2">
+        <img alt="Go package docs" src="https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white">
     </a>
     <a href="https://opensource.org/licenses/MIT" rel="nofollow">
         <img alt="MIT license" src="https://img.shields.io/github/license/mdm-code/tq">
     </a>
-    <a href="https://goreportcard.com/report/github.com/mdm-code/tq/v2">
-        <img alt="Go report card" src="https://goreportcard.com/badge/github.com/mdm-code/tq/v2">
+    <a href="https://github.com/mdm-code/tq/actions?query=workflow%3ATest">
+        <img alt="Tests" src="https://github.com/mdm-code/tq/workflows/Test/badge.svg">
     </a>
-    <a href="https://pkg.go.dev/github.com/mdm-code/tq/v2">
-        <img alt="Go package docs" src="https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white">
+    <a href="https://github.com/mdm-code/tq/actions?query=workflow%3ALint">
+        <img alt="Linters" src="https://github.com/mdm-code/tq/workflows/Lint/badge.svg">
+    </a>
+    <a href="https://app.codecov.io/gh/mdm-code/tq">
+        <img alt="Code coverage" src="https://codecov.io/gh/mdm-code/tq/branch/main/graphs/badge.svg?branch=main">
     </a>
 </p>
 </div>
@@ -248,6 +248,9 @@ Development and local builds require Go 1.26 or newer.
 
 Go through the [Makefile](Makefile) to get an idea of the formatting, testing
 and linting that can be used locally for development purposes.
+
+This project uses `golangci-lint`. [Here](https://golangci-lint.run/docs/welcome/install/local/)
+is how to install it on your local machine.
 
 
 ## License

@@ -31,7 +31,7 @@ func setupCLI(args []string) ([]string, error) {
 	fs := flag.NewFlagSet("tq", flag.ExitOnError)
 	fs.Usage = func() {
 		w := flag.CommandLine.Output()
-		fmt.Fprint(w, usage)
+		_, _ = fmt.Fprint(w, usage)
 	}
 
 	queryUsage := "query to run against the input data"
@@ -86,7 +86,7 @@ func run(args []string, input io.Reader, output io.Writer) (int, error) {
 	if len(args) > 0 {
 		f, err := os.Open(args[0])
 		input = f
-		defer func() { f.Close() }()
+		defer func() { _ = f.Close() }()
 		if err != nil {
 			return exitFailure, err
 		}

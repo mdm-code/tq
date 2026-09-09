@@ -1,4 +1,4 @@
-name: CI
+name: Test
 
 on:
   push:
@@ -17,12 +17,12 @@ jobs:
 
     steps:
     - name: Set up Go
-      uses: actions/setup-go@v5.4.0
+      uses: actions/setup-go@v7
       with:
         go-version: ${{ matrix.go }}
 
     - name: Checkout
-      uses: actions/checkout@v4.2.0
+      uses: actions/checkout@v7
       with:
         fetch-depth: 0
 
@@ -31,7 +31,7 @@ jobs:
         go version
 
     - name: Build
-      run: make build
+      run: go build -mod=vendor github.com/mdm-code/tq/...
 
     - name: Test
       run: go test -v -coverprofile='coverage.txt' -covermode='atomic' ./...
@@ -41,8 +41,3 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         verbose: true
-
-  release-check:
-    uses: ./.github/workflows/release.yaml
-    with:
-      args: --snapshot

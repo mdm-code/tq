@@ -10,18 +10,15 @@ ifndef VERBOSE
 .SILENT:
 endif
 
-.PHONY: fmt vet test install build cover clean
+.PHONY: lint test install build cover clean
 
 .PHONY: .ONESHELL
 .ONESHELL:
 
-fmt:
-	$(GO) fmt ./...
+lint:
+	golangci-lint run -v
 
-vet: fmt
-	$(GO) vet ./...
-
-test: vet
+test: lint
 	$(GO) clean -testcache
 	$(GO) test ./... -v
 
