@@ -80,7 +80,7 @@
                   OPTIONS
                 </h2>
               </header>
-              <div class="flex flex-wrap gap-2 px-4 py-3">
+              <div class="flex flex-wrap gap-2 px-4 py-2 place-content-stretch">
                 <label class="cursor-pointer select-none">
                   <input
                     type="checkbox"
@@ -95,8 +95,8 @@
                   />
                   <span
                     data-ripple
-                    class="ripple inline-flex h-9 items-center border border-gray-700 px-3 py-1 text-xs tracking-wide peer-checked:border-[#9cd0f4] peer-checked:bg-[#9cd0f4] peer-checked:text-gray-900"
-                  >--tables-inline</span>
+                    class="ripple inline-block h-full border border-gray-700 px-2 py-2 text-xs tracking-wide peer-checked:border-[#9cd0f4] peer-checked:bg-[#9cd0f4] peer-checked:text-gray-900"
+                  >-t (tables inline)</span>
                 </label>
                 <label class="cursor-pointer select-none">
                   <input
@@ -112,8 +112,8 @@
                   />
                   <span
                     data-ripple
-                    class="ripple inline-flex h-9 items-center border border-gray-700 px-3 py-1 text-xs tracking-wide peer-checked:border-[#9cd0f4] peer-checked:bg-[#9cd0f4] peer-checked:text-gray-900"
-                  >--arrays-multiline</span>
+                    class="ripple inline-block h-full border border-gray-700 px-2 py-2 text-xs tracking-wide peer-checked:border-[#9cd0f4] peer-checked:bg-[#9cd0f4] peer-checked:text-gray-900"
+                  >-m (arrays multiline)</span>
                 </label>
                 <label class="cursor-pointer select-none">
                   <input
@@ -129,17 +129,17 @@
                   />
                   <span
                     data-ripple
-                    class="ripple inline-flex h-9 items-center border border-gray-700 px-3 py-1 text-xs tracking-wide peer-checked:border-[#9cd0f4] peer-checked:bg-[#9cd0f4] peer-checked:text-gray-900"
-                  >--indent-tables</span>
+                    class="ripple inline-block h-full border border-gray-700 px-2 py-2 text-xs tracking-wide peer-checked:border-[#9cd0f4] peer-checked:bg-[#9cd0f4] peer-checked:text-gray-900"
+                  >-i (indent tables)</span>
                 </label>
-                <label class="inline-flex items-center gap-2 border border-gray-700 px-3 py-1 text-xs tracking-wide">
-                  <span>--indent-symbol</span>
+                <label class="inline-block border border-gray-700 px-2 py-2 text-xs tracking-wide">
+                  <span class="h-full">-s (indent symbol)</span>
                   <input
                     type="text"
                     name="indent-symbol"
                     value=""
                     spellcheck="false"
-                    class="w-12 bg-transparent border-b border-gray-700 focus:outline-none focus:border-[#9cd0f4]"
+                    class="w-6 bg-transparent border-b border-gray-700 focus:outline-none focus:border-[#9cd0f4]"
                     hx-post="api/process"
                     hx-trigger="input changed delay:1000ms"
                     hx-sync="this:replace"
