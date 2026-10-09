@@ -37,6 +37,9 @@ from the standard input and producing results to the standard output. Consult th
 [package documentation](https://pkg.go.dev/github.com/mdm-code/tq/v2) or check the
 [Usage](#usage) section to see how you can use `tq`.
 
+> [!NOTE]
+> The package is TOML v1.1.0 compatible.
+
 
 ## Installation
 
@@ -104,8 +107,10 @@ funky keys unless there is a good reason to use them.
 \"          - double quote
 \'          - single quote
 \\          - backslash
-\uhhhh      - short 16-bit hexadecimal form
-\Uhhhhhhhh  - long 32-bit hexadecimal form
+\e          - escape sequence
+\xHH        - short notation for codepoints <255
+\uHHHH      - short 16-bit hexadecimal form
+\UHHHHHHHH  - long 32-bit hexadecimal form
 ```
 
 
