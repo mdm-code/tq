@@ -92,7 +92,6 @@ func (t Token) reprString() string {
 		end = len(*t.Buffer)
 	}
 	chars := make([]string, 0, size)
-	// TODO: Add \xHH notation support for ASCII <255 codepoints.
 	for head != end {
 		// NOTE: For quoted strings, check if the current token initiates an
 		// escape sequence and there is at least a single token left to look up
@@ -107,12 +106,21 @@ func (t Token) reprString() string {
 				chars = append(chars, v)
 				continue
 			}
+			// NOTE: Shorthand hexadecimal notation \xHH for codepoints <255.
+			if (*t.Buffer)[head+1].Rune == 'x' && head+3 != end {
+				char := t.parseUnicode(head, 2, 4)
+				head += 4
+				chars = append(chars, char)
+				continue
+			}
+			// NOTE: Unicode short notation \uHHHH.
 			if (*t.Buffer)[head+1].Rune == 'u' && head+5 != end {
 				char := t.parseUnicode(head, 2, 6)
 				head += 6
 				chars = append(chars, char)
 				continue
 			}
+			// NOTE: Unicode long notation '\uHHHHHHHH.
 			if (*t.Buffer)[head+1].Rune == 'U' && head+9 != end {
 				char := t.parseUnicode(head, 2, 10)
 				head += 10
