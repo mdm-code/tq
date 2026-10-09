@@ -106,7 +106,7 @@ func (t Token) reprString() string {
 				chars = append(chars, v)
 				continue
 			}
-			// NOTE: Shorthand hexadecimal notation \xHH for codepoints <255.
+			// NOTE: Shorthand hexadecimal notation \xHH for codepoints <255 added in TOML v1.1.0.
 			if (*t.Buffer)[head+1].Rune == 'x' && head+3 != end {
 				char := t.parseUnicode(head, 2, 4)
 				head += 4
