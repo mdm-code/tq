@@ -126,6 +126,22 @@ func TestLexeme(t *testing.T) {
 			want: "\tname",
 		},
 		{
+			name: "escape-seq-escape-character",
+			token: Token{
+				Buffer: &[]scanner.Token{
+					{Pos: scanner.Pos{Rune: '\''}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '\\'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'e'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '['}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '\''}, Buffer: nil},
+				},
+				Type:  String,
+				Start: 0,
+				End:   5,
+			},
+			want: "\u001B[",
+		},
+		{
 			name: "escape-seq-quote",
 			token: Token{
 				Buffer: &[]scanner.Token{
