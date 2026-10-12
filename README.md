@@ -122,12 +122,14 @@ value notations will be converted to a different notation related to the
 backing Go type:
 
 ```txt
-1_000       => 1000   # Underscores are not retained.
-0xFFFF      => 65535  # Hexadecimal is converted to decimal.
-0o755       => 493    # Octal is converted to decimal.
-0b1111_1111 => 255    # Binary is converted to decimal.
-+100        => 100    # The plus sign is dropped.
-5e-3        => 0.005  # The exponential notation is not kept.
+1_000             =>  1000                 # Underscores are not retained.
+0xFFFF            =>  65535                # Hexadecimal is converted to decimal.
+0o755             =>  493                  # Octal is converted to decimal.
+0b1111_1111       =>  255                  # Binary is converted to decimal.
++100              =>  100                  # The plus sign is dropped.
+5e-3              =>  0.005                # The exponential notation is not kept.
+2026-10-12 22:00  =>  2026-10-12T22:00:00  # T is dropped and seconds are added.
+22:00             =>  22:00:00             # Seconds are added.
 ```
 
 > [!NOTE]
