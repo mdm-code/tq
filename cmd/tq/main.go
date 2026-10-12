@@ -20,6 +20,9 @@ var (
 	//go:embed usage.txt
 	usage string
 
+	version      = "v0.0.0-dev" // written at build time with ldflags
+	printVersion bool
+
 	query           string
 	tablesInline    bool
 	arraysMultiline bool
@@ -34,25 +37,23 @@ func setupCLI(args []string) ([]string, error) {
 		_, _ = fmt.Fprint(w, usage)
 	}
 
-	queryUsage := "query to run against the input data"
-	fs.StringVar(&query, "q", ".", queryUsage)
-	fs.StringVar(&query, "query", ".", queryUsage)
+	fs.BoolVar(&printVersion, "v", false, "")
+	fs.BoolVar(&printVersion, "version", false, "")
 
-	tablesInlineUsage := "emit tables inline"
-	fs.BoolVar(&tablesInline, "tables-inline", false, tablesInlineUsage)
-	fs.BoolVar(&tablesInline, "t", false, tablesInlineUsage)
+	fs.StringVar(&query, "q", ".", "")
+	fs.StringVar(&query, "query", ".", "")
 
-	arraysMultilineDefault := "emit arrays one element per line"
-	fs.BoolVar(&arraysMultiline, "arrays-multiline", false, arraysMultilineDefault)
-	fs.BoolVar(&arraysMultiline, "m", false, arraysMultilineDefault)
+	fs.BoolVar(&tablesInline, "tables-inline", false, "")
+	fs.BoolVar(&tablesInline, "t", false, "")
 
-	indentSymbolDefault := "provide the indentation string"
-	fs.StringVar(&indentSymbol, "indent-symbol", "  ", indentSymbolDefault)
-	fs.StringVar(&indentSymbol, "s", "  ", indentSymbolDefault)
+	fs.BoolVar(&arraysMultiline, "arrays-multiline", false, "")
+	fs.BoolVar(&arraysMultiline, "m", false, "")
 
-	indentTablesDefault := "indent tables and array tables"
-	fs.BoolVar(&indentTables, "indent-tables", false, indentTablesDefault)
-	fs.BoolVar(&indentTables, "i", false, indentTablesDefault)
+	fs.StringVar(&indentSymbol, "indent-symbol", "  ", "")
+	fs.StringVar(&indentSymbol, "s", "  ", "")
+
+	fs.BoolVar(&indentTables, "indent-tables", false, "")
+	fs.BoolVar(&indentTables, "i", false, "")
 
 	err := fs.Parse(args)
 	return fs.Args(), err
@@ -82,6 +83,11 @@ func run(args []string, input io.Reader, output io.Writer) (int, error) {
 	args, err := setupCLI(args)
 	if err != nil {
 		return exitFailure, err
+	}
+	if printVersion {
+		w := flag.CommandLine.Output()
+		_, _ = fmt.Fprintln(w, version)
+		return exitSuccess, nil
 	}
 	if len(args) > 0 {
 		f, err := os.Open(args[0])

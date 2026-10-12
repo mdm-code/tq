@@ -56,6 +56,7 @@ var escapeSequenceMap = map[rune]string{
 	'"':  "\"",
 	'\'': "'",
 	'\\': "\\",
+	'e':  "\u001B", // TOML v1.1.0: This is TOML shorthand for escape charater.
 }
 
 // TokenType indicates the type of the lexer Token.
@@ -105,12 +106,21 @@ func (t Token) reprString() string {
 				chars = append(chars, v)
 				continue
 			}
+			// TOML v.1.1.0: Shorthand hexadecimal notation \xHH for codepoints <255.
+			if (*t.Buffer)[head+1].Rune == 'x' && head+3 != end {
+				char := t.parseUnicode(head, 2, 4)
+				head += 4
+				chars = append(chars, char)
+				continue
+			}
+			// NOTE: Unicode short notation \uHHHH.
 			if (*t.Buffer)[head+1].Rune == 'u' && head+5 != end {
 				char := t.parseUnicode(head, 2, 6)
 				head += 6
 				chars = append(chars, char)
 				continue
 			}
+			// NOTE: Unicode long notation '\uHHHHHHHH.
 			if (*t.Buffer)[head+1].Rune == 'U' && head+9 != end {
 				char := t.parseUnicode(head, 2, 10)
 				head += 10

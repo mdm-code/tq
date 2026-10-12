@@ -126,6 +126,22 @@ func TestLexeme(t *testing.T) {
 			want: "\tname",
 		},
 		{
+			name: "escape-seq-escape-character",
+			token: Token{
+				Buffer: &[]scanner.Token{
+					{Pos: scanner.Pos{Rune: '\''}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '\\'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'e'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '['}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '\''}, Buffer: nil},
+				},
+				Type:  String,
+				Start: 0,
+				End:   5,
+			},
+			want: "\u001B[",
+		},
+		{
 			name: "escape-seq-quote",
 			token: Token{
 				Buffer: &[]scanner.Token{
@@ -200,6 +216,43 @@ func TestLexeme(t *testing.T) {
 				End:   22,
 			},
 			want: "😱🙏",
+		},
+		{
+			name: "hexadecimal-shorthand-notation",
+			token: Token{
+				Buffer: &[]scanner.Token{
+					{Pos: scanner.Pos{Rune: '"'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '\\'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'x'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '4'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '8'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '\\'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'x'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '4'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '5'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '\\'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'x'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '4'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'c'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '\\'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'x'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '4'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'c'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '\\'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'x'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '4'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'f'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '\\'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: 'x'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '2'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '1'}, Buffer: nil},
+					{Pos: scanner.Pos{Rune: '"'}, Buffer: nil},
+				},
+				Type:  String,
+				Start: 0,
+				End:   26,
+			},
+			want: "HELLO!",
 		},
 	}
 	for _, c := range cases {

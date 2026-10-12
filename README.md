@@ -37,6 +37,9 @@ from the standard input and producing results to the standard output. Consult th
 [package documentation](https://pkg.go.dev/github.com/mdm-code/tq/v2) or check the
 [Usage](#usage) section to see how you can use `tq`.
 
+> [!NOTE]
+> The package is TOML v1.1.0 compatible.
+
 
 ## Installation
 
@@ -104,8 +107,10 @@ funky keys unless there is a good reason to use them.
 \"          - double quote
 \'          - single quote
 \\          - backslash
-\uhhhh      - short 16-bit hexadecimal form
-\Uhhhhhhhh  - long 32-bit hexadecimal form
+\e          - escape sequence
+\xHH        - short notation for codepoints <255
+\uHHHH      - short 16-bit hexadecimal form
+\UHHHHHHHH  - long 32-bit hexadecimal form
 ```
 
 
@@ -117,12 +122,14 @@ value notations will be converted to a different notation related to the
 backing Go type:
 
 ```txt
-1_000       => 1000   # Underscores are not retained.
-0xFFFF      => 65535  # Hexadecimal is converted to decimal.
-0o755       => 493    # Octal is converted to decimal.
-0b1111_1111 => 255    # Binary is converted to decimal.
-+100        => 100    # The plus sign is dropped.
-5e-3        => 0.005  # The exponential notation is not kept.
+1_000             =>  1000                 # Underscores are not retained.
+0xFFFF            =>  65535                # Hexadecimal is converted to decimal.
+0o755             =>  493                  # Octal is converted to decimal.
+0b1111_1111       =>  255                  # Binary is converted to decimal.
++100              =>  100                  # The plus sign is dropped.
+5e-3              =>  0.005                # The exponential notation is not kept.
+2026-10-12 22:00  =>  2026-10-12T22:00:00  # T is dropped and seconds are added.
+22:00             =>  22:00:00             # Seconds are added.
 ```
 
 > [!NOTE]
@@ -131,86 +138,44 @@ backing Go type:
 > input file.
 
 
-### Multiline query with bare strings
+### Simple query with optional modifier
 
-Here is a sample TOML configuration file for GitLab runners on Kubernetes.
-The file is (1) queried with the key `runners` to access the table that is then
-(2) converted to an iterator with `[]`. Then (3) the query goes for
-`kubernetes`, `volumes`, and `host_path` in this order, where `host_path[]?`
-skips entries that are missing or not iterable, and then (4) queries each element
-for `"host path"`; here entries missing that key are also skipped.
-
+Here's a sample TOML configuration file with a query handling missing keys
+gracefully. The query works as follows: (1) iterates over `runners` in the
+array of tables; (2) navigates to each `policy` inside `kubernetes.autoscaler`;
+(3) selects the second element from the `periods` array with `?` modifier
+indicating that the filter is optional so that it won't fail if the index
+doesn't exist.
 
 ```sh
 << EOF tq -q '
-    .runners[]
-        .kubernetes
-        .volumes
-        .host_path[]?
-            ."host path"
+.runners[]
+  .kubernetes.autoscaler.policy[]
+    .periods[1]?
 '
-[session_server]
-  session_timeout = 1800
-
 [[runners]]
-  name = ""
-  url = ""
-  token = ""
-  executor = "kubernetes"
-  cache_dir = "/tmp/gitlab/cache"
-  [runners.kubernetes]
-    host = ""
-    bearer_token_overwrite_allowed = false
-    image = ""
-    namespace = ""
-    namespace_overwrite_allowed = ""
-    privileged = false
-    memory_limit = "1Gi"
-    service_account_overwrite_allowed = ""
-    pod_annotations_overwrite_allowed = ""
-    [runners.kubernetes.node_selector]
-      gitlab = "true"
-    [runners.kubernetes.volumes]
-      [[runners.kubernetes.volumes.host_path]]
-        name = "gitlab-cache"
-        mount_path = "/tmp/gitlab/cache"
-        "host path" = "/home/core/data/gitlab-runner/data"
-      [[runners.kubernetes.volumes.host_path]]
-        name = "gitlab-cache-2"
-        mount_path = "/tmp/gitlab/cache-2"
-
-[[runners]]
-  name = "runner-gitlab-runner-xxx-xxx"
-  url = "https://gitlab.com/"
-  token = "<my-token>"
-  executor = "kubernetes"
-  [runners.cache]
-    [runners.cache.s3]
-    [runners.cache.gcs]
-  [runners.kubernetes]
-    host = ""
-    bearer_token_overwrite_allowed = false
-    image = "ubuntu:16.04"
-    namespace = "gitlab-managed-apps"
-    namespace_overwrite_allowed = ""
-    privileged = true
-    service_account_overwrite_allowed = ""
-    pod_annotations_overwrite_allowed = ""
-    [runners.kubernetes.volumes]
-      host_path = "disabled"
-
-[[runners]]
-  name = "runner-without-kubernetes-volumes"
+  name = "kubernetes-runner"
   executor = "kubernetes"
   [runners.kubernetes]
-    namespace = "gitlab-managed-apps"
+    namespace = "gitlab-runner"
+    cpu_request = "500m"
+    memory_request = "1Gi"
+    [runners.kubernetes.autoscaler]
+      max_pause_pods = 10
+      [[runners.kubernetes.autoscaler.policy]]
+        idle_count = 5
+        periods = ["* * * * *", "* 8-17 * * mon-fri"]
+        timezone = "UTC"
+      [[runners.kubernetes.autoscaler.policy]]
+        idle_count = 0
+        periods = ["* * * * *"]
 EOF
 ```
 
 ```txt
 Output:
 
-/home/core/data/gitlab-runner/data
+* 8-17 * * mon-fri
 ```
 
 

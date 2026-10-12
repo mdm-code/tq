@@ -8,6 +8,7 @@ Usage:
 Options:
 
 	-h, --help              show this help message and exit
+	-v, --version           print version and exit
 	-q, --query             query to run against the input data (default: '.')
 	-t, --tables-inline     emit tables inline (default: false)
 	-m, --arrays-multiline  emit arrays one element per line (default: false)
