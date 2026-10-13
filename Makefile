@@ -1,8 +1,8 @@
-GO=go
-GOFLAGS=-mod=vendor
-COV_PROFILE=coverage.txt
-
-export CGO_ENABLED=0
+VERSION      := $(shell cat VERSION)
+GO_FLAGS     := -trimpath
+GO_LDFLAGS   := "-s -w -X main.version=${VERSION}"
+COV_PROFILE  := coverage.txt
+CGO_ENABLED  := 0
 
 .DEFAULT_GOAL := build
 
@@ -19,21 +19,23 @@ lint:
 	golangci-lint run -v
 
 test: lint
-	$(GO) clean -testcache
-	$(GO) test ./... -v
+	go clean -testcache
+	go test ./... -v
 
 install: test
-	$(GO) install ./...
+	CGO_ENABLED=${CGO_ENABLED} go install ${GO_FLAGS} \
+	-ldflags ${GO_LDFLAGS} -a github.com/mdm-code/tq/...
 
 build: test
-	$(GO) build $(GOFLAGS) github.com/mdm-code/tq/...
+	CGO_ENABLED=${CGO_ENABLED} go build ${GO_FLAGS} \
+	-ldflags ${GO_LDFLAGS} -a github.com/mdm-code/tq/...
 
 cover:
-	$(GO) test -coverprofile=$(COV_PROFILE) -covermode=atomic ./...
-	$(GO) tool cover -html=$(COV_PROFILE)
+	go test -coverprofile=${COV_PROFILE} -covermode=atomic ./...
+	go tool cover -html=${COV_PROFILE}
 
 clean:
-	$(GO) clean github.com/mdm-code/tq/...
-	$(GO) mod tidy
-	$(GO) clean -testcache
-	rm -f $(COV_PROFILE)
+	go clean github.com/mdm-code/tq/...
+	go mod tidy
+	go clean -testcache
+	rm -f ${COV_PROFILE}
