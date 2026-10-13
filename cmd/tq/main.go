@@ -20,9 +20,7 @@ var (
 	//go:embed usage.txt
 	usage string
 
-	version      = "v0.0.0-dev" // written at build time with ldflags
-	printVersion bool
-
+	printVersion    bool
 	query           string
 	tablesInline    bool
 	arraysMultiline bool
@@ -86,7 +84,7 @@ func run(args []string, input io.Reader, output io.Writer) (int, error) {
 	}
 	if printVersion {
 		w := flag.CommandLine.Output()
-		_, _ = fmt.Fprintln(w, version)
+		_, _ = fmt.Fprintln(w, tq.GetVersion())
 		return exitSuccess, nil
 	}
 	if len(args) > 0 {
